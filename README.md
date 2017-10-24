@@ -1,37 +1,44 @@
-## Welcome to GitHub Pages
+## Karger's Algorithm
 
-You can use the [editor on GitHub](https://github.com/Tlacenka/GAL-Karger-algorithm/edit/master/README.md) to maintain and preview the content for your website in Markdown files.
 
-Whenever you commit to this repository, GitHub Pages will run [Jekyll](https://jekyllrb.com/) to rebuild the pages in your site, from the content in your Markdown files.
+### Introduction
 
-### Markdown
+Welcome!
 
-Markdown is a lightweight and easy-to-use syntax for styling your writing. It includes conventions for
+This repository contains a school project for the subject Graph Algorithms held at Faculty of Information Technology, Brno University of Technology.
+The project collaborators are Katerina Pilatova and Michal Tabasek.
 
-```markdown
-Syntax highlighted code block
+Contributing to this repository is not allowed until our project is handed in (December 2017).
 
-# Header 1
-## Header 2
-### Header 3
+### Algorithm
 
-- Bulleted
-- List
+[Karger's Algorithm](https://en.wikipedia.org/wiki/Karger%27s_algorithm) is a randomised algorithm that tries to find the minimal cut in a graph.
 
-1. Numbered
-2. List
+### Installation and running the application
 
-**Bold** and _Italic_ and `Code` text
+Prerequisites:
+* [OpenJDK](http://openjdk.java.net/)
+* [ant](http://ant.apache.org/)
 
-[Link](url) and ![Image](src)
+Dependencies:
+* [JGraphX](https://github.com/jgraph/jgraphx) (User Manual is available [here](https://jgraph.github.io/mxgraph/docs/manual_javavis.html))
+
+After you've downloaded this repository to your computer, you can run it as follows:
+
+```bash
+# Checking that dependencies are available
+ant checklib
+
+# Compilation
+ant compile
+
+# Running the application (includes all steps described above)
+ant run
+
+# Cleaning your directory afterwards
+ant clean
 ```
 
-For more details see [GitHub Flavored Markdown](https://guides.github.com/features/mastering-markdown/).
+### Application Manual
 
-### Jekyll Themes
-
-Your Pages site will use the layout and styles from the Jekyll theme you have selected in your [repository settings](https://github.com/Tlacenka/GAL-Karger-algorithm/settings). The name of this theme is saved in the Jekyll `_config.yml` configuration file.
-
-### Support or Contact
-
-Having trouble with Pages? Check out our [documentation](https://help.github.com/categories/github-pages-basics/) or [contact support](https://github.com/contact) and we’ll help you sort it out.
+TODO
