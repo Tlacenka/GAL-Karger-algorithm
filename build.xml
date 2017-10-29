@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- You may freely edit this file. See commented blocks below for -->
 <!-- some examples of how to customize the build. -->
@@ -70,4 +71,67 @@
     nbproject/build-impl.xml file. 
 
     -->
+=======
+<?xml version="1.0" encoding="utf-8"?>
+<project name="Karger's Algorithm" basedir=".">
+   <description>
+      Demonstration of Karger's algorithm.
+   </description>
+
+   <path id="lib.path">
+      <pathelement path="lib/jgraphx.jar"/>
+   </path>
+
+   <target name="checklib">
+      <available file="lib/jgraphx.jar" property="jgraphx.present"/>
+   </target>
+
+   <target name="clean">
+      <delete includeemptydirs="true">
+         <fileset dir="build" includes="**/*"/>
+         <fileset dir="doc" includes="**/*"/>
+         <fileset dir="lib" includes="**/*"/>
+      </delete>
+      <delete file="karger.jar"/>
+   </target>
+
+   <target name="downloadlib" depends="checklib" unless="jgraphx.present">
+      <get src="https://github.com/jgraph/jgraphx/raw/master/lib/jgraphx.jar" dest="lib/jgraphx.jar"/>
+   </target>
+
+   <target name="build" depends="downloadlib">
+      <javac srcdir="src" destdir="build" classpath="src" includeantruntime="false">
+         <classpath>
+            <pathelement path="lib/jgraphx.jar"/>
+         </classpath>
+      </javac>
+   </target>
+
+   <target name="jar" depends="build">
+      <jar destfile="karger.jar">
+         <manifest>
+            <attribute name="Main-Class" value="karger.KargerAlgorithm"/>
+         </manifest>
+         <fileset dir="build"/>
+         <fileset dir="src">
+             <exclude name="**/*.java"/>
+         </fileset>
+      </jar>
+   </target>
+
+   <target name="doc">
+      <javadoc sourcepath="src" destdir="doc"/>
+   </target>
+
+   <target name="compile" depends="jar,doc"/>
+
+   <target name="run" depends="jar">
+      <java classname="karger.KargerAlgorithm" dir="./" fork="true">
+         <classpath>
+            <pathelement location="karger.jar" />
+            <pathelement location="lib/jgraphx.jar" />
+         </classpath>
+      </java>
+   </target>
+>>>>>>> 89e5398d4527e7a3ec1cd89717b158cfd1edf955
 </project>
