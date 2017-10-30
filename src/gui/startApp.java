@@ -18,8 +18,14 @@ public class startApp {
         
        //initWindow iWindow = new initWindow();
        
-       mainWindow mWindow = new mainWindow();
-       mWindow.setVisible(true);
+      /* mainWindow mWindow = new mainWindow();
+       mWindow.setVisible(true);*/
+      
+      /*helpWindow helpWin = new helpWindow();
+      helpWin.setVisible(true);*/
+      
+      mainWin mainWindow = new mainWin();
+      mainWindow.setVisible(true); 
        
        
     }
