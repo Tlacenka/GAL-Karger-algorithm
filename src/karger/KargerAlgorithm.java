@@ -6,10 +6,16 @@
 
 package karger;
 
+import gui.mainWindow;
+
 public class KargerAlgorithm {
 
    public static void main(String[] args) {
       System.out.println("Hello World");
+      
+        
    }
+   
+   
 
 }
