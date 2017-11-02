@@ -8,12 +8,12 @@
 package karger;
 
 
-public class saveChooser extends javax.swing.JPanel implements java.beans.Customizer {
+public class SaveChooser extends javax.swing.JPanel implements java.beans.Customizer {
 
     private Object bean;
 
     /** Creates new customizer saveChooser */
-    public saveChooser() {
+    public SaveChooser() {
         initComponents();
     }
 

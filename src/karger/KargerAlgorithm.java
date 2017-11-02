@@ -13,7 +13,7 @@ public class KargerAlgorithm {
    public static void main(String[] args) {
 
       // Run the application
-      (new mainWin()).show();
+      (new MainWin()).show();
 
       /* This was in the code before (in startApp)
        * mainWin mainWindow = new mainWin();
