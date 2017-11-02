@@ -1,4 +1,11 @@
 *.form
-karger.jar
+*.sh
+*.zip
+
 build/*
 doc/*
+
+build/.keep
+doc/.keep
+karger.jar
+lib/jgraphx.jar

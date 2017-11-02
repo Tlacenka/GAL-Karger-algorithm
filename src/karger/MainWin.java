@@ -306,7 +306,7 @@ public class MainWin extends javax.swing.JFrame {
 
     private void userGuideHelpActionPerformed(java.awt.event.ActionEvent evt) {
         // TODO add your handling code here:
-        userGuideWindow userGuideWin = new userGuideWindow();
+        UserGuideWindow userGuideWin = new UserGuideWindow();
         userGuideWin.setVisible(true);
     }
 
@@ -318,19 +318,19 @@ public class MainWin extends javax.swing.JFrame {
 
     private void aboutHelpActionPerformed(java.awt.event.ActionEvent evt) {
         // TODO add your handling code here:
-        aboutWindow aboutWin = new aboutWindow();
+        AboutWindow aboutWin = new AboutWindow();
         aboutWin.setVisible(true);
     }
 
     private void openFileMenuActionPerformed(java.awt.event.ActionEvent evt) {
         // TODO add your handling code here:
-        openFileWindow openFileWin = new openFileWindow();
+        OpenFileWindow openFileWin = new OpenFileWindow();
         openFileWin.setVisible(true);
     }
 
     private void saveFileMenuActionPerformed(java.awt.event.ActionEvent evt) {
         // TODO add your handling code here:
-        saveFileWindow saveFileWin = new saveFileWindow();
+        SaveFileWindow saveFileWin = new SaveFileWindow();
         saveFileWin.setVisible(true);
     }
 
