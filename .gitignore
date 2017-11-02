@@ -1,1 +1,4 @@
-/build/
+*.form
+karger.jar
+build/*
+doc/*
