@@ -1,2 +1,4 @@
-/build/
-/nbproject/
+*.form
+karger.jar
+build/*
+doc/*

@@ -36,7 +36,7 @@
    <target name="jar" depends="build">
       <jar destfile="karger.jar">
          <manifest>
-            <attribute name="Main-Class" value="gui.startApp"/>
+            <attribute name="Main-Class" value="karger.KargerAlgorithm"/>
          </manifest>
          <fileset dir="build"/>
          <fileset dir="src">
@@ -52,7 +52,7 @@
    <target name="compile" depends="jar,doc"/>
 
    <target name="run" depends="jar">
-      <java classname="gui.startApp" dir="./" fork="true">
+      <java classname="karger.KargerAlgorithm" dir="./" fork="true">
          <classpath>
             <pathelement location="karger.jar" />
             <pathelement location="lib/jgraphx.jar" />
