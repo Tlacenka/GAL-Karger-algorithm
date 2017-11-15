@@ -1,2 +1,12 @@
 /build/
 /nbproject/
+doc/.keep
+doc/.keep
+karger.jar
+doc/.keep
+*.jar
+*.xml
+nbproject/project.properties
+src/karger/KargerAlgorithm.java
+src/kargersalgorithm/KargersAlgorithm.java
+doc/.keep
