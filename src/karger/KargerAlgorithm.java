@@ -6,8 +6,6 @@
 
 package karger;
 
-import gui.mainWindow;
-
 public class KargerAlgorithm {
 
    public static void main(String[] args) {
