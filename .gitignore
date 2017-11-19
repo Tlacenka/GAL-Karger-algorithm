@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /build/
 /nbproject/
 doc/.keep
@@ -10,3 +11,16 @@ nbproject/project.properties
 src/karger/KargerAlgorithm.java
 src/kargersalgorithm/KargersAlgorithm.java
 doc/.keep
+=======
+*.form
+*.sh
+*.zip
+
+build/*
+doc/*
+
+build/.keep
+doc/.keep
+karger.jar
+lib/jgraphx.jar
+>>>>>>> 5270d0218e6b327c8c84cfcc06cf638ac10e2eec
