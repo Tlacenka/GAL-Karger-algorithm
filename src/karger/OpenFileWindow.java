@@ -11,124 +11,54 @@ package karger;
 import java.io.File;
 import javax.swing.JFileChooser;
 import javax.swing.filechooser.FileNameExtensionFilter;
+import static com.sun.java.accessibility.util.AWTEventMonitor.addActionListener;
 
+import java.awt.BorderLayout;
+import java.awt.Container;
+import java.awt.GridLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.io.File;
 
-public class OpenFileWindow extends javax.swing.JFrame {
+import javax.swing.JButton;
+import javax.swing.JFileChooser;
+import javax.swing.JFrame;
+import javax.swing.JPanel;
+import javax.swing.JTextField;
 
-    /**
-     * Creates new form openWindow
-     */
-    public OpenFileWindow() {
-        initComponents();
+public class OpenFileWindow extends JFrame {
+    
+    public OpenFileWindow(){    
+        File f; 
+        showOpenChooser();  
     }
-
-    /**
-     * This method is called from within the constructor to initialize the form.
-     */
-    @SuppressWarnings("unchecked")
-
-    private void initComponents() {
-
-        chooser = new javax.swing.JFileChooser();
-
-        setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
-
-        chooser.setDialogTitle("Open File");
-        chooser.setDebugGraphicsOptions(javax.swing.DebugGraphics.LOG_OPTION);
-        chooser.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mouseClicked(java.awt.event.MouseEvent evt) {
-                chooserMouseClicked(evt);
-            }
-        });
-        chooser.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                chooserActionPerformed(evt);
-            }
-        });
-
-        javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
-        getContentPane().setLayout(layout);
-        layout.setHorizontalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 582, Short.MAX_VALUE)
-            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                .addGroup(layout.createSequentialGroup()
-                    .addGap(0, 0, Short.MAX_VALUE)
-                    .addComponent(chooser, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addGap(0, 0, Short.MAX_VALUE)))
-        );
-        layout.setVerticalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 397, Short.MAX_VALUE)
-            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                .addGroup(layout.createSequentialGroup()
-                    .addGap(0, 0, Short.MAX_VALUE)
-                    .addComponent(chooser, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addGap(0, 0, Short.MAX_VALUE)))
-        );
-
-        pack();
-    }
-
-    private void chooserMouseClicked(java.awt.event.MouseEvent evt) {
-        // TODO add your handling code here:
-    }
-
-    private void chooserActionPerformed(java.awt.event.ActionEvent evt) {
-        // TODO add your handling code here:
-      /*  int returnVal = chooser.showOpenDialog(this);
+    
+     /*
+        show open dialog using jfilechooser
+    */
+    public void showOpenChooser(){
+        JFileChooser chooser = new JFileChooser();
         
-        if (returnVal == JFileChooser.APPROVE_OPTION) {
-            System.out.println("You chose to open this file: "
-                    + chooser.getSelectedFile().getName());
-        }else if(returnVal == JFileChooser.CANCEL_OPTION){
-            System.out.println("Cancel was selected");
-            this.dispose();
-        }*/
+        // set filter for xml files
+        FileNameExtensionFilter xmlfilter = new FileNameExtensionFilter("xml files (*.xml)", "xml");
         
-       
-        if (evt.getActionCommand().equals(javax.swing.JFileChooser.APPROVE_OPTION)) {
-            System.out.println("You chose to open this file: "
-                    + chooser.getSelectedFile().getName());
-        }else if(evt.getActionCommand().equals(javax.swing.JFileChooser.CANCEL_OPTION)){
-            System.out.println("Cancel was selected");
-            this.dispose();
+        // set selected filter
+        chooser.setFileFilter(xmlfilter);
+        
+        // Demonstrate "Open" dialog:
+        int rVal = chooser.showOpenDialog(OpenFileWindow.this);
+        
+        // file is selected
+        if (rVal == JFileChooser.APPROVE_OPTION) {
+            System.out.println(chooser.getSelectedFile().getName());    // print file name
         }
-    }
-
-    /**
-     * @param args the command line arguments
-     */
-    public static void main(String args[]) {
-
-        try {
-            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
-                if ("Nimbus".equals(info.getName())) {
-                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
-                    break;
-                }
-            }
-        } catch (ClassNotFoundException ex) {
-            java.util.logging.Logger.getLogger(OpenFileWindow.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (InstantiationException ex) {
-            java.util.logging.Logger.getLogger(OpenFileWindow.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (IllegalAccessException ex) {
-            java.util.logging.Logger.getLogger(OpenFileWindow.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (javax.swing.UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(OpenFileWindow.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+      
+        if (rVal == JFileChooser.CANCEL_OPTION) {         
+            System.out.println("CANCEL"); 
+            dispose();
         }
-
-        /* Create and display the form */
-        java.awt.EventQueue.invokeLater(new Runnable() {
-            public void run() {
-                new OpenFileWindow().setVisible(true);
-            }
-        });
+        
+        //return(chooser.getSelectedFile().getName());
     }
-
-    public javax.swing.JFileChooser chooser;
-
-    private String readFile(File file) {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
+   
 }
