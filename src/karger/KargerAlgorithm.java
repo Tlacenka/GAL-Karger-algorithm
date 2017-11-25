@@ -7,7 +7,10 @@
 
 package karger;
 
+/*<<<<<<< HEAD
+=======
 
+>>>>>>> 5270d0218e6b327c8c84cfcc06cf638ac10e2eec*/
 public class KargerAlgorithm {
 
    public static void main(String[] args) {
