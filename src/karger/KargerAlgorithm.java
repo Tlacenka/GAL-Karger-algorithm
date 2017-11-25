@@ -18,6 +18,9 @@ public class KargerAlgorithm {
       // Run the application
       (new MainWin()).show();
 
+      // In order to only display graph
+      //(new Graph()).show();
+
       /* This was in the code before (in startApp)
        * mainWin mainWindow = new mainWin();
        * mainWindow.setVisible(true); 
