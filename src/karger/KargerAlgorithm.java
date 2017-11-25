@@ -16,7 +16,10 @@ public class KargerAlgorithm {
    public static void main(String[] args) {
 
       // Run the application
-      (new MainWin()).show();
+      //(new MainWin()).show();
+
+      // In order to only display graph
+      (new Graph()).show();
 
       /* This was in the code before (in startApp)
        * mainWin mainWindow = new mainWin();
