@@ -5,6 +5,16 @@
  */
 
 
+/**
+ * - How and where will we edit graph? We will need coordinates to update the current one.
+ *   - such as creating/removing/moving a new edge, vertex
+ * - Which values do we need to send between windows and graph when storing/loading?
+ * - Where will the reactions on buttons be implemented?
+ *   - it will probably call operations of this class with instance in MainWin
+ *   - initial buttons: 1 step further/back, 1 run/reset, run the whole algorithm
+ *   - so does the karger algorithm go here as well? making the step etc
+ */
+
 package karger;
 
 import java.util.Map;
@@ -27,6 +37,9 @@ public class Graph {
     private JFrame frame;
     private JPanel panel;
 
+    private mxGraph graph; // graph
+    private mxGraphComponent gc; // graph component (wrapper)
+
     public Graph() {
 
         // Create a frame with a panel for graph
@@ -36,7 +49,7 @@ public class Graph {
         this.frame.add(panel);
 
         // Create a graph
-        mxGraph graph = new mxGraph();
+        this.graph = new mxGraph();
 
 
         // Add graph style
@@ -77,12 +90,58 @@ public class Graph {
         graph.getModel().endUpdate();
 
         // Wrap it in a component
-        mxGraphComponent gc = new mxGraphComponent(graph);
+        this.gc = new mxGraphComponent(this.graph);
 
         // Add graph to panel
         this.panel.add(gc); // create graph pannel
     }
 
+    /**
+     * Prompts for the updated graph component.
+     * @return Graph component object.
+     */
+    public mxGraphComponent getGraphComponent() {
+        this.gc = new mxGraphComponent(this.graph);
+        return this.gc;
+    }
+
+    /**
+     * Creates a new graph by removing everything from the current one.
+     */
+    private void createEmptyGraph() {
+        this.graph.getModel().beginUpdate();
+        {
+            this.graph.removeCells(this.graph.getChildCells(this.graph.getDefaultParent(), true, true));
+        }
+        this.graph.getModel().endUpdate();
+    }
+
+    /**
+     * Loads graph from file.
+     * @param filepath Path to file containing encoded graph.
+     */
+    public void loadGraph(String filepath) {
+        // Empty current graph if one exists
+        this.createEmptyGraph();
+
+        // Load encoded graph from file
+        // Decode graph and store it to graph variable
+        return;
+    }
+
+    /**
+     * Returns encoded graph to be stored to file.
+     * @return Encoded graph.
+     */
+    public String getEncodedGraph() {
+        // Take current graph and encode it
+        // Return encoded graph to be stored
+        return "";
+    }
+
+    /**
+     * Shows Graph in its own window (for now).
+     */
     public void show() {
 
         // Show panel in application window
