@@ -21,10 +21,12 @@ import java.util.Map;
 import java.util.*;
 
 import java.lang.Boolean;
+import java.io.IOException;
 
 import javax.swing.JPanel;
 import javax.swing.JFrame;
 import javax.swing.BorderFactory;
+import javax.swing.JOptionPane;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
@@ -38,6 +40,8 @@ import com.mxgraph.util.mxUtils;
 import com.mxgraph.util.mxXmlUtils;
 import com.mxgraph.view.mxGraph;
 import com.mxgraph.util.mxRectangle;
+
+import org.w3c.dom.Document;
 
 public class KargerGraph {
 
@@ -117,7 +121,7 @@ public class KargerGraph {
     /**
      * Creates a new graph by removing everything from the current one.
      */
-    private void createEmptyGraph() {
+    public void createEmptyGraph() {
         this.graph.getModel().beginUpdate();
         {
             this.graph.removeCells(this.graph.getChildCells(this.graph.getDefaultParent(), true, true));
@@ -130,11 +134,22 @@ public class KargerGraph {
      * @param filepath Path to file containing encoded graph.
      */
     public void loadGraph(String filepath) {
+
         // Empty current graph if one exists
         this.createEmptyGraph();
 
-        // Load encoded graph from file
+        Document graph_file;
+
         // Decode graph and store it to graph variable
+        try {
+            graph_file = mxXmlUtils.parseXml(mxUtils.readFile(filepath));
+        } catch (IOException ex) {
+            JOptionPane.showMessageDialog(null, "File could not be loaded.");
+            return;
+        }
+
+        mxCodec codec = new mxCodec(graph_file);
+        codec.decode(graph_file.getDocumentElement(), graph.getModel());
         return;
     }
 
@@ -142,10 +157,18 @@ public class KargerGraph {
      * Returns encoded graph to be stored to file.
      * @return Encoded graph.
      */
-    public String getEncodedGraph() {
+    public void saveGraph(String filepath) {
+
         // Take current graph and encode it
-        // Return encoded graph to be stored
-        return "";
+        mxCodec codec = new mxCodec();
+        String encodedGraph = mxXmlUtils.getXml(codec.encode(this.graph.getModel()));
+
+        try {
+            mxUtils.writeFile(encodedGraph, filepath);
+        } catch (IOException ex) {
+            JOptionPane.showMessageDialog(null, "File could not be saved.");
+            return;
+        }
     }
 
 }

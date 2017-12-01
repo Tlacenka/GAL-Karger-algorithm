@@ -46,6 +46,7 @@ import com.mxgraph.view.mxGraph;
 public class MainWindow {
 
    private JFrame frame;
+
    private JMenuBar menuBar;
    private JMenu menu;
    private JMenu help_menu;
@@ -64,6 +65,13 @@ public class MainWindow {
 
    private KargerGraph graph;
    private mxGraphComponent gc;
+
+   // Button event enumeration type
+   private enum ButtonEventType {
+       NEW,
+       LOAD,
+       SAVE
+   }
 
    // Class constructor
    public MainWindow() {
@@ -96,8 +104,11 @@ public class MainWindow {
 
       // Create menu items
       JMenuItem menuCreateGraph = new JMenuItem("Create Graph");
+      menuCreateGraph.addActionListener(new ButtonListener(this, ButtonEventType.NEW));
       JMenuItem menuLoadGraph = new JMenuItem("Load Graph");
+      menuLoadGraph.addActionListener(new ButtonListener(this, ButtonEventType.LOAD));
       JMenuItem menuSaveGraph = new JMenuItem("Save Graph");
+      menuSaveGraph.addActionListener(new ButtonListener(this, ButtonEventType.SAVE));
 
       // Add items to menu
       this.menu.add(menuCreateGraph);
@@ -206,6 +217,56 @@ public class MainWindow {
       // Add graph to panel
       this.centerPanel.add(this.graph.getGraphComponent());
 
+   }
+
+   /**
+    * Class for performing button actions
+    */
+   private class ButtonListener implements ActionListener {
+      private final MainWindow mainwindow;
+      private final ButtonEventType eventType;
+
+      // Class constructor
+      public ButtonListener(MainWindow mainwindow, ButtonEventType eventType) {
+         this.mainwindow = mainwindow;
+         this.eventType = eventType;
+      }
+
+      // Performing button actions
+      @Override
+      public void actionPerformed(ActionEvent e) {
+         switch(this.eventType) {
+            case NEW:
+               this.mainwindow.newGraph();
+               break;
+            case LOAD:
+               this.mainwindow.loadGraph();
+               break;
+            case SAVE:
+               this.mainwindow.saveGraph();
+               break;
+         }
+      }
+
+   }
+
+   // Create new graph
+   public void newGraph() {
+      this.graph.createEmptyGraph();
+   }
+
+   // Load graph from file
+   public void loadGraph() {
+      OpenFileWindow win = new OpenFileWindow();
+      String filepath = win.showOpenChooser();
+      this.graph.loadGraph(filepath);
+   }
+
+   // Save graph to file
+   public void saveGraph() {
+      SaveFileWindow win = new SaveFileWindow();
+      String filepath = win.showSaveChooser();
+      this.graph.saveGraph(filepath);
    }
 
    public void show () {
