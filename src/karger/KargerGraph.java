@@ -23,6 +23,7 @@ import java.lang.Boolean;
 import javax.swing.JPanel;
 import javax.swing.JFrame;
 import java.awt.BorderLayout;
+import java.awt.Dimension;
 
 import com.mxgraph.io.mxCodec;
 import com.mxgraph.model.mxCell;
@@ -31,25 +32,21 @@ import com.mxgraph.util.mxConstants;
 import com.mxgraph.util.mxUtils;
 import com.mxgraph.util.mxXmlUtils;
 import com.mxgraph.view.mxGraph;
+import com.mxgraph.util.mxRectangle;
 
-public class Graph {
+public class KargerGraph {
 
     private JFrame frame;
     private JPanel panel;
 
     private mxGraph graph; // graph
-    private mxGraphComponent gc; // graph component (wrapper)
+    public mxGraphComponent gc; // graph component (wrapper)
 
-    public Graph() {
-
-        // Create a frame with a panel for graph
-        this.frame = new JFrame("Karger Algorithm");
-        this.panel = new JPanel(new BorderLayout());
-
-        this.frame.add(panel);
+    public KargerGraph() {
 
         // Create a graph
         this.graph = new mxGraph();
+        //this.graph.setMinimumGraphSize(new mxRectangle(600,600));
 
 
         // Add graph style
@@ -91,9 +88,6 @@ public class Graph {
 
         // Wrap it in a component
         this.gc = new mxGraphComponent(this.graph);
-
-        // Add graph to panel
-        this.panel.add(gc); // create graph pannel
     }
 
     /**
@@ -101,7 +95,6 @@ public class Graph {
      * @return Graph component object.
      */
     public mxGraphComponent getGraphComponent() {
-        this.gc = new mxGraphComponent(this.graph);
         return this.gc;
     }
 
@@ -137,19 +130,6 @@ public class Graph {
         // Take current graph and encode it
         // Return encoded graph to be stored
         return "";
-    }
-
-    /**
-     * Shows Graph in its own window (for now).
-     */
-    public void show() {
-
-        // Show panel in application window
-        this.frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        this.frame.pack();
-        this.frame.setSize(600,600);
-        this.frame.setLocationRelativeTo(null);
-        this.frame.setVisible(true);
     }
 
 }
