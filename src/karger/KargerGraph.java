@@ -19,11 +19,16 @@ package karger;
 
 import java.util.Map;
 import java.util.*;
+
 import java.lang.Boolean;
+
 import javax.swing.JPanel;
 import javax.swing.JFrame;
+import javax.swing.BorderFactory;
+
 import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.awt.Color;
 
 import com.mxgraph.io.mxCodec;
 import com.mxgraph.model.mxCell;
@@ -48,17 +53,23 @@ public class KargerGraph {
         this.graph = new mxGraph();
         //this.graph.setMinimumGraphSize(new mxRectangle(600,600));
 
+        int vertex_size = 60;
 
         // Add graph style
         Map<String, Object> edgestyle = graph.getStylesheet().getDefaultEdgeStyle();
         edgestyle.put(mxConstants.STYLE_ENDARROW, "none");
         edgestyle.put(mxConstants.STYLE_STROKEWIDTH, 3);
+        edgestyle.put(mxConstants.STYLE_STROKECOLOR, "#A10115");
         
         Map<String, Object> vertstyle = graph.getStylesheet().getDefaultVertexStyle();
         vertstyle.put(mxConstants.STYLE_SHAPE, mxConstants.SHAPE_ELLIPSE);
         vertstyle.put(mxConstants.STYLE_PERIMETER, mxConstants.PERIMETER_ELLIPSE);
         vertstyle.put(mxConstants.STYLE_FONTSTYLE, mxConstants.FONT_BOLD);
-    
+        vertstyle.put(mxConstants.STYLE_FILLCOLOR, "#F0EFEA");
+        vertstyle.put(mxConstants.STYLE_FONTCOLOR, "#000000");
+        vertstyle.put(mxConstants.STYLE_FONTSIZE, "15");
+        vertstyle.put(mxConstants.STYLE_STROKECOLOR, "#D72C16");
+        vertstyle.put(mxConstants.STYLE_GRADIENTCOLOR, "white");
 
         // Create default parent object
         Object parent = graph.getDefaultParent();
@@ -66,14 +77,14 @@ public class KargerGraph {
         // Add some vertices and edges
         graph.getModel().beginUpdate();
         {
-           Object vA = graph.insertVertex(parent, null, "A", 100, 180, 50, 50);
-           Object vB = graph.insertVertex(parent, null, "B", 10, 250, 50, 50);
-           Object vC = graph.insertVertex(parent, null, "C", 180, 320, 50, 50);
-           Object vD = graph.insertVertex(parent, null, "D", 300, 180, 50, 50);
-           Object vE = graph.insertVertex(parent, null, "E", 250, 100, 50, 50);
-           Object vF = graph.insertVertex(parent, null, "F", 300, 20, 50, 50);
-           Object vG = graph.insertVertex(parent, null, "G", 400, 120, 50, 50);
-           Object vH = graph.insertVertex(parent, null, "H", 400, 250, 50, 50);
+           Object vA = graph.insertVertex(parent, null, "A", 100, 180, vertex_size, vertex_size);
+           Object vB = graph.insertVertex(parent, null, "B", 10, 250, vertex_size, vertex_size);
+           Object vC = graph.insertVertex(parent, null, "C", 180, 320, vertex_size, vertex_size);
+           Object vD = graph.insertVertex(parent, null, "D", 300, 180, vertex_size, vertex_size);
+           Object vE = graph.insertVertex(parent, null, "E", 250, 100, vertex_size, vertex_size);
+           Object vF = graph.insertVertex(parent, null, "F", 300, 20, vertex_size, vertex_size);
+           Object vG = graph.insertVertex(parent, null, "G", 400, 120, vertex_size, vertex_size);
+           Object vH = graph.insertVertex(parent, null, "H", 400, 250, vertex_size, vertex_size);
            Object eAB = graph.insertEdge(parent, null, "", vA, vB);
            Object eBC = graph.insertEdge(parent, null, "", vB, vC);
            Object eAC = graph.insertEdge(parent, null, "", vA, vC);
@@ -88,6 +99,11 @@ public class KargerGraph {
 
         // Wrap it in a component
         this.gc = new mxGraphComponent(this.graph);
+        
+        // Set background color
+        this.gc.getViewport().setOpaque(true);
+        this.gc.getViewport().setBackground(new Color(255,255,255));
+        this.gc.setViewportBorder(BorderFactory.createMatteBorder(0,0,0,0,Color.white));
     }
 
     /**
