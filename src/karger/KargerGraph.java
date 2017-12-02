@@ -45,33 +45,31 @@ import org.w3c.dom.Document;
 
 public class KargerGraph {
 
-    private JFrame frame;
-    private JPanel panel;
-
     private mxGraph graph; // graph
     public mxGraphComponent gc; // graph component (wrapper)
 
     private String runCounter;
     private String bestResult;
 
-    public KargerGraph() {
+    private Object parent;
+    private int vertex_size;
 
-        // Create a graph
-        this.graph = new mxGraph();
-        //this.graph.setMinimumGraphSize(new mxRectangle(600,600));
+    public KargerGraph() {
 
         this.runCounter = "0";
         this.bestResult = "-";
+        this.vertex_size = 60;
 
-        int vertex_size = 60;
+        // Create a graph
+        this.graph = new mxGraph();
 
         // Add graph style
-        Map<String, Object> edgestyle = graph.getStylesheet().getDefaultEdgeStyle();
+        Map<String, Object> edgestyle = this.graph.getStylesheet().getDefaultEdgeStyle();
         edgestyle.put(mxConstants.STYLE_ENDARROW, "none");
         edgestyle.put(mxConstants.STYLE_STROKEWIDTH, 3);
         edgestyle.put(mxConstants.STYLE_STROKECOLOR, "#A10115");
         
-        Map<String, Object> vertstyle = graph.getStylesheet().getDefaultVertexStyle();
+        Map<String, Object> vertstyle = this.graph.getStylesheet().getDefaultVertexStyle();
         vertstyle.put(mxConstants.STYLE_SHAPE, mxConstants.SHAPE_ELLIPSE);
         vertstyle.put(mxConstants.STYLE_PERIMETER, mxConstants.PERIMETER_ELLIPSE);
         vertstyle.put(mxConstants.STYLE_FONTSTYLE, mxConstants.FONT_BOLD);
@@ -82,10 +80,27 @@ public class KargerGraph {
         vertstyle.put(mxConstants.STYLE_GRADIENTCOLOR, "white");
 
         // Create default parent object
-        Object parent = graph.getDefaultParent();
+        this.parent = graph.getDefaultParent();
 
+        // Create default graph
+        this.createDefaultGraph();
+
+        // Wrap it in a component
+        this.gc = new mxGraphComponent(this.graph);
+        this.gc.setEnabled(false); // disable graph editing ad hoc
+        
+        // Set background color, remove default border
+        this.gc.getViewport().setOpaque(true);
+        this.gc.getViewport().setBackground(Color.white);
+        this.gc.setBorder(null);
+    }
+
+    /**
+     * Create default graph to be displayed at the start
+     */
+    private void createDefaultGraph() {
         // Add some vertices and edges
-        graph.getModel().beginUpdate();
+        this.graph.getModel().beginUpdate();
         {
            Object vA = graph.insertVertex(parent, null, "A", 100, 180, vertex_size, vertex_size);
            Object vB = graph.insertVertex(parent, null, "B", 10, 250, vertex_size, vertex_size);
@@ -105,16 +120,7 @@ public class KargerGraph {
            Object eDG = graph.insertEdge(parent, null, "", vD, vG);
            Object eDH = graph.insertEdge(parent, null, "", vD, vH);
         }
-        graph.getModel().endUpdate();
-
-        // Wrap it in a component
-        this.gc = new mxGraphComponent(this.graph);
-        this.gc.setEnabled(false); // disable graph editing ad hoc
-        
-        // Set background color, remove default border
-        this.gc.getViewport().setOpaque(true);
-        this.gc.getViewport().setBackground(new Color(255,255,255));
-        this.gc.setBorder(null);
+        this.graph.getModel().endUpdate();
     }
 
     /**
