@@ -111,10 +111,10 @@ public class KargerGraph {
         this.gc = new mxGraphComponent(this.graph);
         this.gc.setEnabled(false); // disable graph editing ad hoc
         
-        // Set background color
+        // Set background color, remove default border
         this.gc.getViewport().setOpaque(true);
         this.gc.getViewport().setBackground(new Color(255,255,255));
-        this.gc.setViewportBorder(BorderFactory.createMatteBorder(0,0,0,0,Color.white));
+        this.gc.setBorder(null);
     }
 
     /**
