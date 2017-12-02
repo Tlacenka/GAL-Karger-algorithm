@@ -51,11 +51,17 @@ public class KargerGraph {
     private mxGraph graph; // graph
     public mxGraphComponent gc; // graph component (wrapper)
 
+    private String runCounter;
+    private String bestResult;
+
     public KargerGraph() {
 
         // Create a graph
         this.graph = new mxGraph();
         //this.graph.setMinimumGraphSize(new mxRectangle(600,600));
+
+        this.runCounter = "0";
+        this.bestResult = "-";
 
         int vertex_size = 60;
 
@@ -103,6 +109,7 @@ public class KargerGraph {
 
         // Wrap it in a component
         this.gc = new mxGraphComponent(this.graph);
+        this.gc.setEnabled(false); // disable graph editing ad hoc
         
         // Set background color
         this.gc.getViewport().setOpaque(true);
@@ -116,6 +123,22 @@ public class KargerGraph {
      */
     public mxGraphComponent getGraphComponent() {
         return this.gc;
+    }
+
+    /**
+     * Prompts for the current run counter.
+     * @return Run counter.
+     */
+    public String getRunCounter() {
+        return this.runCounter;
+    }
+
+    /**
+     * Prompts for the best result.
+     * @return Best result.
+     */
+    public String getBestResult() {
+        return this.bestResult;
     }
 
     /**

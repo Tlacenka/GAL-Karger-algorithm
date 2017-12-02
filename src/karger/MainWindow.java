@@ -23,6 +23,7 @@ import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
 import javax.swing.border.LineBorder;
 import javax.swing.JComponent;
+import javax.swing.JTextArea;
 
 import java.awt.BorderLayout;
 import java.awt.event.ActionListener;
@@ -62,6 +63,9 @@ public class MainWindow {
    private JButton stepButton;
    private JButton runButton;
    private JButton finishButton;
+
+   private JTextArea runTracker;
+   private JTextArea resultTracker;
 
    private KargerGraph graph;
    private mxGraphComponent gc;
@@ -172,6 +176,7 @@ public class MainWindow {
       this.runButton = new JButton();
       this.finishButton = new JButton();
 
+
       // Set button icons, border, size
       try {
          Image img = ImageIO.read(getClass().getResource("images/resetSmall.png"));
@@ -213,6 +218,30 @@ public class MainWindow {
       this.bottomPanel.add(this.stepButton);
       this.bottomPanel.add(this.runButton);
       this.bottomPanel.add(this.finishButton);
+
+      // Add text areas to top panel
+      this.topPanel.setLayout(new FlowLayout(FlowLayout.CENTER, 50, 40));
+
+      // Create text areas
+      Font font = new Font("Calibri", Font.BOLD, 18);
+      this.runTracker = new JTextArea("Total Runs: " + this.graph.getRunCounter());
+      this.resultTracker = new JTextArea("Best Result: " + this.graph.getBestResult());
+
+      // Set text color, size
+      this.runTracker.setForeground(textColor);
+      this.runTracker.setBackground(panelColor);
+      this.runTracker.setFont(font);
+      this.runTracker.setEditable(false);
+      this.runTracker.setPreferredSize(new Dimension(150, 30));
+      this.resultTracker.setForeground(textColor);
+      this.resultTracker.setBackground(panelColor);
+      this.resultTracker.setFont(font);
+      this.resultTracker.setEditable(false);
+      this.resultTracker.setPreferredSize(new Dimension(150, 30));
+
+      // Add text areas
+      this.topPanel.add(this.runTracker);
+      this.topPanel.add(this.resultTracker);
 
       // Add graph to panel
       this.centerPanel.add(this.graph.getGraphComponent());
