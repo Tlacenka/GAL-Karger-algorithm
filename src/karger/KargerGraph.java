@@ -54,6 +54,8 @@ public class KargerGraph {
     private Object parent;
     private int vertex_size;
 
+    private HashMap<mxCell,LinkedList<mxCell>> adjacencyList;
+
     public KargerGraph() {
 
         this.runCounter = "0";
@@ -62,6 +64,8 @@ public class KargerGraph {
 
         // Create a graph
         this.graph = new mxGraph();
+
+        this.adjacencyList = new HashMap<mxCell,LinkedList<mxCell>>();
 
         // Add graph style
         Map<String, Object> edgestyle = this.graph.getStylesheet().getDefaultEdgeStyle();
@@ -85,9 +89,12 @@ public class KargerGraph {
         // Create default graph
         this.createDefaultGraph();
 
+        // Create adjacency list from it
+        this.createAdjacencyList();
+
         // Wrap it in a component
         this.gc = new mxGraphComponent(this.graph);
-        this.gc.setEnabled(false); // disable graph editing ad hoc
+        //this.gc.setEnabled(false); // disable graph editing ad hoc
         
         // Set background color, remove default border
         this.gc.getViewport().setOpaque(true);
@@ -121,6 +128,33 @@ public class KargerGraph {
            Object eDH = graph.insertEdge(parent, null, "", vD, vH);
         }
         this.graph.getModel().endUpdate();
+    }
+
+    /**
+     * Create adjacency list to graph.
+     */
+    public void createAdjacencyList() {
+
+        // Add all vertices
+        for (Object v : this.graph.getChildVertices(this.parent)) {
+            mxCell vertex = (mxCell)v;
+            this.adjacencyList.put(vertex, new LinkedList<mxCell>());
+        }
+
+        // Link adjacent vertices
+        for (Object e : this.graph.getChildEdges(this.parent)) {
+            mxCell edge = (mxCell)e;
+            mxCell src = (mxCell)edge.getSource();
+            mxCell dst = (mxCell)edge.getTarget();
+
+            // Check that all edges are between two vertices
+            if ((src == null) || (dst == null)) {
+                throw new IllegalArgumentException("Each edge must be between 2 vertices.");
+            }
+
+            this.adjacencyList.get(src).add(dst);
+            this.adjacencyList.get(dst).add(src);
+        }
     }
 
     /**
@@ -179,6 +213,10 @@ public class KargerGraph {
 
         mxCodec codec = new mxCodec(graph_file);
         codec.decode(graph_file.getDocumentElement(), graph.getModel());
+
+        // Update adjacency list
+        this.createAdjacencyList();
+
         return;
     }
 
@@ -200,4 +238,39 @@ public class KargerGraph {
         }
     }
 
+    /**
+     * Resets all runs, re-creates the whole graph.
+     */
+    public void resetAlgorithm() {
+        System.out.println("Reset algorithm.");
+        return;
+    }
+
+    /**
+     * Goes back one step in the algorithm.
+     */
+    public void undoStep() {
+        return;
+    }
+
+    /**
+     * Performs one step instead of the user.
+     */
+    public void nextStep() {
+        return;
+    }
+
+    /**
+     * Finishes current run of the algorithm.
+     */
+    public void finishRun() {
+        return;
+    }
+
+    /**
+     * Finishes the whole algorithm.
+     */
+    public void finishAlgorithm() {
+        return;
+    }
 }

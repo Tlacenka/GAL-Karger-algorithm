@@ -70,11 +70,20 @@ public class MainWindow {
    private KargerGraph graph;
    private mxGraphComponent gc;
 
-   // Button event enumeration type
-   private enum ButtonEventType {
+   // Menu event enumeration type
+   private enum MenuEventType {
        NEW,
        LOAD,
        SAVE
+   }
+
+   // Button event enumeration type
+   private enum ButtonEventType {
+      RESET,
+      UNDO,
+      NEXT_STEP,
+      RUN,
+      FINISH
    }
 
    // Class constructor
@@ -108,11 +117,11 @@ public class MainWindow {
 
       // Create menu items
       JMenuItem menuCreateGraph = new JMenuItem("Create Graph");
-      menuCreateGraph.addActionListener(new ButtonListener(this, ButtonEventType.NEW));
+      menuCreateGraph.addActionListener(new MenuListener(this, MenuEventType.NEW));
       JMenuItem menuLoadGraph = new JMenuItem("Load Graph");
-      menuLoadGraph.addActionListener(new ButtonListener(this, ButtonEventType.LOAD));
+      menuLoadGraph.addActionListener(new MenuListener(this, MenuEventType.LOAD));
       JMenuItem menuSaveGraph = new JMenuItem("Save Graph");
-      menuSaveGraph.addActionListener(new ButtonListener(this, ButtonEventType.SAVE));
+      menuSaveGraph.addActionListener(new MenuListener(this, MenuEventType.SAVE));
 
       // Add items to menu
       this.menu.add(menuCreateGraph);
@@ -184,30 +193,35 @@ public class MainWindow {
          this.resetButton.setPreferredSize(new Dimension(button_width, button_height));
          //this.resetButton.setBorder(new LineBorder(Color.black));
          this.resetButton.setToolTipText("Reset");
+         this.resetButton.addActionListener(new ButtonListener(this, ButtonEventType.RESET));
 
          img = ImageIO.read(getClass().getResource("images/stepBackSmall.png"));
          this.undoButton.setIcon(new ImageIcon(img));
          this.undoButton.setPreferredSize(new Dimension(button_width, button_height));
          //this.undoButton.setBorder(new LineBorder(Color.black));
          this.undoButton.setToolTipText("Undo");
+         this.undoButton.addActionListener(new ButtonListener(this, ButtonEventType.UNDO));
 
          img = ImageIO.read(getClass().getResource("images/playSmall.png"));
          this.stepButton.setIcon(new ImageIcon(img));
          this.stepButton.setPreferredSize(new Dimension(button_width, button_height));
          //this.stepButton.setBorder(new LineBorder(Color.black));
          this.stepButton.setToolTipText("Next Step");
+         this.stepButton.addActionListener(new ButtonListener(this, ButtonEventType.NEXT_STEP));
 
          img = ImageIO.read(getClass().getResource("images/nextStepSmall.png"));
          this.runButton.setIcon(new ImageIcon(img));
          this.runButton.setPreferredSize(new Dimension(button_width, button_height));
          //this.runButton.setBorder(new LineBorder(Color.black));
          this.runButton.setToolTipText("Finish Run");
+         this.runButton.addActionListener(new ButtonListener(this, ButtonEventType.RUN));
 
          img = ImageIO.read(getClass().getResource("images/finishSmall.png"));
          this.finishButton.setIcon(new ImageIcon(img));
          this.finishButton.setPreferredSize(new Dimension(button_width, button_height));
          //this.finishButton.setBorder(new LineBorder(Color.black));
          this.finishButton.setToolTipText("Finish Algorithm");
+         this.finishButton.addActionListener(new ButtonListener(this, ButtonEventType.FINISH));
 
       } catch (Exception ex) {
          System.out.println(ex);
@@ -249,19 +263,19 @@ public class MainWindow {
    }
 
    /**
-    * Class for performing button actions
+    * Class for performing menu actions.
     */
-   private class ButtonListener implements ActionListener {
+   private class MenuListener implements ActionListener {
       private final MainWindow mainwindow;
-      private final ButtonEventType eventType;
+      private final MenuEventType eventType;
 
       // Class constructor
-      public ButtonListener(MainWindow mainwindow, ButtonEventType eventType) {
+      public MenuListener(MainWindow mainwindow, MenuEventType eventType) {
          this.mainwindow = mainwindow;
          this.eventType = eventType;
       }
 
-      // Performing button actions
+      // Performing menu actions
       @Override
       public void actionPerformed(ActionEvent e) {
          switch(this.eventType) {
@@ -277,6 +291,42 @@ public class MainWindow {
          }
       }
 
+   }
+
+   /**
+    * Class for performing bottom button actions.
+    */
+   private class ButtonListener implements ActionListener {
+      private final MainWindow mainwindow;
+      private final ButtonEventType eventType;
+
+      // Class constructor
+      public ButtonListener(MainWindow mainwindow, ButtonEventType eventType) {
+         this.mainwindow = mainwindow;
+         this.eventType = eventType;
+      }
+
+      // Performing button actions
+      @Override
+      public void actionPerformed(ActionEvent e) {
+         switch(this.eventType) {
+            case RESET:
+               this.mainwindow.graph.resetAlgorithm();
+               break;
+            case UNDO:
+               this.mainwindow.graph.undoStep();
+               break;
+            case NEXT_STEP:
+               this.mainwindow.graph.nextStep();
+               break;
+            case RUN:
+               this.mainwindow.graph.finishRun();
+               break;
+            case FINISH:
+               this.mainwindow.graph.finishAlgorithm();
+               break;
+         }
+      }
    }
 
    // Create new graph
