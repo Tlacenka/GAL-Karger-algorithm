@@ -19,6 +19,7 @@ package karger;
 
 import java.util.Map;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 import java.lang.Boolean;
 import java.io.IOException;
@@ -31,6 +32,10 @@ import javax.swing.JOptionPane;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.Color;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.ActionEvent;
 
 import com.mxgraph.io.mxCodec;
 import com.mxgraph.model.mxCell;
@@ -72,6 +77,10 @@ public class KargerGraph {
         edgestyle.put(mxConstants.STYLE_ENDARROW, "none");
         edgestyle.put(mxConstants.STYLE_STROKEWIDTH, 3);
         edgestyle.put(mxConstants.STYLE_STROKECOLOR, "#A10115");
+        edgestyle.put(mxConstants.STYLE_FONTCOLOR, "#000000");
+        edgestyle.put(mxConstants.STYLE_FONTSIZE, "15");
+        edgestyle.put(mxConstants.STYLE_FONTSTYLE, mxConstants.FONT_BOLD);
+        edgestyle.put(mxConstants.STYLE_VERTICAL_ALIGN, mxConstants.ALIGN_BOTTOM);
         
         Map<String, Object> vertstyle = this.graph.getStylesheet().getDefaultVertexStyle();
         vertstyle.put(mxConstants.STYLE_SHAPE, mxConstants.SHAPE_ELLIPSE);
@@ -100,6 +109,37 @@ public class KargerGraph {
         this.gc.getViewport().setOpaque(true);
         this.gc.getViewport().setBackground(Color.white);
         this.gc.setBorder(null);
+
+        // Override mouse actions
+        this.gc.getGraphControl().addMouseListener(new MouseAdapter() {
+
+            @Override
+            public void mouseClicked(MouseEvent m) {
+
+                // Find out if there is a cell based on mouse location
+                mxCell cell = getCellFromMouse(m);
+                if (cell == null) {
+                    return;
+                }
+
+                // TODO: Specify what to do
+            }
+        });
+
+    }
+
+    /**
+     * Get cell from mouse coordinates.
+     */
+    private mxCell getCellFromMouse(MouseEvent m) {
+        Object o = this.gc.getCellAt(m.getX(), m.getY());
+
+        // If mouse is not on a cell, end action
+        if ((o == null) || !(o instanceof mxCell)) {
+            return null;
+        } else {
+            return (mxCell)o;
+        }
     }
 
     /**
@@ -238,6 +278,83 @@ public class KargerGraph {
         }
     }
 
+    private void mergeCells() {
+
+        // TODO cells based on random generator or user
+        if (this.adjacencyList.keySet().toArray().length < 2) {
+            return;
+        }
+        mxCell v1 = (mxCell)this.adjacencyList.keySet().toArray()[0];
+        mxCell v2 = (mxCell)this.adjacencyList.keySet().toArray()[1];
+
+        // Change their colour to signify something is going to change
+        this.graph.getModel().beginUpdate();
+        try {
+            this.graph.setCellStyles(mxConstants.STYLE_FILLCOLOR, "#D72C16", new Object[] {v1});
+            this.graph.setCellStyles(mxConstants.STYLE_FILLCOLOR, "#D72C16", new Object[] {v2});
+        } finally {
+            this.graph.getModel().endUpdate();
+        }
+
+        // Print out their values
+        System.out.println( (String)v1.getValue() + " and " + (String)v2.getValue()); 
+
+        // Merge the cells
+
+        // Redirect all edges from v2, remove v2 and connected edges
+        this.graph.getModel().beginUpdate();
+        try {
+            this.graph.getModel().setValue(v1, (String)v1.getValue() + (String)v2.getValue());
+
+            // Go through all vertices adjacent to v2
+            for (Object v_obj : this.adjacencyList.get(v2)) {
+                mxCell v = (mxCell)v_obj;
+                if (v != v1) {
+
+                    // Create/update weighted edge
+                    if (this.adjacencyList.get(v1).contains(v)) {
+                        
+                        // Find edge
+                        for (Object e : this.graph.getChildEdges(this.parent)) {
+                            mxCell edge = (mxCell)e;
+                            mxCell src = (mxCell)edge.getSource();
+                            mxCell dst = (mxCell)edge.getTarget();
+                            if (((src == v) && (dst == v1)) || ((src == v1) && (dst == v))) {
+                                if (edge.getValue() != null) {
+                                    this.graph.getModel().setValue(edge, (int)edge.getValue() + 1);
+                                } else {
+                                    this.graph.getModel().setValue(edge, 1);
+                                }
+                                break;
+                            }
+                        }
+                    } else {
+                        Object e = this.graph.insertEdge(parent, null, "", v, v1);
+                        this.adjacencyList.get(v1).add(v);
+                        this.adjacencyList.get(v).add(v1);
+                    }
+
+                    this.adjacencyList.get(v).remove(v2);
+                }
+            }
+
+            // Remove v2 and connected edges
+            this.adjacencyList.remove(v2);
+            this.graph.removeCells(new Object[] {v2});
+            
+        } finally {
+            this.graph.getModel().endUpdate();
+        }
+
+        // Change colour back
+        try {
+            this.graph.setCellStyles(mxConstants.STYLE_FILLCOLOR, "#F0EFEA", new Object[] {v1});
+        } finally {
+            this.graph.getModel().endUpdate();
+        }
+        
+    }
+
     /**
      * Resets all runs, re-creates the whole graph.
      */
@@ -257,7 +374,7 @@ public class KargerGraph {
      * Performs one step instead of the user.
      */
     public void nextStep() {
-        return;
+        this.mergeCells();
     }
 
     /**
