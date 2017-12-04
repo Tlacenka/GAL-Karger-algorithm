@@ -425,10 +425,9 @@ public class KargerGraph {
             this.saveGraph("./examples/reset.xml");
         }
 
-        // TODO enable undo button
-
         // Save current algorithm
         this.saveGraph("./examples/undo.xml");
+
 
         // Choose cells to be merged
         // TODO cells based on random generator or user
