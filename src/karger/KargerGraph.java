@@ -57,6 +57,7 @@ public class KargerGraph {
     public mxGraphComponent gc; // graph component (wrapper)
 
     private String runCounter;
+    private int stepCounter;
     private String bestResult;
 
     private Object parent;
@@ -71,6 +72,7 @@ public class KargerGraph {
         this.bestResult = "-";
         this.vertex_size = 60;
         this.vertex_scaling = 10;
+        this.stepCounter = 0;
 
         // Create a graph
         this.graph = new mxGraph();
@@ -393,21 +395,43 @@ public class KargerGraph {
      * Resets all runs, re-creates the whole graph.
      */
     public void resetAlgorithm() {
-        System.out.println("Reset algorithm.");
-        return;
+        if (this.stepCounter > 0) {
+            this.loadGraph("reset.xml");
+            this.stepCounter = 0;
+            
+            // TODO disable undo button
+        }
     }
 
     /**
      * Goes back one step in the algorithm.
      */
     public void undoStep() {
-        return;
+
+        if (this.stepCounter > 0) {
+            this.loadGraph("undo.xml");
+
+            // Update step counter
+            this.stepCounter = this.stepCounter - 1;
+            
+            // TODO disable undo button
+        }
     }
 
     /**
      * Performs one step instead of the user.
      */
     public void nextStep() {
+
+        // If this is first step, save for resetting
+        if (this.stepCounter == 0) {
+            this.saveGraph("./examples/reset.xml");
+        }
+
+        // TODO enable undo button
+
+        // Save current algorithm
+        this.saveGraph("./examples/undo.xml");
 
         // Choose cells to be merged
         // TODO cells based on random generator or user
@@ -449,13 +473,20 @@ public class KargerGraph {
             this.graph.getModel().endUpdate();
         }
 
+        // Update step counter
+        this.stepCounter = this.stepCounter + 1;
+
     }
 
     /**
      * Finishes current run of the algorithm.
      */
     public void finishRun() {
-        return;
+        while (this.adjacencyList.keySet().toArray().length >= 3) {
+            this.nextStep();
+        }
+
+        // TODO update best result, number of runs
     }
 
     /**

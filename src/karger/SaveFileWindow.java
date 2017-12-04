@@ -23,8 +23,8 @@ public class SaveFileWindow extends JFrame {
      * @return Path to file
      */
     public String showSaveChooser(){
-        JFileChooser chooser = new JFileChooser();
-        
+        JFileChooser chooser = new JFileChooser("./examples");
+
         // Demonstrate "Save" dialog:
         int rVal = chooser.showSaveDialog(SaveFileWindow.this);
       

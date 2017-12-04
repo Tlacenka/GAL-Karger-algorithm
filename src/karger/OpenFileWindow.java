@@ -23,7 +23,7 @@ public class OpenFileWindow extends JFrame {
      * @return Path to file
      */
     public String showOpenChooser(){
-        JFileChooser chooser = new JFileChooser();
+        JFileChooser chooser = new JFileChooser("./examples");
         
         // set filter for xml files
         FileNameExtensionFilter xmlfilter = new FileNameExtensionFilter("xml files (*.xml)", "xml");
