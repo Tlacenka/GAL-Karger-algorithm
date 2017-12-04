@@ -191,35 +191,32 @@ public class MainWindow {
          Image img = ImageIO.read(getClass().getResource("images/resetSmall.png"));
          this.resetButton.setIcon(new ImageIcon(img));
          this.resetButton.setPreferredSize(new Dimension(button_width, button_height));
-         //this.resetButton.setBorder(new LineBorder(Color.black));
          this.resetButton.setToolTipText("Reset");
          this.resetButton.addActionListener(new ButtonListener(this, ButtonEventType.RESET));
+         this.resetButton.setEnabled(false);
 
          img = ImageIO.read(getClass().getResource("images/stepBackSmall.png"));
          this.undoButton.setIcon(new ImageIcon(img));
          this.undoButton.setPreferredSize(new Dimension(button_width, button_height));
-         //this.undoButton.setBorder(new LineBorder(Color.black));
          this.undoButton.setToolTipText("Undo");
          this.undoButton.addActionListener(new ButtonListener(this, ButtonEventType.UNDO));
+         this.undoButton.setEnabled(false);
 
          img = ImageIO.read(getClass().getResource("images/playSmall.png"));
          this.stepButton.setIcon(new ImageIcon(img));
          this.stepButton.setPreferredSize(new Dimension(button_width, button_height));
-         //this.stepButton.setBorder(new LineBorder(Color.black));
          this.stepButton.setToolTipText("Next Step");
          this.stepButton.addActionListener(new ButtonListener(this, ButtonEventType.NEXT_STEP));
 
          img = ImageIO.read(getClass().getResource("images/nextStepSmall.png"));
          this.runButton.setIcon(new ImageIcon(img));
          this.runButton.setPreferredSize(new Dimension(button_width, button_height));
-         //this.runButton.setBorder(new LineBorder(Color.black));
          this.runButton.setToolTipText("Finish Run");
          this.runButton.addActionListener(new ButtonListener(this, ButtonEventType.RUN));
 
          img = ImageIO.read(getClass().getResource("images/finishSmall.png"));
          this.finishButton.setIcon(new ImageIcon(img));
          this.finishButton.setPreferredSize(new Dimension(button_width, button_height));
-         //this.finishButton.setBorder(new LineBorder(Color.black));
          this.finishButton.setToolTipText("Finish Algorithm");
          this.finishButton.addActionListener(new ButtonListener(this, ButtonEventType.FINISH));
 
@@ -311,19 +308,27 @@ public class MainWindow {
       public void actionPerformed(ActionEvent e) {
          switch(this.eventType) {
             case RESET:
+               this.mainwindow.undoButton.setEnabled(false);
+               this.mainwindow.resetButton.setEnabled(false);
                this.mainwindow.graph.resetAlgorithm();
                break;
             case UNDO:
+               this.mainwindow.undoButton.setEnabled(false);
                this.mainwindow.graph.undoStep();
                break;
             case NEXT_STEP:
                this.mainwindow.graph.nextStep();
+               this.mainwindow.undoButton.setEnabled(true);
+               this.mainwindow.resetButton.setEnabled(true);
                break;
             case RUN:
                this.mainwindow.graph.finishRun();
+               this.mainwindow.undoButton.setEnabled(true);
+               this.mainwindow.resetButton.setEnabled(true);
                break;
             case FINISH:
                this.mainwindow.graph.finishAlgorithm();
+               this.mainwindow.resetButton.setEnabled(true);
                break;
          }
       }
