@@ -253,8 +253,13 @@ public class KargerGraph {
         mxCodec codec = new mxCodec(graph_file);
         codec.decode(graph_file.getDocumentElement(), graph.getModel());
 
+        // Update default parent
+        this.parent = graph.getDefaultParent();
+
         // Update adjacency list
         this.createAdjacencyList();
+
+        System.out.println("Adj list created.");
 
         return;
     }
@@ -282,7 +287,7 @@ public class KargerGraph {
         int edge_val = 0;
 
         // Print out their values
-        System.out.println( (String)v1.getValue() + " and " + (String)v2.getValue()); 
+        System.out.println((String)v1.getValue() + " and " + (String)v2.getValue()); 
 
         // Merge the cells
 
@@ -450,6 +455,7 @@ public class KargerGraph {
         }
 
         this.mergeCells(v1,v2);
+
         //this.graph.getModel().beginUpdate();
         //try {
             //(new Timer(true)).schedule(new HighlightBeforeMerging(v1, v2), 2*1000);
