@@ -20,6 +20,8 @@ package karger;
 import java.util.Map;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import java.lang.Boolean;
 import java.io.IOException;
@@ -45,6 +47,7 @@ import com.mxgraph.util.mxUtils;
 import com.mxgraph.util.mxXmlUtils;
 import com.mxgraph.view.mxGraph;
 import com.mxgraph.util.mxRectangle;
+import com.mxgraph.model.mxGeometry;
 
 import org.w3c.dom.Document;
 
@@ -57,7 +60,8 @@ public class KargerGraph {
     private String bestResult;
 
     private Object parent;
-    private int vertex_size;
+    private int vertex_size; // width = height of vertex
+    private int vertex_scaling; // by how much is vertex expanded when new node is merged into it
 
     private HashMap<mxCell,LinkedList<mxCell>> adjacencyList;
 
@@ -66,6 +70,7 @@ public class KargerGraph {
         this.runCounter = "0";
         this.bestResult = "-";
         this.vertex_size = 60;
+        this.vertex_scaling = 10;
 
         // Create a graph
         this.graph = new mxGraph();
@@ -278,23 +283,9 @@ public class KargerGraph {
         }
     }
 
-    private void mergeCells() {
+    private void mergeCells(mxCell v1, mxCell v2) {
 
-        // TODO cells based on random generator or user
-        if (this.adjacencyList.keySet().toArray().length < 2) {
-            return;
-        }
-        mxCell v1 = (mxCell)this.adjacencyList.keySet().toArray()[0];
-        mxCell v2 = (mxCell)this.adjacencyList.keySet().toArray()[1];
-
-        // Change their colour to signify something is going to change
-        this.graph.getModel().beginUpdate();
-        try {
-            this.graph.setCellStyles(mxConstants.STYLE_FILLCOLOR, "#D72C16", new Object[] {v1});
-            this.graph.setCellStyles(mxConstants.STYLE_FILLCOLOR, "#D72C16", new Object[] {v2});
-        } finally {
-            this.graph.getModel().endUpdate();
-        }
+        int edge_val = 0;
 
         // Print out their values
         System.out.println( (String)v1.getValue() + " and " + (String)v2.getValue()); 
@@ -302,58 +293,101 @@ public class KargerGraph {
         // Merge the cells
 
         // Redirect all edges from v2, remove v2 and connected edges
+        // Make the merged node bigger
         this.graph.getModel().beginUpdate();
-        try {
-            this.graph.getModel().setValue(v1, (String)v1.getValue() + (String)v2.getValue());
+        {
+            v1.setGeometry(new mxGeometry(v1.getGeometry().getX(), v1.getGeometry().getY(),
+                                          v1.getGeometry().getWidth() + 10,
+                                          v1.getGeometry().getHeight() + 10));
+        }
+        this.graph.getModel().endUpdate();
 
-            // Go through all vertices adjacent to v2
-            for (Object v_obj : this.adjacencyList.get(v2)) {
-                mxCell v = (mxCell)v_obj;
-                if (v != v1) {
+        // New node is in alphabetical order
+        String val = (String)v1.getValue() + (String)v2.getValue();
+        char[] val_array = val.toCharArray();
+        Arrays.sort(val_array);
 
-                    // Create/update weighted edge
-                    if (this.adjacencyList.get(v1).contains(v)) {
-                        
-                        // Find edge
-                        for (Object e : this.graph.getChildEdges(this.parent)) {
-                            mxCell edge = (mxCell)e;
-                            mxCell src = (mxCell)edge.getSource();
-                            mxCell dst = (mxCell)edge.getTarget();
-                            if (((src == v) && (dst == v1)) || ((src == v1) && (dst == v))) {
-                                if (edge.getValue() != null) {
-                                    this.graph.getModel().setValue(edge, (int)edge.getValue() + 1);
-                                } else {
-                                    this.graph.getModel().setValue(edge, 1);
+        this.graph.getModel().beginUpdate();
+        {
+            this.graph.getModel().setValue(v1, new String(val_array));
+        }
+        this.graph.getModel().endUpdate();
+
+        // Go through all vertices adjacent to v2
+        for (Object v_obj : this.adjacencyList.get(v2)) {
+            mxCell v = (mxCell)v_obj;
+            if (v != v1) {
+
+                // Create/update weighted edge
+                if (this.adjacencyList.get(v).contains(v1)) {
+                    
+                    // Find edge
+                    for (Object e : this.graph.getChildEdges(this.parent)) {
+                        mxCell edge = (mxCell)e;
+                        mxCell src = (mxCell)edge.getSource();
+                        mxCell dst = (mxCell)edge.getTarget();
+
+                        if (((src == v) && (dst == v1)) || ((src == v1) && (dst == v))) {
+                            if (edge.getValue() != null) {
+                                edge_val = ((String)edge.getValue() == "") ? 1 : Integer.parseInt((String)edge.getValue());
+                                this.graph.getModel().beginUpdate();
+                                {
+                                    this.graph.getModel().setValue(edge, Integer.toString(edge_val + 1));
                                 }
-                                break;
+                                this.graph.getModel().endUpdate();
+                            } else {
+                                this.graph.getModel().beginUpdate();
+                                {
+                                    this.graph.getModel().setValue(edge, "2");
+                                }
+                                this.graph.getModel().endUpdate();
                             }
+                            break;
                         }
-                    } else {
-                        Object e = this.graph.insertEdge(parent, null, "", v, v1);
-                        this.adjacencyList.get(v1).add(v);
-                        this.adjacencyList.get(v).add(v1);
                     }
+                } else {
+                    this.graph.getModel().beginUpdate();
+                    {
+                        Object e = this.graph.insertEdge(parent, null, "", v, v1);
+                    }
+                    this.graph.getModel().endUpdate();
 
-                    this.adjacencyList.get(v).remove(v2);
+                    this.adjacencyList.get(v).add(v1);
+                    this.adjacencyList.get(v1).add(v);
                 }
+
+                this.adjacencyList.get(v).remove(v2);
             }
+        }
 
-            // Remove v2 and connected edges
-            this.adjacencyList.remove(v2);
+        // Remove v2 and connected edges
+        this.adjacencyList.remove(v2);
+
+        this.graph.getModel().beginUpdate();
+        {
             this.graph.removeCells(new Object[] {v2});
-            
-        } finally {
-            this.graph.getModel().endUpdate();
+        }
+        this.graph.getModel().endUpdate();
+    }
+
+    /**
+     * Subclass for a timer used when highlighting cells before merging.
+     */
+     class HighlightBeforeMerging extends TimerTask {
+        private final mxCell v1;
+        private final mxCell v2;
+
+        HighlightBeforeMerging(mxCell v1, mxCell v2) {
+            this.v1 = v1;
+            this.v2 = v2;
         }
 
-        // Change colour back
-        try {
-            this.graph.setCellStyles(mxConstants.STYLE_FILLCOLOR, "#F0EFEA", new Object[] {v1});
-        } finally {
-            this.graph.getModel().endUpdate();
+        @Override
+        public void run() {
+            // Merge cells
+            mergeCells(v1, v2);
         }
-        
-    }
+     }
 
     /**
      * Resets all runs, re-creates the whole graph.
@@ -374,7 +408,47 @@ public class KargerGraph {
      * Performs one step instead of the user.
      */
     public void nextStep() {
-        this.mergeCells();
+
+        // Choose cells to be merged
+        // TODO cells based on random generator or user
+        // 3 - wouldn't make sense to have empty set of vertices
+        if (this.adjacencyList.keySet().toArray().length < 3) {
+            return;
+        }
+        mxCell v1 = (mxCell)this.adjacencyList.keySet().toArray()[0];
+        mxCell v2 = (mxCell)this.adjacencyList.keySet().toArray()[1];
+
+        this.graph.getModel().beginUpdate();
+        try {
+            this.graph.setCellStyles(mxConstants.STYLE_FILLCOLOR, "#D72C16", new Object[] {v1});
+            this.graph.setCellStyles(mxConstants.STYLE_FILLCOLOR, "#D72C16", new Object[] {v2});
+        } finally {
+            this.graph.getModel().endUpdate();
+        }
+
+        // v1 is the one being merged to
+        if (v1.getGeometry().getX() >  v2.getGeometry().getX()) {
+            mxCell v_swap = v1;
+            v1 = v2;
+            v2 = v_swap;
+        }
+
+        this.mergeCells(v1,v2);
+        //this.graph.getModel().beginUpdate();
+        //try {
+            //(new Timer(true)).schedule(new HighlightBeforeMerging(v1, v2), 2*1000);
+        //} finally {
+            //this.graph.getModel().endUpdate();
+        //}
+
+        // Change colour back
+        this.graph.getModel().beginUpdate();
+        try {
+            this.graph.setCellStyles(mxConstants.STYLE_FILLCOLOR, "#F0EFEA", new Object[] {v1});
+        } finally {
+            this.graph.getModel().endUpdate();
+        }
+
     }
 
     /**
