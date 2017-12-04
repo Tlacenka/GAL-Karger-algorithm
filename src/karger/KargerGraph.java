@@ -4,17 +4,6 @@
  * @date 2017
  */
 
-
-/**
- * - How and where will we edit graph? We will need coordinates to update the current one.
- *   - such as creating/removing/moving a new edge, vertex
- * - Which values do we need to send between windows and graph when storing/loading?
- * - Where will the reactions on buttons be implemented?
- *   - it will probably call operations of this class with instance in MainWin
- *   - initial buttons: 1 step further/back, 1 run/reset, run the whole algorithm
- *   - so does the karger algorithm go here as well? making the step etc
- */
-
 package karger;
 
 import java.util.Map;
