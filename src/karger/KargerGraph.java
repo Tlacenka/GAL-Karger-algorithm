@@ -182,6 +182,9 @@ public class KargerGraph {
      */
     public void createAdjacencyList() {
 
+        // Remove previous adjacency list - TODO somehow empty it?
+        this.adjacencyList = new HashMap<mxCell,LinkedList<mxCell>>();
+
         // Add all vertices
         for (Object v : this.graph.getChildVertices(this.parent)) {
             mxCell vertex = (mxCell)v;
@@ -396,7 +399,7 @@ public class KargerGraph {
      */
     public void resetAlgorithm() {
         if (this.stepCounter > 0) {
-            this.loadGraph("reset.xml");
+            this.loadGraph("./examples/reset.xml");
             this.stepCounter = 0;
             
             // TODO disable undo button
@@ -409,7 +412,7 @@ public class KargerGraph {
     public void undoStep() {
 
         if (this.stepCounter > 0) {
-            this.loadGraph("undo.xml");
+            this.loadGraph("./examples/undo.xml");
 
             // Update step counter
             this.stepCounter = this.stepCounter - 1;
