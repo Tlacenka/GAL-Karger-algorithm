@@ -31,6 +31,18 @@ import com.mxgraph.util.mxUtils;
 import com.mxgraph.util.mxXmlUtils;
 import com.mxgraph.view.mxGraph;
 
+import java.awt.BorderLayout;
+import java.awt.EventQueue;
+import java.util.ArrayList;
+
+import javax.swing.JFrame;
+import javax.swing.JList;
+import javax.swing.JScrollPane;
+import javax.swing.ListModel;
+import javax.swing.ListSelectionModel;
+import javax.swing.event.ListDataListener;
+
+
 public class MainWindow {
 
    private JFrame frame;
@@ -84,7 +96,7 @@ public class MainWindow {
    JList<String> edgeChoice;
 
    DefaultListModel<String> algorithmModel = new DefaultListModel<String>();
-   JList<String> algorithmChoice;
+   public JList<String> algorithmChoice;
 
 
    // Menu event enumeration type
@@ -265,7 +277,7 @@ public class MainWindow {
             public void actionPerformed(ActionEvent e)
             {
                xSidePanels = new SidePanels();
-               xSidePanels.removeItem(nodeModel, nodeChoice);
+               xSidePanels.removeItem(nodeChoice);
             }
          });
 
@@ -297,7 +309,7 @@ public class MainWindow {
             public void actionPerformed(ActionEvent e)
             {
                xSidePanels = new SidePanels();
-               xSidePanels.removeItem(edgeModel, edgeChoice);
+               xSidePanels.removeItem(edgeChoice);
             }
          });
 
@@ -340,23 +352,26 @@ public class MainWindow {
       this.rightPanel.setPreferredSize(new Dimension(250, 800));
       this.rightPanel.setBorder(BorderFactory.createMatteBorder(1,0,1,0,Color.black));
 
-      try {
-         algorithmModel.addElement("ALGORITHM");
-         algorithmModel.addElement("  1|");
-         algorithmModel.addElement("  2|");
-         algorithmModel.addElement("  3|");
-         algorithmModel.addElement("  4|");
-         algorithmModel.addElement("  5|");
-         algorithmModel.addElement("  6|");
-         algorithmModel.addElement("  7|");
-         algorithmModel.addElement("  8|");
-         algorithmModel.addElement("  9|");
-         algorithmModel.addElement("10|");
-         algorithmModel.addElement("11|");
-         algorithmModel.addElement("12|");
-         algorithmModel.addElement("13|");
-         algorithmModel.addElement("14|");
-         algorithmModel.addElement("15|");
+      try {                                                                      // index
+         algorithmModel.addElement("  ");                                        //
+         algorithmModel.addElement("          ALGORITHM");                  // 0
+         algorithmModel.addElement("  ");                                        // 1
+         algorithmModel.addElement("  1|    let G = (V,E)");                     // 2
+         algorithmModel.addElement("  2|");                                      // 3
+         algorithmModel.addElement("  3|    void KargerAlgorithm() {");          // 4
+         algorithmModel.addElement("  4|      while (V.length > 2)");            // 5
+         algorithmModel.addElement("  5|         choose nodes to be merged");    // 6
+         algorithmModel.addElement("  6|         mergeCells(v1,v2)");            // 7
+         algorithmModel.addElement("  7|    }");                                 // 8
+         algorithmModel.addElement("  8|");                                      // 9
+         algorithmModel.addElement("  9|    void mergeCells(v1, v2) {");         // 10
+         algorithmModel.addElement("10|       go through all vertices");         // 11
+         algorithmModel.addElement("11|         adjacent to v2");                // 12
+         algorithmModel.addElement("12|       create/update weighted edge");     // 13
+         algorithmModel.addElement("13|       find edge");                       // 14
+         algorithmModel.addElement("14|       merge nodes");                     // 15
+         algorithmModel.addElement("15|       update graph");                    // 16
+         algorithmModel.addElement("16|    }");                                  // 17
 
          algorithmChoice = new JList<String>(algorithmModel);
 
@@ -364,14 +379,15 @@ public class MainWindow {
          System.out.println(ex);
       }
 
+     // algorithmChoice.setSelectedIndex(graph.algorithmItemIndex);
 
       this.algorithmPanel = new JScrollPane(algorithmChoice);
-      this.algorithmPanel.setPreferredSize(new Dimension(240, 500));
+      this.algorithmPanel.setPreferredSize(new Dimension(240, 370));
 
       this.rightPanel.add(this.algorithmPanel, BorderLayout.CENTER);
       this.frame.add(this.rightPanel, BorderLayout.EAST);
 
-
+      this.rightPanel.setLayout(new FlowLayout(FlowLayout.CENTER, 0, 70));
 
 
       // control panel
