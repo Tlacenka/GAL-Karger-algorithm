@@ -492,4 +492,12 @@ public class KargerGraph {
     public void finishAlgorithm() {
         return;
     }
+
+
+    public HashMap<mxCell,LinkedList<mxCell>> getAdjacencyList(){
+
+        System.out.println("Adjacency list 25: " + this.adjacencyList);
+
+        return adjacencyList;
+    }
 }

@@ -9,21 +9,8 @@ package karger;
 import java.lang.reflect.Field;
 import javax.imageio.ImageIO;
 
-import javax.swing.JFrame;
-import javax.swing.JPanel;
-import javax.swing.JComboBox;
-import javax.swing.JButton;
-import javax.swing.JLabel;
-import javax.swing.JList;
-import javax.swing.JMenuBar;
-import javax.swing.JMenu;
-import javax.swing.JMenuItem;
-import javax.swing.UIManager;
-import javax.swing.BorderFactory;
-import javax.swing.ImageIcon;
+import javax.swing.*;
 import javax.swing.border.LineBorder;
-import javax.swing.JComponent;
-import javax.swing.JTextArea;
 
 import java.awt.BorderLayout;
 import java.awt.event.ActionListener;
@@ -43,6 +30,18 @@ import com.mxgraph.util.mxConstants;
 import com.mxgraph.util.mxUtils;
 import com.mxgraph.util.mxXmlUtils;
 import com.mxgraph.view.mxGraph;
+
+import java.awt.BorderLayout;
+import java.awt.EventQueue;
+import java.util.ArrayList;
+
+import javax.swing.JFrame;
+import javax.swing.JList;
+import javax.swing.JScrollPane;
+import javax.swing.ListModel;
+import javax.swing.ListSelectionModel;
+import javax.swing.event.ListDataListener;
+
 
 public class MainWindow {
 
@@ -67,14 +66,46 @@ public class MainWindow {
    private JTextArea runTracker;
    private JTextArea resultTracker;
 
+   private JPanel panel1;
+   private JPanel panel2;
+
+   private JScrollPane nodePanel;
+   private JScrollPane edgePanel;
+   private JScrollPane algorithmPanel;
+
+   private JPanel nodeButtonPanel;
+   private JPanel edgeButtonPanel;
+
+   private JButton addNodeButton;
+   private JButton removeNodeButton;
+   private JButton addEdgeButton;
+   private JButton removeEdgeButton;
+
+
+
    private KargerGraph graph;
    private mxGraphComponent gc;
+
+
+   protected SidePanels xSidePanels;
+
+   DefaultListModel<String> nodeModel = new DefaultListModel<String>();
+   JList<String> nodeChoice;
+
+   DefaultListModel<String> edgeModel = new DefaultListModel<String>();
+   JList<String> edgeChoice;
+
+   DefaultListModel<String> algorithmModel = new DefaultListModel<String>();
+   public JList<String> algorithmChoice;
+
 
    // Menu event enumeration type
    private enum MenuEventType {
        NEW,
        LOAD,
-       SAVE
+       SAVE,
+       GUIDE,
+       ABOUT
    }
 
    // Button event enumeration type
@@ -98,8 +129,14 @@ public class MainWindow {
       Color panelColor = new Color(215, 44, 22);
       Color sidePanelColor = new Color(192, 178, 181);
 
-      int button_width = 70;
-      int button_height = 70;
+      Color panelColorTest = new Color(70, 70, 70);
+
+      int button_width = 50;
+      int button_height = 50;
+
+      int sideButton_width = 50;
+      int sideButton_height = 30;
+
 
       // Set window options, title, size, position
       this.frame = new JFrame();
@@ -131,7 +168,9 @@ public class MainWindow {
 
       // Create help menu items
       JMenuItem menuUserGuide = new JMenuItem("User Guide");
+      menuUserGuide.addActionListener(new MenuListener(this, MenuEventType.GUIDE));
       JMenuItem menuAbout = new JMenuItem("About");
+      menuAbout.addActionListener(new MenuListener(this, MenuEventType.ABOUT));
 
       // Add items to help menu
       this.help_menu.add(menuUserGuide);
@@ -139,7 +178,7 @@ public class MainWindow {
       this.menuBar.add(this.help_menu);
 
       // Set menu background colour
-      this.menuBar.setBackground(menuColor);
+      this.menuBar.setBackground(panelColorTest);
       this.menu.setForeground(textColor);
       this.help_menu.setForeground(textColor);
 
@@ -150,34 +189,215 @@ public class MainWindow {
       // Create the layout - panels, their position and size
       this.topPanel = new JPanel();
       this.topPanel.setBackground(panelColor);
-      this.topPanel.setPreferredSize(new Dimension(1000, 100));
+      this.topPanel.setPreferredSize(new Dimension(1000, 90));
       this.frame.add(this.topPanel, BorderLayout.NORTH);
 
+
+      // graph editor panel
       this.leftPanel = new JPanel();
       this.leftPanel.setBackground(sidePanelColor);
       this.leftPanel.setPreferredSize(new Dimension(250, 800));
       this.leftPanel.setBorder(BorderFactory.createMatteBorder(1,0,1,0,Color.black));
+
+      // node list and edge list panels
+      this.panel1 = new JPanel();
+      this.panel1.setBackground(sidePanelColor);
+      this.panel1.setPreferredSize(new Dimension(115, 570));
+
+      this.panel2 = new JPanel();
+      this.panel2.setBackground(sidePanelColor);
+      this.panel2.setPreferredSize(new Dimension(120, 570));
+
+      // test lists
+      try {
+         nodeModel.addElement("EDGE LIST");
+         nodeChoice = new JList<String>(nodeModel);
+
+      } catch (Exception ex) {
+         System.out.println(ex);
+      }
+
+
+      try {
+         edgeModel.addElement("NODE LIST");
+         edgeChoice = new JList<String>(edgeModel);
+
+      } catch (Exception ex) {
+         System.out.println(ex);
+      }
+
+
+      this.nodePanel = new JScrollPane(nodeChoice);
+      this.edgePanel = new JScrollPane(edgeChoice);
+
+      this.nodePanel.setPreferredSize(new Dimension(110, 500));
+      this.edgePanel.setPreferredSize(new Dimension(110, 500));
+
+      this.nodeButtonPanel = new JPanel();
+      this.edgeButtonPanel = new JPanel();
+
+      this.nodeButtonPanel.setPreferredSize(new Dimension(110, 40));
+      this.edgeButtonPanel.setPreferredSize(new Dimension(110, 40));
+
+      this.nodeButtonPanel.setBackground(sidePanelColor);
+      this.edgeButtonPanel.setBackground(sidePanelColor);
+
+
+      // add and remove button for node and edge lists
+      this.addNodeButton     = new JButton();
+      this.removeNodeButton  = new JButton();
+      this.addEdgeButton     = new JButton();
+      this.removeEdgeButton  = new JButton();
+
+
+      // what will happen if there is clicked on some button in the graph editor panel
+      try{
+         Image img = ImageIO.read(getClass().getResource("images/addButton.png"));
+         this.addNodeButton.setIcon(new ImageIcon(img));
+         this.addNodeButton.setPreferredSize(new Dimension(sideButton_width, sideButton_height));
+         this.addNodeButton.setBorder(BorderFactory.createLineBorder(Color.black));
+         this.addNodeButton.setToolTipText("Add node");
+         this.addNodeButton.addActionListener(new ActionListener()
+         {
+            public void actionPerformed(ActionEvent e)
+            {
+               xSidePanels = new SidePanels();
+               xSidePanels.addNode(nodeModel);
+            }
+         });
+
+
+         img = ImageIO.read(getClass().getResource("images/removeButton.png"));
+         this.removeNodeButton.setIcon(new ImageIcon(img));
+         this.removeNodeButton.setPreferredSize(new Dimension(sideButton_width, sideButton_height));
+         this.removeNodeButton.setBorder(BorderFactory.createLineBorder(Color.black));
+         this.removeNodeButton.setToolTipText("Remove node");
+         this.removeNodeButton.addActionListener(new ActionListener()
+         {
+            public void actionPerformed(ActionEvent e)
+            {
+               xSidePanels = new SidePanels();
+               xSidePanels.removeItem(nodeChoice);
+            }
+         });
+
+
+
+         img = ImageIO.read(getClass().getResource("images/addButton.png"));
+         this.addEdgeButton.setIcon(new ImageIcon(img));
+         this.addEdgeButton.setPreferredSize(new Dimension(sideButton_width, sideButton_height));
+         this.addEdgeButton.setBorder(BorderFactory.createLineBorder(Color.black));
+         this.addEdgeButton.setToolTipText("Add edge");
+         this.addEdgeButton.addActionListener(new ActionListener()
+         {
+            public void actionPerformed(ActionEvent e)
+            {
+               xSidePanels = new SidePanels();
+               xSidePanels.addEdge(edgeModel);
+            }
+         });
+
+
+
+         img = ImageIO.read(getClass().getResource("images/removeButton.png"));
+         this.removeEdgeButton.setIcon(new ImageIcon(img));
+         this.removeEdgeButton.setPreferredSize(new Dimension(sideButton_width, sideButton_height));
+         this.removeEdgeButton.setBorder(BorderFactory.createLineBorder(Color.black));
+         this.removeEdgeButton.setToolTipText("Remove edge");
+         this.removeEdgeButton.addActionListener(new ActionListener()
+         {
+            public void actionPerformed(ActionEvent e)
+            {
+               xSidePanels = new SidePanels();
+               xSidePanels.removeItem(edgeChoice);
+            }
+         });
+
+
+      } catch (Exception ex) {
+         System.out.println(ex);
+      }
+
+
+      this.nodeButtonPanel.add(this.addNodeButton, BorderLayout.WEST);
+      this.nodeButtonPanel.add(this.removeNodeButton, BorderLayout.EAST);
+
+      this.edgeButtonPanel.add(this.addEdgeButton, BorderLayout.WEST);
+      this.edgeButtonPanel.add(this.removeEdgeButton, BorderLayout.EAST);
+
+      this.panel1.add(this.nodePanel, BorderLayout.CENTER);
+      this.panel1.add(this.nodeButtonPanel, BorderLayout.SOUTH);
+
+      this.panel2.add(this.edgePanel, BorderLayout.CENTER);
+      this.panel2.add(this.edgeButtonPanel, BorderLayout.SOUTH);
+
+      this.leftPanel.add(this.panel1, BorderLayout.WEST);
+      this.leftPanel.add(this.panel2, BorderLayout.CENTER);
+
       this.frame.add(this.leftPanel, BorderLayout.WEST);
 
+
+
+      // simulation panel
       this.centerPanel = new JPanel();
       this.centerPanel.setBackground(Color.WHITE);
       this.centerPanel.setPreferredSize(new Dimension(550, 500));
       this.centerPanel.setBorder(BorderFactory.createLineBorder(Color.black));
       this.frame.add(this.centerPanel, BorderLayout.CENTER);
 
+
+      // algorithm panel
       this.rightPanel = new JPanel();
       this.rightPanel.setBackground(sidePanelColor);
       this.rightPanel.setPreferredSize(new Dimension(250, 800));
       this.rightPanel.setBorder(BorderFactory.createMatteBorder(1,0,1,0,Color.black));
+
+      try {                                                                      // index
+         algorithmModel.addElement("  ");                                        //
+         algorithmModel.addElement("          ALGORITHM");                  // 0
+         algorithmModel.addElement("  ");                                        // 1
+         algorithmModel.addElement("  1|    let G = (V,E)");                     // 2
+         algorithmModel.addElement("  2|");                                      // 3
+         algorithmModel.addElement("  3|    void KargerAlgorithm() {");          // 4
+         algorithmModel.addElement("  4|      while (V.length > 2)");            // 5
+         algorithmModel.addElement("  5|         choose nodes to be merged");    // 6
+         algorithmModel.addElement("  6|         mergeCells(v1,v2)");            // 7
+         algorithmModel.addElement("  7|    }");                                 // 8
+         algorithmModel.addElement("  8|");                                      // 9
+         algorithmModel.addElement("  9|    void mergeCells(v1, v2) {");         // 10
+         algorithmModel.addElement("10|       go through all vertices");         // 11
+         algorithmModel.addElement("11|         adjacent to v2");                // 12
+         algorithmModel.addElement("12|       create/update weighted edge");     // 13
+         algorithmModel.addElement("13|       find edge");                       // 14
+         algorithmModel.addElement("14|       merge nodes");                     // 15
+         algorithmModel.addElement("15|       update graph");                    // 16
+         algorithmModel.addElement("16|    }");                                  // 17
+
+         algorithmChoice = new JList<String>(algorithmModel);
+
+      } catch (Exception ex) {
+         System.out.println(ex);
+      }
+
+     // algorithmChoice.setSelectedIndex(graph.algorithmItemIndex);
+
+      this.algorithmPanel = new JScrollPane(algorithmChoice);
+      this.algorithmPanel.setPreferredSize(new Dimension(240, 370));
+
+      this.rightPanel.add(this.algorithmPanel, BorderLayout.CENTER);
       this.frame.add(this.rightPanel, BorderLayout.EAST);
 
+      this.rightPanel.setLayout(new FlowLayout(FlowLayout.CENTER, 0, 70));
+
+
+      // control panel
       this.bottomPanel = new JPanel();
-      this.bottomPanel.setBackground(panelColor);
-      this.bottomPanel.setPreferredSize(new Dimension(1000, 100));
+      this.bottomPanel.setBackground(panelColorTest);
+      this.bottomPanel.setPreferredSize(new Dimension(1000, 60));
       this.frame.add(this.bottomPanel, BorderLayout.SOUTH);
 
       // Add buttons to bottom panel
-      this.bottomPanel.setLayout(new FlowLayout(FlowLayout.CENTER, 20, 15));
+      this.bottomPanel.setLayout(new FlowLayout(FlowLayout.CENTER, 20, 5));
 
       this.resetButton = new JButton();
       this.undoButton = new JButton();
@@ -284,6 +504,14 @@ public class MainWindow {
                break;
             case SAVE:
                this.mainwindow.saveGraph();
+               break;
+            case GUIDE:
+               UserGuideWindow xGuide = new UserGuideWindow();
+               xGuide.showGuideDialog();
+               break;
+            case ABOUT:
+               AboutWindow xAbout = new AboutWindow();
+               xAbout.showAboutDialog();
                break;
          }
       }
