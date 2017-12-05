@@ -1,52 +1,42 @@
 /**
  * This class implements the "Save File" window
- * @author Michal Tabasek (xtabas02)
+ * @author Michal Tabasek (xtabas02), Katerina Pilatova (xpilat05)
  * @date 2017
  */
 
 
 package karger;
 
-import static com.sun.java.accessibility.util.AWTEventMonitor.addActionListener;
-import java.awt.BorderLayout;
-import java.awt.Container;
-import java.awt.GridLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.io.File;
+import java.lang.String;
 
-import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
-import javax.swing.JPanel;
-import javax.swing.JTextField;
 
 
 public class SaveFileWindow extends JFrame {
     
-    public SaveFileWindow(){
-        File f;
-        showSaveChooser();
+    public SaveFileWindow() {
     }
     
-    /*
-        show save dialog using jfilechooser
-    */
-    public void showSaveChooser(){
-        JFileChooser c = new JFileChooser();
-        
+    /**
+     * Show save dialog using JFileChooser
+     * @return Path to file
+     */
+    public String showSaveChooser(){
+        JFileChooser chooser = new JFileChooser("./examples");
+
         // Demonstrate "Save" dialog:
-        int rVal = c.showSaveDialog(SaveFileWindow.this);
+        int rVal = chooser.showSaveDialog(SaveFileWindow.this);
       
         if (rVal == JFileChooser.APPROVE_OPTION) {
-            System.out.println(c.getSelectedFile().getName());
+            System.out.println(chooser.getSelectedFile().getPath());
         }
       
         if (rVal == JFileChooser.CANCEL_OPTION) {         
-            System.out.println("CANCEL"); 
+            System.out.println("Action cancelled."); 
         }
         
-        //return(c.getSelectedFile().getName());
+        return(chooser.getSelectedFile().getPath());
     }
    
 }
