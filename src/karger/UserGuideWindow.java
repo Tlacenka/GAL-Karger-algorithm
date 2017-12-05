@@ -19,11 +19,11 @@ public class UserGuideWindow {
                 "- the panel with the results on the top. \n\n" +
                 "How to control this application\n" +
                 "The control panel contains five buttons: \n" +
-                "- play/pause button - \n" +
-                "- next step button - \n" +
+                "- play/pause button\n" +
+                "- next step button\n" +
                 "- step back button - \n" +
-                "- finish button - \n" +
-                "- reset button - ");
+                "- finish button\n" +
+                "- reset button");
 
         JScrollPane scrollPane = new JScrollPane(textArea);
         textArea.setLineWrap(true);
