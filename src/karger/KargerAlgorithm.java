@@ -13,8 +13,6 @@ public class KargerAlgorithm {
 
       // Run the application
       (new MainWindow()).show();
-      // In order to only display graph
-      //(new Graph()).show();
         
    }
 }

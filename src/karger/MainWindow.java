@@ -124,12 +124,17 @@ public class MainWindow {
       this.graph = new KargerGraph();
 
       // Colours
-      Color menuColor = new Color(161, 1, 21);
+      Color menuColor = new Color(125, 30, 30);
       Color textColor = new Color(240, 239, 234);
       Color panelColor = new Color(215, 44, 22);
       Color sidePanelColor = new Color(192, 178, 181);
-
       Color panelColorTest = new Color(70, 70, 70);
+
+      // Fonts
+      Font titleFont = new Font("Calibri", Font.BOLD, 25);
+      Font smallTitleFont = new Font("Calibri", Font.BOLD, 18);
+      Font algFont = new Font("Inconsolata", Font.PLAIN, 15);
+
 
       int button_width = 50;
       int button_height = 50;
@@ -140,11 +145,11 @@ public class MainWindow {
 
       // Set window options, title, size, position
       this.frame = new JFrame();
-      this.frame.setPreferredSize(new Dimension(1000,800));
+      this.frame.setPreferredSize(new Dimension(1400,900));
 
       this.frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
       this.frame.setTitle("Karger Algorithm for Finding Minimal Cut");
-      this.frame.setSize(1000, 800);
+      this.frame.setSize(1400, 900);
       this.frame.setLocationRelativeTo(null); // center of screen
 
       // Create top menu bar, menu, help menu
@@ -178,7 +183,7 @@ public class MainWindow {
       this.menuBar.add(this.help_menu);
 
       // Set menu background colour
-      this.menuBar.setBackground(panelColorTest);
+      this.menuBar.setBackground(menuColor);
       this.menu.setForeground(textColor);
       this.help_menu.setForeground(textColor);
 
@@ -189,28 +194,28 @@ public class MainWindow {
       // Create the layout - panels, their position and size
       this.topPanel = new JPanel();
       this.topPanel.setBackground(panelColor);
-      this.topPanel.setPreferredSize(new Dimension(1000, 90));
+      this.topPanel.setPreferredSize(new Dimension(1400, 90));
       this.frame.add(this.topPanel, BorderLayout.NORTH);
 
 
-      // graph editor panel
+      // Graph editor panel
       this.leftPanel = new JPanel();
       this.leftPanel.setBackground(sidePanelColor);
-      this.leftPanel.setPreferredSize(new Dimension(250, 800));
+      this.leftPanel.setPreferredSize(new Dimension(350, 750));
       this.leftPanel.setBorder(BorderFactory.createMatteBorder(1,0,1,0,Color.black));
 
-      // node list and edge list panels
+      // Node list and edge list panels
       this.panel1 = new JPanel();
       this.panel1.setBackground(sidePanelColor);
-      this.panel1.setPreferredSize(new Dimension(115, 570));
+      this.panel1.setPreferredSize(new Dimension(150, 600));
 
       this.panel2 = new JPanel();
       this.panel2.setBackground(sidePanelColor);
-      this.panel2.setPreferredSize(new Dimension(120, 570));
+      this.panel2.setPreferredSize(new Dimension(150, 600));
 
-      // test lists
+      // Test lists
       try {
-         nodeModel.addElement("EDGE LIST");
+         nodeModel.addElement("<Edge List>");
          nodeChoice = new JList<String>(nodeModel);
 
       } catch (Exception ex) {
@@ -219,7 +224,7 @@ public class MainWindow {
 
 
       try {
-         edgeModel.addElement("NODE LIST");
+         edgeModel.addElement("<Node List>");
          edgeChoice = new JList<String>(edgeModel);
 
       } catch (Exception ex) {
@@ -227,31 +232,50 @@ public class MainWindow {
       }
 
 
+      // Create panel for edges and nodes
+
+      JTextArea edgeTitle = new JTextArea("Edge List");
+      JTextArea nodeTitle = new JTextArea("Node List");
+
+      edgeTitle.setForeground(textColor);
+      edgeTitle.setBackground(sidePanelColor);
+      edgeTitle.setFont(smallTitleFont);
+      edgeTitle.setEditable(false);
+      edgeTitle.setPreferredSize(new Dimension(140, 30));
+      this.panel1.add(edgeTitle);
+
+      nodeTitle.setForeground(textColor);
+      nodeTitle.setBackground(sidePanelColor);
+      nodeTitle.setFont(smallTitleFont);
+      nodeTitle.setEditable(false);
+      nodeTitle.setPreferredSize(new Dimension(140, 30));
+      this.panel2.add(nodeTitle);
+
       this.nodePanel = new JScrollPane(nodeChoice);
       this.edgePanel = new JScrollPane(edgeChoice);
 
-      this.nodePanel.setPreferredSize(new Dimension(110, 500));
-      this.edgePanel.setPreferredSize(new Dimension(110, 500));
+      this.nodePanel.setPreferredSize(new Dimension(140, 500));
+      this.edgePanel.setPreferredSize(new Dimension(140, 500));
 
       this.nodeButtonPanel = new JPanel();
       this.edgeButtonPanel = new JPanel();
 
-      this.nodeButtonPanel.setPreferredSize(new Dimension(110, 40));
-      this.edgeButtonPanel.setPreferredSize(new Dimension(110, 40));
+      this.nodeButtonPanel.setPreferredSize(new Dimension(140, 40));
+      this.edgeButtonPanel.setPreferredSize(new Dimension(140, 40));
 
       this.nodeButtonPanel.setBackground(sidePanelColor);
       this.edgeButtonPanel.setBackground(sidePanelColor);
 
 
-      // add and remove button for node and edge lists
+      // Add and remove button for node and edge lists
       this.addNodeButton     = new JButton();
       this.removeNodeButton  = new JButton();
       this.addEdgeButton     = new JButton();
       this.removeEdgeButton  = new JButton();
 
 
-      // what will happen if there is clicked on some button in the graph editor panel
-      try{
+      // Adding/removing nodes/edges action
+      try {
          Image img = ImageIO.read(getClass().getResource("images/addButton.png"));
          this.addNodeButton.setIcon(new ImageIcon(img));
          this.addNodeButton.setPreferredSize(new Dimension(sideButton_width, sideButton_height));
@@ -265,7 +289,6 @@ public class MainWindow {
                xSidePanels.addNode(nodeModel);
             }
          });
-
 
          img = ImageIO.read(getClass().getResource("images/removeButton.png"));
          this.removeNodeButton.setIcon(new ImageIcon(img));
@@ -281,8 +304,6 @@ public class MainWindow {
             }
          });
 
-
-
          img = ImageIO.read(getClass().getResource("images/addButton.png"));
          this.addEdgeButton.setIcon(new ImageIcon(img));
          this.addEdgeButton.setPreferredSize(new Dimension(sideButton_width, sideButton_height));
@@ -296,8 +317,6 @@ public class MainWindow {
                xSidePanels.addEdge(edgeModel);
             }
          });
-
-
 
          img = ImageIO.read(getClass().getResource("images/removeButton.png"));
          this.removeEdgeButton.setIcon(new ImageIcon(img));
@@ -338,42 +357,40 @@ public class MainWindow {
 
 
 
-      // simulation panel
+      // Simulation panel
       this.centerPanel = new JPanel();
       this.centerPanel.setBackground(Color.WHITE);
-      this.centerPanel.setPreferredSize(new Dimension(550, 500));
+      this.centerPanel.setPreferredSize(new Dimension(750, 750));
       this.centerPanel.setBorder(BorderFactory.createLineBorder(Color.black));
       this.frame.add(this.centerPanel, BorderLayout.CENTER);
 
 
-      // algorithm panel
+      // Algorithm panel
       this.rightPanel = new JPanel();
       this.rightPanel.setBackground(sidePanelColor);
-      this.rightPanel.setPreferredSize(new Dimension(250, 800));
+      this.rightPanel.setPreferredSize(new Dimension(350, 750));
       this.rightPanel.setBorder(BorderFactory.createMatteBorder(1,0,1,0,Color.black));
 
       try {                                                                      // index
-         algorithmModel.addElement("  ");                                        //
-         algorithmModel.addElement("          ALGORITHM");                  // 0
          algorithmModel.addElement("  ");                                        // 1
-         algorithmModel.addElement("  1|    let G = (V,E)");                     // 2
-         algorithmModel.addElement("  2|");                                      // 3
-         algorithmModel.addElement("  3|    void KargerAlgorithm() {");          // 4
-         algorithmModel.addElement("  4|      while (V.length > 2)");            // 5
-         algorithmModel.addElement("  5|         choose nodes to be merged");    // 6
-         algorithmModel.addElement("  6|         mergeCells(v1,v2)");            // 7
-         algorithmModel.addElement("  7|    }");                                 // 8
-         algorithmModel.addElement("  8|");                                      // 9
-         algorithmModel.addElement("  9|    void mergeCells(v1, v2) {");         // 10
-         algorithmModel.addElement("10|       go through all vertices");         // 11
-         algorithmModel.addElement("11|         adjacent to v2");                // 12
-         algorithmModel.addElement("12|       create/update weighted edge");     // 13
-         algorithmModel.addElement("13|       find edge");                       // 14
-         algorithmModel.addElement("14|       merge nodes");                     // 15
-         algorithmModel.addElement("15|       update graph");                    // 16
-         algorithmModel.addElement("16|    }");                                  // 17
+         algorithmModel.addElement("      1|  let G = (V,E)");                       // 2
+         algorithmModel.addElement("      2|");                                      // 3
+         algorithmModel.addElement("      3|  void KargerAlgorithm(G) {");           // 4
+         algorithmModel.addElement("      4|    while (|V| > 2)");                   // 5
+         algorithmModel.addElement("      5|       choose 2 adjacent nodes v1, v2"); // 6
+         algorithmModel.addElement("      6|       mergeCells(v1, v2)");             // 7
+         algorithmModel.addElement("      7|  }");                                   // 8
+         algorithmModel.addElement("      8|");                                      // 9
+         algorithmModel.addElement("      9|  void mergeCells(v1, v2) {");           // 10
+         algorithmModel.addElement("    10|     for v in Adj[v2]:");                 // 11
+         algorithmModel.addElement("    11|        redirect edge to v1");            // 12
+         algorithmModel.addElement("    12|     rename v1");                         // 13
+         algorithmModel.addElement("    13|     remove v2 and its edges");           // 14
+         algorithmModel.addElement("    14|  }");                                    // 15
 
          algorithmChoice = new JList<String>(algorithmModel);
+         algorithmChoice.setFont(algFont);
+         algorithmChoice.setBackground(Color.white);
 
       } catch (Exception ex) {
          System.out.println(ex);
@@ -382,18 +399,28 @@ public class MainWindow {
      // algorithmChoice.setSelectedIndex(graph.algorithmItemIndex);
 
       this.algorithmPanel = new JScrollPane(algorithmChoice);
-      this.algorithmPanel.setPreferredSize(new Dimension(240, 370));
+      this.algorithmPanel.setPreferredSize(new Dimension(350, 325));
+      this.algorithmPanel.setBorder(BorderFactory.createMatteBorder(1,0,1,0,Color.black));
+
+      // Add title Algorithm
+      JTextArea algorithmTitle = new JTextArea("Algorithm");
+
+      // Set its text color, size
+      algorithmTitle.setForeground(textColor);
+      algorithmTitle.setBackground(sidePanelColor);
+      algorithmTitle.setFont(titleFont);
+      this.rightPanel.add(algorithmTitle);
 
       this.rightPanel.add(this.algorithmPanel, BorderLayout.CENTER);
       this.frame.add(this.rightPanel, BorderLayout.EAST);
 
-      this.rightPanel.setLayout(new FlowLayout(FlowLayout.CENTER, 0, 70));
+      this.rightPanel.setLayout(new FlowLayout(FlowLayout.CENTER, 0, 20));
 
 
-      // control panel
+      // Control panel
       this.bottomPanel = new JPanel();
-      this.bottomPanel.setBackground(panelColorTest);
-      this.bottomPanel.setPreferredSize(new Dimension(1000, 60));
+      this.bottomPanel.setBackground(menuColor);
+      this.bottomPanel.setPreferredSize(new Dimension(1200, 60));
       this.frame.add(this.bottomPanel, BorderLayout.SOUTH);
 
       // Add buttons to bottom panel
@@ -451,24 +478,23 @@ public class MainWindow {
       this.bottomPanel.add(this.finishButton);
 
       // Add text areas to top panel
-      this.topPanel.setLayout(new FlowLayout(FlowLayout.CENTER, 50, 40));
+      this.topPanel.setLayout(new FlowLayout(FlowLayout.CENTER, 80, 30));
 
       // Create text areas
-      Font font = new Font("Calibri", Font.BOLD, 18);
       this.runTracker = new JTextArea("Total Runs: " + this.graph.getRunCounter());
       this.resultTracker = new JTextArea("Best Result: " + this.graph.getBestResult());
 
       // Set text color, size
       this.runTracker.setForeground(textColor);
       this.runTracker.setBackground(panelColor);
-      this.runTracker.setFont(font);
+      this.runTracker.setFont(titleFont);
       this.runTracker.setEditable(false);
-      this.runTracker.setPreferredSize(new Dimension(150, 30));
+      this.runTracker.setPreferredSize(new Dimension(200, 30));
       this.resultTracker.setForeground(textColor);
       this.resultTracker.setBackground(panelColor);
-      this.resultTracker.setFont(font);
+      this.resultTracker.setFont(titleFont);
       this.resultTracker.setEditable(false);
-      this.resultTracker.setPreferredSize(new Dimension(150, 30));
+      this.resultTracker.setPreferredSize(new Dimension(200, 30));
 
       // Add text areas
       this.topPanel.add(this.runTracker);
