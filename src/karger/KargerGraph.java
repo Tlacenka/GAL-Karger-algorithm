@@ -55,6 +55,17 @@ public class KargerGraph {
 
     private HashMap<mxCell,LinkedList<mxCell>> adjacencyList;
 
+    /** Basic idea
+     * - create ordered list of edges
+     * - each time there is a run, store the order of removed edges somewhere?
+     * - after run is finished, store V1, V2, value and edges to KargerResult
+     * - keep the best result yet on the screen (and in best.xml just the 2 nodes)
+     * - when algorithm is finished, find best result and display the graph
+     * - figure out a way to randomly shuffle for one next run
+     * - just go one by one when doing the whole thing
+     * - find out if one can shuffle without repeating itself in a random way
+     **/
+
     public KargerGraph() {
 
         this.runCounter = "0";
@@ -122,6 +133,23 @@ public class KargerGraph {
             }
         });
 
+    }
+
+    // Class for storing results of individual runs
+    class KargerRecord {
+
+        // V1 u V2 = V
+        private JList<mxCell> V1; // First set of vertices
+        private JList<mxCell> V2; // Second set of vertices
+        private int cut; // cut value
+
+        // Class constructor
+        public KargerRecord(JList<mxCell> V1, JList <mxCell> V2, int cut) {
+
+            this.V1 = V1;
+            this.V2 = V2;
+            this.cut = cut;
+        }
     }
 
     /**
