@@ -482,7 +482,7 @@ public class MainWindow {
 
       // Create text areas
       this.runTracker = new JTextArea("Total Runs: " + this.graph.getRunCounter());
-      this.resultTracker = new JTextArea("Best Result: " + this.graph.getBestResult());
+      this.resultTracker = new JTextArea("Best Result: " + this.graph.getBestResultCut());
 
       // Set text color, size
       this.runTracker.setForeground(textColor);
@@ -565,6 +565,8 @@ public class MainWindow {
                this.mainwindow.undoButton.setEnabled(false);
                this.mainwindow.resetButton.setEnabled(false);
                this.mainwindow.graph.resetAlgorithm();
+               this.mainwindow.runTracker.setText("Total Runs: " + this.mainwindow.graph.getRunCounter());
+               this.mainwindow.resultTracker.setText("Best Result: " + this.mainwindow.graph.getBestResultCut());
                break;
             case UNDO:
                this.mainwindow.undoButton.setEnabled(false);
@@ -576,13 +578,17 @@ public class MainWindow {
                this.mainwindow.resetButton.setEnabled(true);
                break;
             case RUN:
+               this.mainwindow.undoButton.setEnabled(false);
                this.mainwindow.graph.finishRun();
-               this.mainwindow.undoButton.setEnabled(true);
                this.mainwindow.resetButton.setEnabled(true);
+               this.mainwindow.runTracker.setText("Total Runs: " + this.mainwindow.graph.getRunCounter());
+               this.mainwindow.resultTracker.setText("Best Result: " + this.mainwindow.graph.getBestResultCut());
                break;
             case FINISH:
                this.mainwindow.graph.finishAlgorithm();
                this.mainwindow.resetButton.setEnabled(true);
+               this.mainwindow.runTracker.setText("Total Runs: " + this.mainwindow.graph.getRunCounter());
+               this.mainwindow.resultTracker.setText("Best Result: " + this.mainwindow.graph.getBestResultCut());
                break;
          }
       }
