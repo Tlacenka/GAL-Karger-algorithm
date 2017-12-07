@@ -47,12 +47,14 @@ public class KargerGraph {
     public mxGraphComponent gc; // graph component (wrapper)
 
     private String runCounter;
+    private int maxRuns;
     private int stepCounter;
     private KargerRecord bestResult;
     private String bestResultCut;
 
     private ArrayList<KargerRecord> runs; // runs
     private ArrayList<Integer> curOrder;
+    private ArrayList<mxCell> graphEdges; // ordered edges
 
     private Object parent;
     private int vertex_size; // width = height of vertex
@@ -79,7 +81,9 @@ public class KargerGraph {
         this.vertex_scaling = 10;
         this.stepCounter = 0;
         this.runs = new ArrayList<KargerRecord>();
+        this.graphEdges = new ArrayList<mxCell>();
         this.bestResult = null;
+        this.maxRuns = 0;
 
         // Create a graph
         this.graph = new mxGraph();
@@ -197,6 +201,25 @@ public class KargerGraph {
     }
 
     /**
+     * Compute n!
+     */
+    public int factorial(int n) {
+
+        int result = 1;
+
+        if ((n == 0) || (n == 1)) {
+            return 1;
+        }
+        
+
+        for (int i = 2; i <= n; i++) {
+            result *= i;
+        }
+
+        return result;
+    }
+
+    /**
      * Shuffle edges until they are uniquely ordered.
      */
     public void shuffleEdges() {
@@ -205,7 +228,10 @@ public class KargerGraph {
         Boolean keepShuffling = true;
         Boolean isUnique = true;
 
-        // TODO check if all runs have not been done - in which case, end
+        // Total number of possible runs is |E|!
+        if (Integer.parseInt(this.runCounter) >= this.maxRuns) {
+            return;
+        }
 
         do {
             Collections.shuffle(this.curOrder);
@@ -224,6 +250,8 @@ public class KargerGraph {
             }
         } while (keepShuffling);
     }
+
+    
 
     /**
      * Get cell from mouse coordinates.
@@ -281,9 +309,13 @@ public class KargerGraph {
             this.adjacencyList.put(vertex, new LinkedList<mxCell>());
         }
 
-        // Link adjacent vertices
+        // Link adjacent vertices, add edges into a list
         for (Object e : this.graph.getChildEdges(this.parent)) {
             mxCell edge = (mxCell)e;
+
+            // Add edge to list of edges
+            this.graphEdges.add((mxCell)edge);
+
             mxCell src = (mxCell)edge.getSource();
             mxCell dst = (mxCell)edge.getTarget();
 
@@ -295,6 +327,11 @@ public class KargerGraph {
             this.adjacencyList.get(src).add(dst);
             this.adjacencyList.get(dst).add(src);
         }
+
+        // Get max runs
+        this.maxRuns = this.factorial(this.graphEdges.size());
+        System.out.print(this.maxRuns);
+
     }
 
     /**
@@ -538,11 +575,19 @@ public class KargerGraph {
 
 
         // Choose cells to be merged
-        // TODO cells based on random generator or user
+        // maybe save all edges in ArrayList if getChildEdges isn't ordered?
+
         // 3 - wouldn't make sense to have empty set of vertices
         if (this.adjacencyList.keySet().toArray().length < 3) {
             return;
         }
+
+        // TODO fix
+        // In order[stepCounter] is index of edge to be removed
+        //mxCell v1 = (mxCell)this.graphEdges.get(this.curOrder.get(this.stepCounter)).getSource();
+        //mxCell v2 = (mxCell)this.graphEdges.get(this.curOrder.get(this.stepCounter)).getTarget();
+        //this.graphEdges.set(this.curOrder.get(this.stepCounter), null);
+
         mxCell v1 = (mxCell)this.adjacencyList.keySet().toArray()[0];
         mxCell v2 = (mxCell)this.adjacencyList.keySet().toArray()[1];
 
@@ -579,7 +624,7 @@ public class KargerGraph {
         }
 
         // Update step counter
-        this.stepCounter = this.stepCounter + 1;
+        this.stepCounter += 1;
 
     }
 
@@ -587,6 +632,11 @@ public class KargerGraph {
      * Finishes current run of the algorithm.
      */
     public void finishRun() {
+
+        if (Integer.parseInt(this.runCounter) >= this.maxRuns) {
+            return;
+        }
+
         // Go on until there are 2 nodes left
         while (this.adjacencyList.keySet().toArray().length >= 3) {
             this.nextStep();
@@ -595,8 +645,11 @@ public class KargerGraph {
         // Update results obtained by the lat run
         this.updateResults();
 
-        // Update run counter - TODO disable undo
+        // Update run counter
         this.runCounter = Integer.toString(Integer.parseInt(this.runCounter) + 1);
+
+        // Shuffle edge order
+        this.shuffleEdges();
     }
 
     /**
@@ -637,12 +690,11 @@ public class KargerGraph {
             }
         }
 
+        // Update best result
         if (this.bestResultCut.equals("-") || Integer.parseInt(this.bestResultCut) > cut_val) {
             this.bestResultCut = Integer.toString(cut_val);
             this.bestResult = (sameResult == null) ? newRecord : sameResult;
         }
-
-        // TODO update best result, number of runs
     }
 
     /**
@@ -663,6 +715,14 @@ public class KargerGraph {
      * Finishes the whole algorithm.
      */
     public void finishAlgorithm() {
+
+        // Run the whole thing maximum number of times
+        while (Integer.parseInt(this.runCounter) < this.maxRuns) {
+            this.finishRun();
+        }
+
+        // Display the best result - load from best.xml (TODO) or create graph based on best result (bleh)
+
         return;
     }
 
