@@ -34,6 +34,8 @@ import com.mxgraph.view.mxGraph;
 import java.awt.BorderLayout;
 import java.awt.EventQueue;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedList;
 
 import javax.swing.JFrame;
 import javax.swing.JList;
@@ -41,6 +43,8 @@ import javax.swing.JScrollPane;
 import javax.swing.ListModel;
 import javax.swing.ListSelectionModel;
 import javax.swing.event.ListDataListener;
+import java.util.ArrayList;
+import java.util.List;
 
 
 public class MainWindow {
@@ -98,6 +102,8 @@ public class MainWindow {
    DefaultListModel<String> algorithmModel = new DefaultListModel<String>();
    public JList<String> algorithmChoice;
 
+   protected HashMap<mxCell,LinkedList<mxCell>> aList;
+
 
    // Menu event enumeration type
    private enum MenuEventType {
@@ -122,6 +128,9 @@ public class MainWindow {
 
       // Create graph interface
       this.graph = new KargerGraph();
+      this.aList = graph.getAdjacencyList();
+
+
 
       // Colours
       Color menuColor = new Color(125, 30, 30);
@@ -213,23 +222,11 @@ public class MainWindow {
       this.panel2.setBackground(sidePanelColor);
       this.panel2.setPreferredSize(new Dimension(150, 600));
 
-      // Test lists
-      try {
-         nodeModel.addElement("<Edge List>");
-         nodeChoice = new JList<String>(nodeModel);
+      // show node lists
+      updateNodeList();
 
-      } catch (Exception ex) {
-         System.out.println(ex);
-      }
-
-
-      try {
-         edgeModel.addElement("<Node List>");
-         edgeChoice = new JList<String>(edgeModel);
-
-      } catch (Exception ex) {
-         System.out.println(ex);
-      }
+      // show edge list
+      updateEdgeList();
 
 
       // Create panel for edges and nodes
@@ -242,14 +239,14 @@ public class MainWindow {
       edgeTitle.setFont(smallTitleFont);
       edgeTitle.setEditable(false);
       edgeTitle.setPreferredSize(new Dimension(140, 30));
-      this.panel1.add(edgeTitle);
+      this.panel1.add(nodeTitle);
 
       nodeTitle.setForeground(textColor);
       nodeTitle.setBackground(sidePanelColor);
       nodeTitle.setFont(smallTitleFont);
       nodeTitle.setEditable(false);
       nodeTitle.setPreferredSize(new Dimension(140, 30));
-      this.panel2.add(nodeTitle);
+      this.panel2.add(edgeTitle);
 
       this.nodePanel = new JScrollPane(nodeChoice);
       this.edgePanel = new JScrollPane(edgeChoice);
@@ -300,7 +297,7 @@ public class MainWindow {
             public void actionPerformed(ActionEvent e)
             {
                xSidePanels = new SidePanels();
-               xSidePanels.removeItem(nodeChoice);
+               xSidePanels.removeItem(nodeChoice, true);
             }
          });
 
@@ -328,7 +325,7 @@ public class MainWindow {
             public void actionPerformed(ActionEvent e)
             {
                xSidePanels = new SidePanels();
-               xSidePanels.removeItem(edgeChoice);
+               xSidePanels.removeItem(edgeChoice, false);
             }
          });
 
@@ -399,7 +396,7 @@ public class MainWindow {
      // algorithmChoice.setSelectedIndex(graph.algorithmItemIndex);
 
       this.algorithmPanel = new JScrollPane(algorithmChoice);
-      this.algorithmPanel.setPreferredSize(new Dimension(350, 325));
+      this.algorithmPanel.setPreferredSize(new Dimension(350, 350));
       this.algorithmPanel.setBorder(BorderFactory.createMatteBorder(1,0,1,0,Color.black));
 
       // Add title Algorithm
@@ -585,6 +582,16 @@ public class MainWindow {
                this.mainwindow.resetButton.setEnabled(true);
                break;
          }
+
+
+         // some action was performed so the lists must be updated
+
+         // in the first step, the "old" list must be cleared
+         edgeModel.clear();
+         nodeModel.clear();
+
+         this.mainwindow.updateEdgeList();
+         this.mainwindow.updateNodeList();
       }
    }
 
@@ -613,4 +620,51 @@ public class MainWindow {
        this.frame.setVisible(true);
    }
 
+
+
+   public void updateEdgeList(){
+      try {
+
+         Object xParent = graph.xGetGraph().getDefaultParent();
+
+         for (Object e : graph.xGetGraph().getChildEdges(xParent)) {
+            mxCell edge = (mxCell)e;
+            mxCell src = (mxCell)edge.getSource();
+            mxCell dst = (mxCell)edge.getTarget();
+
+            // Check that all edges are between two vertices
+            if ((src == null) || (dst == null)) {
+               throw new IllegalArgumentException("Each edge must be between 2 vertices.");
+            }
+
+            this.edgeModel.addElement(src.getValue() + " - " + dst.getValue());
+
+         }
+
+         this.edgeChoice = new JList<String>(edgeModel);
+
+
+      } catch (Exception ex) {
+         System.out.println(ex);
+      }
+   }
+
+
+
+   public void updateNodeList(){
+      try {
+
+         if(aList != null){
+
+            for (mxCell value: this.aList.keySet()) {
+               nodeModel.addElement(value.getValue().toString());
+            }
+         }
+
+         nodeChoice = new JList<String>(nodeModel);
+
+      } catch (Exception ex) {
+         System.out.println(ex);
+      }
+   }
 }

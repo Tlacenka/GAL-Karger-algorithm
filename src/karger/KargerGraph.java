@@ -37,6 +37,7 @@ import com.mxgraph.util.mxXmlUtils;
 import com.mxgraph.view.mxGraph;
 import com.mxgraph.util.mxRectangle;
 import com.mxgraph.model.mxGeometry;
+import javax.swing.JList;
 
 import org.w3c.dom.Document;
 
@@ -523,9 +524,10 @@ public class KargerGraph {
 
 
     public HashMap<mxCell,LinkedList<mxCell>> getAdjacencyList(){
-
-        System.out.println("Adjacency list 25: " + this.adjacencyList);
-
         return adjacencyList;
+    }
+
+    public mxGraph xGetGraph(){
+        return graph;
     }
 }

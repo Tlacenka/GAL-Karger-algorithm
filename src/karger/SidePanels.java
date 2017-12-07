@@ -1,60 +1,27 @@
 package karger;
 
-import com.mxgraph.model.mxCell;
-import karger.MainWindow;
-import karger.KargerGraph;
-
 import javax.swing.*;
-import java.util.HashMap;
-import java.util.LinkedList;
 
-import java.util.Map;
-import java.util.*;
 
 public class SidePanels {
 
     protected KargerGraph xGraph;
 
-    protected String startEdge; // newly added start node of the edge
-    protected String endEdge;   // newly added end node of the edge
+    // newly added node/edge
+    protected String addedNode;
+    protected String addedSrc;
+    protected String addedDst;
 
-    protected String nodeName;  // newly added node
+
+    // removed node/edge
+    protected String removedNode;
+    protected String removedSrc;
+    protected String removedDst;
+
 
     public DefaultListModel<String> algorithmModel = new DefaultListModel<String>();
     public JList<String> algorithmChoice;
 
-    /**
-     * Getting nodes and edges from the adjacency list and display them into the list.
-     */
-    public void crateList(){
-        xGraph = new KargerGraph();
-        xGraph.getAdjacencyList();
-
-        System.out.println("i'm here \n");
-
-        try{
-
-            HashMap<mxCell,LinkedList<mxCell>> aList = xGraph.getAdjacencyList();
-
-            if(aList != null) {
-                System.out.println("Adjacency list 3: " + aList);
-                System.out.println("something is there \n");
-
-                if(aList != null){
-                    for (mxCell key: aList.keySet()) {
-                        System.out.println("key : " + key);
-                        System.out.println("value : " + aList.get(key));
-                    }
-                }
-            }
-            else
-                System.out.println("it's null \n");
-
-        }catch (Throwable any) {
-            System.out.println("side panels: " + any);
-        }
-
-    }
 
 
     /**
@@ -63,11 +30,11 @@ public class SidePanels {
      */
     public void addNode(DefaultListModel<String> model){
 
-        nodeName = JOptionPane.showInputDialog(null, "Node name");
+        addedNode = JOptionPane.showInputDialog(null, "Node name");
 
-        if(nodeName != null){
+        if(addedNode != null){
             try {
-                model.addElement(nodeName);
+                model.addElement(addedNode);
 
             } catch (Exception ex) {
                 System.out.println(ex);
@@ -82,23 +49,33 @@ public class SidePanels {
      * Remove selected item from node/edge list.
      * @param choice - which item should be removed.
      */
-    public void removeItem(JList<String> choice){
+    public void removeItem(JList<String> choice, boolean isNode){
 
+        try {
 
-        System.out.println("Selected item: " + choice.getSelectedValue());
+            if(isNode){
+                removedNode = choice.getSelectedValue();
 
-         //first entry cannot be removed
-        if((choice.getSelectedValue() != "NODE LIST") && (choice.getSelectedValue() != "EDGE LIST")){
+              //  System.out.println("Node " + removedNode);
 
-            try {
-                DefaultListModel<String> modelX = (DefaultListModel<String>)choice.getModel();
-                modelX.remove(choice.getSelectedIndex());
+            }else {
+                String[] splits = choice.getSelectedValue().split("[\\s-]+");
 
-            } catch (Exception ex) {
-                System.out.println(ex);
+                removedSrc = splits[0];
+                removedDst = splits[1];
+
+               // System.out.println("Src " + removedSrc);
+               // System.out.println("Dsc " + removedDst);
+
             }
-        }
 
+
+            DefaultListModel<String> modelX = (DefaultListModel<String>)choice.getModel();
+            modelX.remove(choice.getSelectedIndex());
+
+        } catch (Exception ex) {
+            System.out.println(ex);
+        }
 
     }
 
@@ -126,13 +103,13 @@ public class SidePanels {
 
         if (result == JOptionPane.OK_OPTION) {
 
-            startEdge = xField.getText();
-            endEdge = yField.getText();
+            addedSrc = xField.getText();
+            addedDst = yField.getText();
 
-            System.out.println("start node: " + startEdge);
-            System.out.println("end node: " + endEdge);
+            System.out.println("start node: " + addedSrc);
+            System.out.println("end node: " + addedDst);
 
-            strEdge = startEdge + " - " + endEdge;
+            strEdge = addedSrc + " - " + addedDst;
 
             try {
                 edgeModel.addElement(strEdge);
@@ -144,41 +121,7 @@ public class SidePanels {
     }
 
 
-    public JList<String> setAlgorithm(){
-
-        try {
-            algorithmModel.addElement("         ALGORITHM");
-            algorithmModel.addElement("  ");
-            algorithmModel.addElement("  1|    let G = (V,E)");
-            algorithmModel.addElement("  2|");
-            algorithmModel.addElement("  3|    void KargerAlgorithm() {");
-            algorithmModel.addElement("  4|      while (V.length > 2)");
-            algorithmModel.addElement("  5|         choose nodes to be merged");
-            algorithmModel.addElement("  6|         mergeCells(v1,v2)");
-            algorithmModel.addElement("  7|    }");
-            algorithmModel.addElement("  8|");
-            algorithmModel.addElement("  9|    void mergeCells(v1, v2) {");
-            algorithmModel.addElement("10|       go through all vertices");
-            algorithmModel.addElement("11|         adjacent to v2");
-            algorithmModel.addElement("12|       create/update weighted edge");
-            algorithmModel.addElement("13|       find edge");
-            algorithmModel.addElement("14|       merge nodes");
-            algorithmModel.addElement("15|       update graph");
-            algorithmModel.addElement("16|    }");
-
-          // algorithmChoice = new JList<String>(algorithmModel);
-
-            algorithmChoice = new JList<String>(algorithmModel);
-
-        } catch (Exception ex) {
-            System.out.println(ex);
-        }
-
-        return algorithmChoice;
-
-    }
-
-
+    // unused
     public void setAlgorithmItem(int index, JList<String> algorithmChoice){
 
         algorithmChoice.setSelectedIndex(1);
