@@ -19,6 +19,7 @@ import javax.swing.JPanel;
 import javax.swing.JFrame;
 import javax.swing.BorderFactory;
 import javax.swing.JOptionPane;
+import javax.swing.JList;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
@@ -47,7 +48,11 @@ public class KargerGraph {
 
     private String runCounter;
     private int stepCounter;
-    private String bestResult;
+    private KargerRecord bestResult;
+    private String bestResultCut;
+
+    private ArrayList<KargerRecord> runs; // runs
+    private ArrayList<Integer> curOrder;
 
     private Object parent;
     private int vertex_size; // width = height of vertex
@@ -69,10 +74,12 @@ public class KargerGraph {
     public KargerGraph() {
 
         this.runCounter = "0";
-        this.bestResult = "-";
+        this.bestResultCut = "-";
         this.vertex_size = 60;
         this.vertex_scaling = 10;
         this.stepCounter = 0;
+        this.runs = new ArrayList<KargerRecord>();
+        this.bestResult = null;
 
         // Create a graph
         this.graph = new mxGraph();
@@ -108,6 +115,15 @@ public class KargerGraph {
         // Create adjacency list from it
         this.createAdjacencyList();
 
+        // Create default edge order and randomize it
+        this.curOrder = new ArrayList();
+        int i = 0;
+        for (Object e: this.graph.getChildVertices(this.parent)) {
+            this.curOrder.add(i);
+            i++;
+        }
+        this.shuffleEdges();
+
         // Wrap it in a component
         this.gc = new mxGraphComponent(this.graph);
         //this.gc.setEnabled(false); // disable graph editing ad hoc
@@ -139,17 +155,74 @@ public class KargerGraph {
     class KargerRecord {
 
         // V1 u V2 = V
-        private JList<mxCell> V1; // First set of vertices
-        private JList<mxCell> V2; // Second set of vertices
+        private String V1; // First set of vertices
+        private String V2; // Second set of vertices
         private int cut; // cut value
+        private ArrayList<Integer> edgeOrder; // Order of removed edges - last stayed
 
         // Class constructor
-        public KargerRecord(JList<mxCell> V1, JList <mxCell> V2, int cut) {
+        public KargerRecord(String V1, String V2, int cut,
+                            ArrayList<Integer> edgeOrder) {
 
             this.V1 = V1;
             this.V2 = V2;
             this.cut = cut;
+            this.edgeOrder = edgeOrder;
         }
+
+        // Get edge order
+        public ArrayList<Integer> getOrder() {
+            return this.edgeOrder;
+        }
+
+        // Get V1
+        public String getV1() {
+            return this.V1;
+        }
+
+        // Get V2
+        public String getV2() {
+            return V2;
+        }
+
+        // Get cut value
+        public int getCut() {
+            return this.cut;
+        }
+
+        // Set cut value
+        public void setCut(int cut) {
+            this.cut = cut;
+        }
+    }
+
+    /**
+     * Shuffle edges until they are uniquely ordered.
+     */
+    public void shuffleEdges() {
+        //System.out.print(this.curOrder);
+
+        Boolean keepShuffling = true;
+        Boolean isUnique = true;
+
+        // TODO check if all runs have not been done - in which case, end
+
+        do {
+            Collections.shuffle(this.curOrder);
+            //System.out.print(this.curOrder);
+
+            // Make sure it is unique
+            for (KargerRecord r: this.runs) {
+                if (this.curOrder.equals(r)) {
+                    isUnique = false;
+                    break;
+                }
+            }
+
+            if (isUnique) {
+                break;
+            }
+        } while (keepShuffling);
     }
 
     /**
@@ -242,10 +315,17 @@ public class KargerGraph {
 
     /**
      * Prompts for the best result.
-     * @return Best result.
+     * @return Best result (object).
      */
-    public String getBestResult() {
+    public KargerRecord getBestResult() {
         return this.bestResult;
+    }
+
+    /**
+     * Prompts for the best result (string).
+     */
+    public String getBestResultCut() {
+        return this.bestResultCut;
     }
 
     /**
@@ -423,8 +503,10 @@ public class KargerGraph {
         if (this.stepCounter > 0) {
             this.loadGraph("./examples/reset.xml");
             this.stepCounter = 0;
-            
-            // TODO disable undo button
+            this.runCounter = "0";
+            this.bestResultCut = "-";
+            this.runs = new ArrayList<KargerRecord>();
+            this.shuffleEdges();
         }
     }
 
@@ -438,8 +520,6 @@ public class KargerGraph {
 
             // Update step counter
             this.stepCounter = this.stepCounter - 1;
-            
-            // TODO disable undo button
         }
     }
 
@@ -507,11 +587,76 @@ public class KargerGraph {
      * Finishes current run of the algorithm.
      */
     public void finishRun() {
+        // Go on until there are 2 nodes left
         while (this.adjacencyList.keySet().toArray().length >= 3) {
             this.nextStep();
         }
 
+        // Update results obtained by the lat run
+        this.updateResults();
+
+        // Update run counter - TODO disable undo
+        this.runCounter = Integer.toString(Integer.parseInt(this.runCounter) + 1);
+    }
+
+    /**
+     * Update results - store/update list of results
+     */
+    public void updateResults() {
+        // Last two vertices
+        mxCell v1 = (mxCell)this.adjacencyList.keySet().toArray()[0];
+        mxCell v2 = (mxCell)this.adjacencyList.keySet().toArray()[1];
+
+        String V1 = (String)v1.getValue();
+        String V2 = (String)v2.getValue();
+
+        // V1 will be the lexiographically lesser one
+        if (V1.compareTo(V2) > 0) {
+            String swap = V1;
+            V1 = V2;
+            V2 = swap;
+        }
+
+        // Find out if these sets have been there before
+        KargerRecord sameResult = this.getResult(V1, V2);
+        KargerRecord newRecord = null;
+
+        // Get edge value in the graph
+        Object e_obj = this.graph.getChildEdges(this.parent)[0];
+        mxCell edge = (mxCell)e_obj;
+        int cut_val = Integer.parseInt((String)edge.getValue());
+
+        // If result set is unique, Add new record
+        if (sameResult == null) {
+            newRecord = new KargerRecord(V1, V2, cut_val, this.curOrder);
+            this.runs.add(newRecord);
+        } else {
+            // Otherwise, compare the two and save the better value
+            if (cut_val < sameResult.getCut()) {
+                sameResult.setCut(cut_val);
+            }
+        }
+
+        if (this.bestResultCut.equals("-") || Integer.parseInt(this.bestResultCut) > cut_val) {
+            this.bestResultCut = Integer.toString(cut_val);
+            this.bestResult = (sameResult == null) ? newRecord : sameResult;
+        }
+
         // TODO update best result, number of runs
+    }
+
+    /**
+     * Return result with these sets of vertices if it exists
+     */
+    public KargerRecord getResult(String V1, String V2) {
+
+        for (KargerRecord r: this.runs) {
+            if ((r.getV1().compareTo(V1) == 0) && (r.getV2().compareTo(V2) == 0)) {
+                return r;
+            }
+        }
+
+        return null;
     }
 
     /**
