@@ -432,7 +432,7 @@ public class KargerGraph {
         int edge_val = 0;
 
         // Print out their values
-        System.out.println((String)v1.getValue() + " and " + (String)v2.getValue()); 
+        //System.out.println((String)v1.getValue() + " and " + (String)v2.getValue()); 
 
         // Merge the cells
 
@@ -473,12 +473,14 @@ public class KargerGraph {
 
                 // Redirect edge, update adjacency list
                 if ((src == v) && (dst == v2)) {
+                    //System.out.println("redirecting edge " + (String)edge.getSource().getValue() + " - " + (String)edge.getTarget().getValue());
                     this.graph.getModel().beginUpdate();
                     {
+                        v2.removeEdge(edge, false);
                         edge.setTarget(v1);
                     }
                     this.graph.getModel().endUpdate();
-
+                    //System.out.println("redirected to edge " + (String)edge.getSource().getValue() + " - " + (String)edge.getTarget().getValue());
                     // If there is no edge between v and v1, update adjacency
                     if (!this.multipleEdges(edge)) {
                         this.adjacencyList.get(v1).add(v);
@@ -487,6 +489,7 @@ public class KargerGraph {
                 } else if ((src == v2) && (dst == v)) {
                     this.graph.getModel().beginUpdate();
                     {
+                        v2.removeEdge(edge, true);
                         edge.setSource(v1);
                     }
                     this.graph.getModel().endUpdate();
@@ -506,7 +509,13 @@ public class KargerGraph {
         this.adjacencyList.remove(v2);
         this.graph.getModel().beginUpdate();
         {
-            this.graph.removeCells(new Object[] {this.graphEdges.indexOf(this.curOrder.get(this.stepCounter))});
+            mxCell removingEdge = this.graphEdges.get(this.curOrder.get(this.stepCounter));
+            //System.out.println("Removing edge " + (String)removingEdge.getSource().getValue() + " - " + (String)removingEdge.getTarget().getValue());
+            this.graph.removeCells(new Object[] {this.graphEdges.get(this.curOrder.get(this.stepCounter))});
+
+            //System.out.println("Removing node " + (String)v2.getValue());
+            //System.out.println("Edge count " + Integer.toString(v2.getEdgeCount()));
+
             this.graph.removeCells(new Object[] {v2});
         }
         this.graph.getModel().endUpdate();
@@ -517,7 +526,7 @@ public class KargerGraph {
             mxCell edge = (mxCell)e;
             mxCell src = (mxCell)edge.getSource();
             mxCell dst = (mxCell)edge.getTarget();
-            System.out.println("hello edges " + (String)src.getValue() + " - " + (String)dst.getValue());
+            //System.out.println("hello edges " + (String)src.getValue() + " - " + (String)dst.getValue());
         }
 
         this.gc.refresh();
@@ -546,6 +555,8 @@ public class KargerGraph {
                 ((edge.getSource() == edge2.getTarget()) &&
                  (edge.getTarget() == edge2.getSource()))) {
 
+                System.out.println("multiple edge " + (String)edge.getSource().getValue() + " - " + (String)edge.getTarget().getValue());
+
                 // Store sum of edges' values
                 int val1 = this.getEdgeValue(edge);
                 int val2 = this.getEdgeValue(edge2);
@@ -555,6 +566,8 @@ public class KargerGraph {
                     edge.setValue(Integer.toString(val1 + val2));
                 }
                 this.graph.getModel().endUpdate();
+
+                System.out.println("updated value of edge " + (String)edge.getSource().getValue() + " - " + (String)edge.getTarget().getValue());
 
                 // Store edge to graphEdges for the nth time
                 if ( this.graphEdges.indexOf(edge2) == -1) {
@@ -569,6 +582,8 @@ public class KargerGraph {
                     this.graph.removeCells(new Object[] {edge2});
                 }
                 this.graph.getModel().endUpdate();
+
+                System.out.println("still existing edge " + (String)edge.getSource().getValue() + " - " + (String)edge.getTarget().getValue());
 
                 found = true;
                 break;
