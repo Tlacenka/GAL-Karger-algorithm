@@ -328,9 +328,9 @@ public class KargerGraph {
             this.adjacencyList.get(dst).add(src);
         }
 
-        // Get max runs
+        // Get max runs - TODO set maximum edges to say 6
         this.maxRuns = this.factorial(this.graphEdges.size());
-        System.out.print(this.maxRuns);
+        //System.out.print(this.maxRuns);
 
     }
 
@@ -436,7 +436,6 @@ public class KargerGraph {
 
         // Merge the cells
 
-        // Redirect all edges from v2, remove v2 and connected edges
         // Make the merged node bigger
         this.graph.getModel().beginUpdate();
         {
@@ -460,58 +459,132 @@ public class KargerGraph {
         // Go through all vertices adjacent to v2
         for (Object v_obj : this.adjacencyList.get(v2)) {
             mxCell v = (mxCell)v_obj;
-            if (v != v1) {
 
-                // Create/update weighted edge
-                if (this.adjacencyList.get(v).contains(v1)) {
-                    
-                    // Find edge
-                    for (Object e : this.graph.getChildEdges(this.parent)) {
-                        mxCell edge = (mxCell)e;
-                        mxCell src = (mxCell)edge.getSource();
-                        mxCell dst = (mxCell)edge.getTarget();
+            // Skip v1
+            if (v == v1) {
+                continue;
+            }
 
-                        if (((src == v) && (dst == v1)) || ((src == v1) && (dst == v))) {
-                            if (edge.getValue() != null) {
-                                edge_val = ((String)edge.getValue() == "") ? 1 : Integer.parseInt((String)edge.getValue());
-                                this.graph.getModel().beginUpdate();
-                                {
-                                    this.graph.getModel().setValue(edge, Integer.toString(edge_val + 1));
-                                }
-                                this.graph.getModel().endUpdate();
-                            } else {
-                                this.graph.getModel().beginUpdate();
-                                {
-                                    this.graph.getModel().setValue(edge, "2");
-                                }
-                                this.graph.getModel().endUpdate();
-                            }
-                            break;
-                        }
-                    }
-                } else {
+            // Find edge and redirect it
+            for (Object e : this.graph.getChildEdges(this.parent)) {
+                mxCell edge = (mxCell)e;
+                mxCell src = (mxCell)edge.getSource();
+                mxCell dst = (mxCell)edge.getTarget();
+
+                // Redirect edge, update adjacency list
+                if ((src == v) && (dst == v2)) {
                     this.graph.getModel().beginUpdate();
                     {
-                        Object e = this.graph.insertEdge(parent, null, "", v, v1);
+                        edge.setTarget(v1);
                     }
                     this.graph.getModel().endUpdate();
 
-                    this.adjacencyList.get(v).add(v1);
-                    this.adjacencyList.get(v1).add(v);
-                }
+                    // If there is no edge between v and v1, update adjacency
+                    if (!this.multipleEdges(edge)) {
+                        this.adjacencyList.get(v1).add(v);
+                        this.adjacencyList.get(v).add(v1);
+                    }
+                } else if ((src == v2) && (dst == v)) {
+                    this.graph.getModel().beginUpdate();
+                    {
+                        edge.setSource(v1);
+                    }
+                    this.graph.getModel().endUpdate();
 
-                this.adjacencyList.get(v).remove(v2);
+                    // If there is no edge between v and v1, update adjacency
+                    if (!this.multipleEdges(edge)) {
+                        this.adjacencyList.get(v1).add(v);
+                        this.adjacencyList.get(v).add(v1);
+                    }
+                }
             }
         }
 
-        // Remove v2 and connected edges
-        this.adjacencyList.remove(v2);
+        this.gc.refresh();
 
+        // Remove v2, contracted edge
+        this.adjacencyList.remove(v2);
         this.graph.getModel().beginUpdate();
         {
+            this.graph.removeCells(new Object[] {this.graphEdges.indexOf(this.curOrder.get(this.stepCounter))});
             this.graph.removeCells(new Object[] {v2});
         }
         this.graph.getModel().endUpdate();
+        this.graphEdges.set(this.curOrder.get(this.stepCounter), null);
+
+        // Print out edges - TODO DEBUG
+        for (Object e : this.graph.getChildEdges(this.parent)) {
+            mxCell edge = (mxCell)e;
+            mxCell src = (mxCell)edge.getSource();
+            mxCell dst = (mxCell)edge.getTarget();
+            System.out.println("hello edges " + (String)src.getValue() + " - " + (String)dst.getValue());
+        }
+
+        this.gc.refresh();
+
+    }
+ 
+    /**
+     * Handle multiple edges
+     */
+    public Boolean multipleEdges(mxCell edge) {
+
+        Boolean found = false;
+
+        // Handle multiple edges
+        for (Object e2 : this.graph.getChildEdges(this.parent)) {
+            mxCell edge2 = (mxCell)e2;
+            mxCell src2 = (mxCell)edge2.getSource();
+            mxCell dst2 = (mxCell)edge2.getTarget();
+
+            if (edge == edge2) {
+                continue;
+            }
+
+            if (((edge.getSource() == edge2.getSource()) &&
+                 (edge.getTarget() == edge2.getTarget())) ||
+                ((edge.getSource() == edge2.getTarget()) &&
+                 (edge.getTarget() == edge2.getSource()))) {
+
+                // Store sum of edges' values
+                int val1 = this.getEdgeValue(edge);
+                int val2 = this.getEdgeValue(edge2);
+
+                this.graph.getModel().beginUpdate();
+                {
+                    edge.setValue(Integer.toString(val1 + val2));
+                }
+                this.graph.getModel().endUpdate();
+
+                // Store edge to graphEdges for the nth time
+                if ( this.graphEdges.indexOf(edge2) == -1) {
+                    System.out.println("Fuck my life 2");
+                }
+
+                this.graphEdges.set(this.graphEdges.indexOf(edge2), edge);
+
+                // Remove edge2
+                this.graph.getModel().beginUpdate();
+                {
+                    this.graph.removeCells(new Object[] {edge2});
+                }
+                this.graph.getModel().endUpdate();
+
+                found = true;
+                break;
+
+            }
+        }
+
+        return found;
+
+    }
+
+    /**
+     * Get integer value of edge.
+     */
+    public int getEdgeValue(mxCell edge) {
+        return ((String)edge.getValue() == "") ? 1 : Integer.parseInt((String)edge.getValue());
     }
 
     /**
@@ -584,12 +657,11 @@ public class KargerGraph {
 
         // TODO fix
         // In order[stepCounter] is index of edge to be removed
-        //mxCell v1 = (mxCell)this.graphEdges.get(this.curOrder.get(this.stepCounter)).getSource();
-        //mxCell v2 = (mxCell)this.graphEdges.get(this.curOrder.get(this.stepCounter)).getTarget();
-        //this.graphEdges.set(this.curOrder.get(this.stepCounter), null);
-
-        mxCell v1 = (mxCell)this.adjacencyList.keySet().toArray()[0];
-        mxCell v2 = (mxCell)this.adjacencyList.keySet().toArray()[1];
+        System.out.println("step " + this.stepCounter);
+        System.out.println("edge at index " + this.curOrder.get(this.stepCounter));
+        int edgeIndex = this.curOrder.get(this.stepCounter);
+        mxCell v1 = (mxCell)this.graphEdges.get(edgeIndex).getSource();
+        mxCell v2 = (mxCell)this.graphEdges.get(edgeIndex).getTarget();
 
         this.graph.getModel().beginUpdate();
         try {
