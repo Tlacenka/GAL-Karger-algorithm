@@ -302,6 +302,7 @@ public class KargerGraph {
 
         // Remove previous adjacency list - TODO somehow empty it?
         this.adjacencyList = new HashMap<mxCell,LinkedList<mxCell>>();
+        this.graphEdges = new ArrayList<mxCell>();
 
         // Add all vertices
         for (Object v : this.graph.getChildVertices(this.parent)) {
@@ -323,6 +324,11 @@ public class KargerGraph {
             if ((src == null) || (dst == null)) {
                 throw new IllegalArgumentException("Each edge must be between 2 vertices.");
             }
+            
+            // Check that there are no self-loops
+            if (src == dst) {
+                throw new IllegalArgumentException("Self-loops are not allowed.");
+            }
 
             this.adjacencyList.get(src).add(dst);
             this.adjacencyList.get(dst).add(src);
@@ -331,6 +337,17 @@ public class KargerGraph {
         // Get max runs - TODO set maximum edges to say 6
         this.maxRuns = this.factorial(this.graphEdges.size());
         //System.out.print(this.maxRuns);
+
+         // Print it for debugging
+        //System.out.println("Adjacency list: ");
+        for (Object v_obj : this.adjacencyList.keySet().toArray()) {
+            mxCell v = (mxCell)v_obj;
+            //System.out.print((String)v.getValue() + " -> ");
+            for (mxCell adj : this.adjacencyList.get(v)) {
+                //System.out.print((String)adj.getValue() + " " );
+            }
+            //System.out.print("\n");
+        }
 
     }
 
@@ -555,7 +572,7 @@ public class KargerGraph {
                 ((edge.getSource() == edge2.getTarget()) &&
                  (edge.getTarget() == edge2.getSource()))) {
 
-                System.out.println("multiple edge " + (String)edge.getSource().getValue() + " - " + (String)edge.getTarget().getValue());
+                //System.out.println("multiple edge " + (String)edge.getSource().getValue() + " - " + (String)edge.getTarget().getValue());
 
                 // Store sum of edges' values
                 int val1 = this.getEdgeValue(edge);
@@ -567,7 +584,7 @@ public class KargerGraph {
                 }
                 this.graph.getModel().endUpdate();
 
-                System.out.println("updated value of edge " + (String)edge.getSource().getValue() + " - " + (String)edge.getTarget().getValue());
+                //System.out.println("updated value of edge " + (String)edge.getSource().getValue() + " - " + (String)edge.getTarget().getValue());
 
                 // Store edge to graphEdges for the nth time
                 if ( this.graphEdges.indexOf(edge2) == -1) {
@@ -583,7 +600,7 @@ public class KargerGraph {
                 }
                 this.graph.getModel().endUpdate();
 
-                System.out.println("still existing edge " + (String)edge.getSource().getValue() + " - " + (String)edge.getTarget().getValue());
+                //System.out.println("still existing edge " + (String)edge.getSource().getValue() + " - " + (String)edge.getTarget().getValue());
 
                 found = true;
                 break;
@@ -632,6 +649,17 @@ public class KargerGraph {
             this.bestResultCut = "-";
             this.runs = new ArrayList<KargerRecord>();
             this.shuffleEdges();
+            //System.out.println("Current order");
+            //System.out.println(this.curOrder);
+            //System.out.println(this.graphEdges);
+
+            // Print out edges - TODO DEBUG
+            for (Object e : this.graphEdges) {
+                mxCell edge = (mxCell)e;
+                mxCell src = (mxCell)edge.getSource();
+                mxCell dst = (mxCell)edge.getTarget();
+                //System.out.println("hello edges " + (String)src.getValue() + " - " + (String)dst.getValue());
+            }
         }
     }
 
@@ -815,8 +843,6 @@ public class KargerGraph {
 
 
     public HashMap<mxCell,LinkedList<mxCell>> getAdjacencyList(){
-
-        System.out.println("Adjacency list 25: " + this.adjacencyList);
 
         return adjacencyList;
     }
