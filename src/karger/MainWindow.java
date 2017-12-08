@@ -565,6 +565,9 @@ public class MainWindow {
                this.mainwindow.undoButton.setEnabled(false);
                this.mainwindow.resetButton.setEnabled(false);
                this.mainwindow.graph.resetAlgorithm();
+               this.mainwindow.stepButton.setEnabled(true);
+               this.mainwindow.finishButton.setEnabled(true);
+               this.mainwindow.runButton.setEnabled(true);
                this.mainwindow.runTracker.setText("Total Runs: " + this.mainwindow.graph.getRunCounter());
                this.mainwindow.resultTracker.setText("Best Result: " + this.mainwindow.graph.getBestResultCut());
                break;
@@ -579,12 +582,17 @@ public class MainWindow {
                break;
             case RUN:
                this.mainwindow.undoButton.setEnabled(false);
+               this.mainwindow.stepButton.setEnabled(false);
                this.mainwindow.graph.finishRun();
                this.mainwindow.resetButton.setEnabled(true);
                this.mainwindow.runTracker.setText("Total Runs: " + this.mainwindow.graph.getRunCounter());
                this.mainwindow.resultTracker.setText("Best Result: " + this.mainwindow.graph.getBestResultCut());
                break;
             case FINISH:
+               this.mainwindow.finishButton.setEnabled(false);
+               this.mainwindow.runButton.setEnabled(false);
+               this.mainwindow.undoButton.setEnabled(false);
+               this.mainwindow.stepButton.setEnabled(false);
                this.mainwindow.graph.finishAlgorithm();
                this.mainwindow.resetButton.setEnabled(true);
                this.mainwindow.runTracker.setText("Total Runs: " + this.mainwindow.graph.getRunCounter());
