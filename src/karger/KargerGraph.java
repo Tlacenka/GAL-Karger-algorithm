@@ -13,6 +13,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 import java.lang.Boolean;
+import java.lang.*;
 import java.io.IOException;
 
 import javax.swing.JPanel;
@@ -473,9 +474,47 @@ public class KargerGraph {
         }
         this.graph.getModel().endUpdate();
 
+        // TODO why is it sometimes null??
+        if (this.adjacencyList.get(v2) == null) {
+            System.out.println("this sucks balls");
+        } else {
+            System.out.println("this does not suck balls");
+        }
+
+        mxCell edge, src, dst;
+        edge = dst = src = new mxCell();
+        try {
+        
+        // Print out edges - TODO DEBUG
+        for (Object e : this.graphEdges) {
+            edge = (mxCell)e;
+            if (edge == null) {
+                continue;
+            }
+            src = (mxCell)edge.getSource();
+            dst = (mxCell)edge.getTarget();
+            System.out.println("printing edges " + (String)src.getValue() + " - " + (String)dst.getValue());
+        }
+        } catch (NullPointerException ex) {
+            if (edge == null) {
+                System.out.println("edge null");
+            }
+            if (src == null) {
+                System.out.println("src null");
+            }
+            if (dst == null) {
+                System.out.println("dst null");
+            }
+            System.out.println("some edge has only one vertex");
+            System.out.println("it is this one " + (String)src.getValue() + " - " + (String)dst.getValue());
+        }
+
         // Go through all vertices adjacent to v2
         for (Object v_obj : this.adjacencyList.get(v2)) {
-            mxCell v = (mxCell)v_obj;
+            mxCell v = new mxCell();
+
+
+            v = (mxCell)v_obj;
 
             // Skip v1
             if (v == v1) {
@@ -484,12 +523,21 @@ public class KargerGraph {
 
             // Find edge and redirect it
             for (Object e : this.graph.getChildEdges(this.parent)) {
-                mxCell edge = (mxCell)e;
-                mxCell src = (mxCell)edge.getSource();
-                mxCell dst = (mxCell)edge.getTarget();
+
+                //mxCell edge, src, dst;
+
+                edge = (mxCell)e;
+                src = (mxCell)edge.getSource();
+                dst = (mxCell)edge.getTarget();
+                
+                if ((src == null) || (dst == null)) {
+                    System.out.println("This edge is not between 2 edges.");
+                }
 
                 // Redirect edge, update adjacency list
                 if ((src == v) && (dst == v2)) {
+ 
+                    
                     //System.out.println("redirecting edge " + (String)edge.getSource().getValue() + " - " + (String)edge.getTarget().getValue());
                     this.graph.getModel().beginUpdate();
                     {
@@ -516,6 +564,7 @@ public class KargerGraph {
                         this.adjacencyList.get(v1).add(v);
                         this.adjacencyList.get(v).add(v1);
                     }
+
                 }
             }
         }
@@ -524,11 +573,12 @@ public class KargerGraph {
 
         // Remove v2, contracted edge
         this.adjacencyList.remove(v2);
+        mxCell contractedEdge = this.graphEdges.get(this.curOrder.get(this.stepCounter));
         this.graph.getModel().beginUpdate();
         {
-            mxCell removingEdge = this.graphEdges.get(this.curOrder.get(this.stepCounter));
+            
             //System.out.println("Removing edge " + (String)removingEdge.getSource().getValue() + " - " + (String)removingEdge.getTarget().getValue());
-            this.graph.removeCells(new Object[] {this.graphEdges.get(this.curOrder.get(this.stepCounter))});
+            this.graph.removeCells(new Object[] {contractedEdge});
 
             //System.out.println("Removing node " + (String)v2.getValue());
             //System.out.println("Edge count " + Integer.toString(v2.getEdgeCount()));
@@ -536,18 +586,24 @@ public class KargerGraph {
             this.graph.removeCells(new Object[] {v2});
         }
         this.graph.getModel().endUpdate();
-        this.graphEdges.set(this.curOrder.get(this.stepCounter), null);
+        // Replace all occurences of edge by null
+        for (Object e3 : this.graphEdges) {
+            mxCell edge3 = (mxCell)e3;
 
-        // Print out edges - TODO DEBUG
-        for (Object e : this.graph.getChildEdges(this.parent)) {
-            mxCell edge = (mxCell)e;
-            mxCell src = (mxCell)edge.getSource();
-            mxCell dst = (mxCell)edge.getTarget();
-            //System.out.println("hello edges " + (String)src.getValue() + " - " + (String)dst.getValue());
+            if (edge3 == contractedEdge) {
+                this.graphEdges.set(this.graphEdges.indexOf(edge3), null);
+            }
         }
 
-        this.gc.refresh();
+        // Print out edges - TODO DEBUG
+        //for (Object e : this.graph.getChildEdges(this.parent)) {
+        //    mxCell edge = (mxCell)e;
+        //    mxCell src = (mxCell)edge.getSource();
+        //    mxCell dst = (mxCell)edge.getTarget();
+        //    System.out.println("hello edges " + (String)src.getValue() + " - " + (String)dst.getValue());
+        //}
 
+        this.gc.refresh();
     }
  
     /**
@@ -591,16 +647,37 @@ public class KargerGraph {
                     System.out.println("Fuck my life 2");
                 }
 
-                this.graphEdges.set(this.graphEdges.indexOf(edge2), edge);
+                // Replace all occurences of edge2 by edge
+                for (Object e3 : this.graphEdges) {
+                    mxCell edge3 = (mxCell)e3;
 
-                // Remove edge2
+                    if (edge3 == edge2) {
+                        this.graphEdges.set(this.graphEdges.indexOf(edge3), edge);
+                    }
+                }
+
+                // Remove edge2 - but it still exists outside of the graph
                 this.graph.getModel().beginUpdate();
                 {
                     this.graph.removeCells(new Object[] {edge2});
                 }
                 this.graph.getModel().endUpdate();
 
+                if (edge2 != null) {
+                    System.out.println("after removing multiple " + (String)edge2.getSource().getValue() + " - " + (String)edge2.getTarget().getValue());
+                }
                 //System.out.println("still existing edge " + (String)edge.getSource().getValue() + " - " + (String)edge.getTarget().getValue());
+
+                // Print out edges - TODO DEBUG
+                for (Object e3 : this.graph.getChildEdges(this.parent)) {
+                    mxCell edge3 = (mxCell)e3;
+                    if (edge3 == edge2) {
+                        System.out.println("wft???");
+                    }
+                    mxCell src = (mxCell)edge3.getSource();
+                    mxCell dst = (mxCell)edge3.getTarget();
+                    System.out.println("after multiple edges " + (String)src.getValue() + " - " + (String)dst.getValue());
+                }
 
                 found = true;
                 break;
@@ -689,10 +766,6 @@ public class KargerGraph {
         // Save current algorithm
         this.saveGraph("./examples/undo.xml");
 
-
-        // Choose cells to be merged
-        // maybe save all edges in ArrayList if getChildEdges isn't ordered?
-
         // 3 - wouldn't make sense to have empty set of vertices
         if (this.adjacencyList.keySet().toArray().length < 3) {
             return;
@@ -703,6 +776,14 @@ public class KargerGraph {
         System.out.println("step " + this.stepCounter);
         System.out.println("edge at index " + this.curOrder.get(this.stepCounter));
         int edgeIndex = this.curOrder.get(this.stepCounter);
+
+        // If this edge was already contracted, skip step
+        if (this.graphEdges.get(edgeIndex) == null) {
+            this.stepCounter += 1;
+            this.nextStep();
+            return;
+        }
+
         mxCell v1 = (mxCell)this.graphEdges.get(edgeIndex).getSource();
         mxCell v2 = (mxCell)this.graphEdges.get(edgeIndex).getTarget();
 
@@ -757,7 +838,7 @@ public class KargerGraph {
             this.nextStep();
         }
 
-        // Update results obtained by the lat run
+        // Update results obtained by the last run
         this.updateResults();
 
         // Update run counter
@@ -771,7 +852,9 @@ public class KargerGraph {
      * Update results - store/update list of results
      */
     public void updateResults() {
+
         // Last two vertices
+    
         mxCell v1 = (mxCell)this.adjacencyList.keySet().toArray()[0];
         mxCell v2 = (mxCell)this.adjacencyList.keySet().toArray()[1];
 
@@ -790,9 +873,16 @@ public class KargerGraph {
         KargerRecord newRecord = null;
 
         // Get edge value in the graph
-        Object e_obj = this.graph.getChildEdges(this.parent)[0];
-        mxCell edge = (mxCell)e_obj;
-        int cut_val = Integer.parseInt((String)edge.getValue());
+        mxCell edge = new mxCell();
+        for (Object e : this.graphEdges) {
+            edge = (mxCell)e;
+            if (edge != null) {
+                System.out.println("updating results, this is left " + (String)edge.getSource().getValue() + " - " + (String)edge.getTarget().getValue());
+                break;
+            }
+        }
+
+        int cut_val = this.getEdgeValue(edge);
 
         // If result set is unique, Add new record
         if (sameResult == null) {
@@ -834,6 +924,8 @@ public class KargerGraph {
         // Run the whole thing maximum number of times
         while (Integer.parseInt(this.runCounter) < this.maxRuns) {
             this.finishRun();
+            this.loadGraph("./examples/reset.xml");
+            this.stepCounter = 0;
         }
 
         // Display the best result - load from best.xml (TODO) or create graph based on best result (bleh)
