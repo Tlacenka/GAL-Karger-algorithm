@@ -133,12 +133,12 @@ public class SidePanels {
                     mxCell vertex = (mxCell)v;
 
                     if(vertex.getValue().equals(addedSrc)){
-                        System.out.println("SRC: " + vertex.getValue());
+                        //System.out.println("SRC: " + vertex.getValue());
                         sourceVertex = vertex;
                     }
 
                     if(vertex.getValue().equals(addedDst)){
-                        System.out.println("DST: " + vertex.getValue());
+                        //System.out.println("DST: " + vertex.getValue());
                         targetVertex = vertex;
                     }
                 }
@@ -183,6 +183,19 @@ public class SidePanels {
                         }
                     }
                 }
+
+
+                // check if edge like this already exists
+                for(int i = 0; i < edgeModel.getSize(); i++){
+
+                    String testStr = addedSrc + " - " + addedDst;
+
+                    if(edgeModel.get(i).toString().equals(testStr)){
+                        warningDialog("Edge with between these vertices already exists.", "Warning");
+                        return false;
+                    }
+                }
+
 
 
                 // both vertices exist or user did want to create non-existent vertex
