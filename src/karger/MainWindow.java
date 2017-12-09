@@ -584,6 +584,7 @@ public class MainWindow {
             case RUN:
                this.mainwindow.undoButton.setEnabled(false);
                this.mainwindow.stepButton.setEnabled(false);
+               this.mainwindow.runButton.setEnabled(false);
                this.mainwindow.graph.finishRun();
                this.mainwindow.resetButton.setEnabled(true);
                this.mainwindow.runTracker.setText("Total Runs: " + this.mainwindow.graph.getRunCounter());
