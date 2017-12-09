@@ -532,10 +532,10 @@ public class KargerGraph {
 
 
     public HashMap<mxCell,LinkedList<mxCell>> getAdjacencyList(){
-        return adjacencyList;
+        return this.adjacencyList;
     }
 
     public mxGraph xGetGraph(){
-        return graph;
+        return this.graph;
     }
 }

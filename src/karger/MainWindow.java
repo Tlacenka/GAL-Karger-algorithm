@@ -102,10 +102,12 @@ public class MainWindow {
    DefaultListModel<String> algorithmModel = new DefaultListModel<String>();
    public JList<String> algorithmChoice;
 
+   private boolean firstTimeCreatedModel = false;
+
    protected HashMap<mxCell,LinkedList<mxCell>> aList;
 
-   boolean gotNode = false;
-   boolean gotEdge = false;
+  // boolean gotNode = false;
+  // boolean gotEdge = false;
 
 
    // Menu event enumeration type
@@ -230,15 +232,17 @@ public class MainWindow {
       this.panel2.setBackground(sidePanelColor);
       this.panel2.setPreferredSize(new Dimension(150, 600));
 
-      // show node lists
-      updateNodeList();
 
-      // show edge list
-      updateEdgeList();
+      // create models for the first time
+       this.firstTimeCreatedModel = true;
+
+        updateNodeList();     // show node lists
+        updateEdgeList();     // show edge list
+
+       this.firstTimeCreatedModel = false;
 
 
       // Create panel for edges and nodes
-
       JTextArea edgeTitle = new JTextArea("Edge List");
       JTextArea nodeTitle = new JTextArea("Node List");
 
@@ -290,8 +294,7 @@ public class MainWindow {
          {
             public void actionPerformed(ActionEvent e)
             {
-               xSidePanels = new SidePanels();
-
+               //xSidePanels = new SidePanels();
                //System.out.println("Add node list: " + graph.getAdjacencyList());
 
                try{
@@ -317,8 +320,8 @@ public class MainWindow {
          {
             public void actionPerformed(ActionEvent e)
             {
-               System.out.println("REMOVE NODE \n");
-               xSidePanels = new SidePanels();
+               //System.out.println("REMOVE NODE \n");
+               //xSidePanels = new SidePanels();
                boolean isRemoved = xSidePanels.removeItem(nodeChoice, true, graph.xGetGraph());
 
                if(isRemoved){
@@ -341,8 +344,8 @@ public class MainWindow {
          {
             public void actionPerformed(ActionEvent e)
             {
-               xSidePanels = new SidePanels();
-               gotEdge = xSidePanels.addEdge(edgeModel, graph.xGetGraph(), graph.getAdjacencyList());
+               //xSidePanels = new SidePanels();
+               boolean gotEdge = xSidePanels.addEdge(edgeModel, graph.xGetGraph(), graph.getAdjacencyList());
 
                if(gotEdge == true)
                   graph.createAdjacencyList();
@@ -359,7 +362,7 @@ public class MainWindow {
          {
             public void actionPerformed(ActionEvent e)
             {
-               xSidePanels = new SidePanels();
+               //xSidePanels = new SidePanels();
                boolean isRemoved = xSidePanels.removeItem(edgeChoice, false, graph.xGetGraph());
 
                if(isRemoved){
@@ -438,7 +441,6 @@ public class MainWindow {
          System.out.println(ex);
       }
 
-     // algorithmChoice.setSelectedIndex(graph.algorithmItemIndex);
 
       this.algorithmPanel = new JScrollPane(algorithmChoice);
       this.algorithmPanel.setPreferredSize(new Dimension(350, 350));
@@ -610,12 +612,10 @@ public class MainWindow {
                this.mainwindow.undoButton.setEnabled(false);
                this.mainwindow.resetButton.setEnabled(false);
                this.mainwindow.graph.resetAlgorithm();
-               //disableEditorButtons();
                break;
             case UNDO:
                this.mainwindow.undoButton.setEnabled(false);
                this.mainwindow.graph.undoStep();
-               //disableEditorButtons();
                break;
             case NEXT_STEP:
                this.mainwindow.graph.nextStep();
@@ -642,7 +642,7 @@ public class MainWindow {
          edgeModel.clear();
          nodeModel.clear();
 
-         System.out.println("\nUpdate lists \n");
+       //  System.out.println("\nUpdate lists \n");
 
          this.mainwindow.updateEdgeList();
          this.mainwindow.updateNodeList();
@@ -676,6 +676,9 @@ public class MainWindow {
 
 
 
+    /**
+     * Update edge list based on current graph model.
+     */
    public void updateEdgeList(){
       try {
 
@@ -695,7 +698,9 @@ public class MainWindow {
 
          }
 
-         this.edgeChoice = new JList<String>(edgeModel);
+         //System.out.println("first time: " + this.firstTimeCreatedModel);
+         if(firstTimeCreatedModel)
+             this.edgeChoice = new JList<String>(edgeModel);
 
 
       } catch (Exception ex) {
@@ -705,6 +710,9 @@ public class MainWindow {
 
 
 
+    /**
+     * Update node list based on current adjacency list.
+     */
    public void updateNodeList(){
       try {
 
@@ -714,12 +722,13 @@ public class MainWindow {
 
             for (mxCell value: this.aList.keySet()) {
                nodeModel.addElement(value.getValue().toString());
-               System.out.println("Added element: " + value.getValue().toString());
+               //System.out.println("Added element: " + value.getValue().toString());
             }
+
+             //System.out.println("first time: " + this.firstTimeCreatedModel);
+            if(firstTimeCreatedModel)
+                nodeChoice = new JList<String>(nodeModel);
          }
-
-         nodeChoice = new JList<String>(nodeModel);
-
 
 
       } catch (Exception ex) {
@@ -728,6 +737,8 @@ public class MainWindow {
    }
 
 
+
+   // currently not used (and never be?)
    public void disableEditorButtons(){
 
       this.addNodeButton.setEnabled(false);
