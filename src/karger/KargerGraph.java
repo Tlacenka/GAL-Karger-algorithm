@@ -30,6 +30,7 @@ import java.awt.event.ActionEvent;
 
 import com.mxgraph.io.mxCodec;
 import com.mxgraph.model.mxCell;
+import com.mxgraph.model.mxIGraphModel;
 import com.mxgraph.swing.mxGraphComponent;
 import com.mxgraph.util.mxConstants;
 import com.mxgraph.util.mxUtils;
@@ -136,6 +137,10 @@ public class KargerGraph {
 
     }
 
+   /* public mxIGraphModel getModelX() {
+        return graph.getModel();
+    }*/
+
     // Class for storing results of individual runs
     class KargerRecord {
 
@@ -206,6 +211,9 @@ public class KargerGraph {
         // Add all vertices
         for (Object v : this.graph.getChildVertices(this.parent)) {
             mxCell vertex = (mxCell)v;
+
+            //System.out.println("Vertex: " + vertex.getValue());
+
             this.adjacencyList.put(vertex, new LinkedList<mxCell>());
         }
 
@@ -316,7 +324,7 @@ public class KargerGraph {
         int edge_val = 0;
 
         // Print out their values
-        System.out.println((String)v1.getValue() + " and " + (String)v2.getValue()); 
+        System.out.println("Merge cells: " + (String)v1.getValue() + " and " + (String)v2.getValue());
 
         // Merge the cells
 
