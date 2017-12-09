@@ -164,15 +164,17 @@ public class KargerGraph {
         private String V2; // Second set of vertices
         private int cut; // cut value
         private ArrayList<Integer> edgeOrder; // Order of removed edges - last stayed
+        private String encodedGraph; // encoded graph
 
         // Class constructor
         public KargerRecord(String V1, String V2, int cut,
-                            ArrayList<Integer> edgeOrder) {
+                            ArrayList<Integer> edgeOrder, String encodedGraph) {
 
             this.V1 = V1;
             this.V2 = V2;
             this.cut = cut;
             this.edgeOrder = edgeOrder;
+            this.encodedGraph = encodedGraph;
         }
 
         // Get edge order
@@ -198,6 +200,11 @@ public class KargerGraph {
         // Set cut value
         public void setCut(int cut) {
             this.cut = cut;
+        }
+
+        // Get encoded graph
+        public String getEncodedGraph() {
+            return this.encodedGraph;
         }
     }
 
@@ -235,7 +242,7 @@ public class KargerGraph {
         }
 
         do {
-            System.out.print("shuffling");
+            //System.out.print("shuffling");
             Collections.shuffle(this.curOrder);
             //System.out.print(this.curOrder);
 
@@ -400,18 +407,17 @@ public class KargerGraph {
         // Empty current graph if one exists
         this.createEmptyGraph();
 
-        Document graph_file;
+        String fileContent;
 
         // Decode graph and store it to graph variable
         try {
-            graph_file = mxXmlUtils.parseXml(mxUtils.readFile(filepath));
+            fileContent = mxUtils.readFile(filepath);
         } catch (IOException ex) {
             JOptionPane.showMessageDialog(null, "File could not be loaded.");
             return;
         }
 
-        mxCodec codec = new mxCodec(graph_file);
-        codec.decode(graph_file.getDocumentElement(), graph.getModel());
+        this.XMLToGraph(fileContent);
 
         // Update default parent
         this.parent = graph.getDefaultParent();
@@ -419,10 +425,26 @@ public class KargerGraph {
         // Update adjacency list
         this.createAdjacencyList();
 
-        //System.out.println("Adj list created.");
-
         return;
     }
+
+
+    /**
+     * Decode XML to graph.
+     */
+    public void XMLToGraph(String encodedGraph) {
+
+        if (this.graph == null) {
+            return;
+        }
+
+        // Parse encoded graph
+        Document graph_file = mxXmlUtils.parseXml(encodedGraph);
+
+        mxCodec codec = new mxCodec(graph_file);
+        codec.decode(graph_file.getDocumentElement(), this.graph.getModel());
+        
+    } 
 
     /**
      * Returns encoded graph to be stored to file.
@@ -430,18 +452,31 @@ public class KargerGraph {
      */
     public void saveGraph(String filepath) {
 
-        // Take current graph and encode it
-        mxCodec codec = new mxCodec();
-        String encodedGraph = mxXmlUtils.getXml(codec.encode(this.graph.getModel()));
-
         try {
-            mxUtils.writeFile(encodedGraph, filepath);
+            mxUtils.writeFile(this.graphToXML(), filepath);
         } catch (IOException ex) {
             JOptionPane.showMessageDialog(null, "File could not be saved.");
             return;
         }
     }
 
+    
+    /**
+     * Encode graph to XML.
+     */
+    public String graphToXML() {
+        if (this.graph == null) {
+            return "";
+        }
+
+        // Take current graph and encode it
+        mxCodec codec = new mxCodec();
+        return mxXmlUtils.getXml(codec.encode(this.graph.getModel()));
+    }
+
+    /**
+     * Merge two cells, v and v2.
+     */
     private void mergeCells(mxCell v1, mxCell v2) {
 
         int edge_val = 0;
@@ -475,16 +510,16 @@ public class KargerGraph {
         edge = dst = src = new mxCell();
         
         // Print out edges - TODO DEBUG
-        for (Object e : this.graphEdges) {
-            edge = (mxCell)e;
-            if (edge == null) {
-                System.out.println("printing a null edge");
-                continue;
-            }
-            src = (mxCell)edge.getSource();
-            dst = (mxCell)edge.getTarget();
-            System.out.println("printing edges " + (String)src.getValue() + " - " + (String)dst.getValue());
-        }
+        //for (Object e : this.graphEdges) {
+        //    edge = (mxCell)e;
+        //    if (edge == null) {
+        //        System.out.println("printing a null edge");
+        //        continue;
+        //    }
+        //    src = (mxCell)edge.getSource();
+        //    dst = (mxCell)edge.getTarget();
+        //    System.out.println("printing edges " + (String)src.getValue() + " - " + (String)dst.getValue());
+        //}
 
         // Go through all vertices adjacent to v2
         for (Object v_obj : this.adjacencyList.get(v2)) {
@@ -725,10 +760,10 @@ public class KargerGraph {
 
         // TODO fix
         // In order[stepCounter] is index of edge to be removed
-        System.out.println("step " + this.stepCounter);
-        System.out.println("edge at index " + this.curOrder.get(this.stepCounter));
-        System.out.println("edge array len " + Integer.toString(this.graphEdges.size()));
-        System.out.println("cur order len " + Integer.toString(this.curOrder.size()));
+        //System.out.println("step " + this.stepCounter);
+        //System.out.println("edge at index " + this.curOrder.get(this.stepCounter));
+        //System.out.println("edge array len " + Integer.toString(this.graphEdges.size()));
+        //System.out.println("cur order len " + Integer.toString(this.curOrder.size()));
 
 
         int edgeIndex = this.curOrder.get(this.stepCounter);
@@ -846,7 +881,7 @@ public class KargerGraph {
 
         // If result set is unique, Add new record
         if (sameResult == null) {
-            newRecord = new KargerRecord(V1, V2, cut_val, this.curOrder);
+            newRecord = new KargerRecord(V1, V2, cut_val, this.curOrder, this.graphToXML());
             this.runs.add(newRecord);
         } else {
             // Otherwise, compare the two and save the better value
@@ -890,6 +925,7 @@ public class KargerGraph {
         }
 
         // Display the best result - load from best.xml (TODO) or create graph based on best result (bleh)
+        
 
         return;
     }
