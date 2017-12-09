@@ -133,6 +133,11 @@ public class MainWindow {
       this.graph = new KargerGraph();
       this.aList = graph.getAdjacencyList();
 
+      xSidePanels = new SidePanels();
+      xSidePanels.getNodeModel(nodeModel);
+      xSidePanels.getAdjacencyList(graph.getAdjacencyList());
+      xSidePanels.getGraph(graph.xGetGraph());
+
 
 
       // Colours
@@ -312,6 +317,7 @@ public class MainWindow {
          {
             public void actionPerformed(ActionEvent e)
             {
+               System.out.println("REMOVE NODE \n");
                xSidePanels = new SidePanels();
                boolean isRemoved = xSidePanels.removeItem(nodeChoice, true, graph.xGetGraph());
 
@@ -336,7 +342,7 @@ public class MainWindow {
             public void actionPerformed(ActionEvent e)
             {
                xSidePanels = new SidePanels();
-               gotEdge = xSidePanels.addEdge(edgeModel, graph.xGetGraph());
+               gotEdge = xSidePanels.addEdge(edgeModel, graph.xGetGraph(), graph.getAdjacencyList());
 
                if(gotEdge == true)
                   graph.createAdjacencyList();
@@ -604,30 +610,34 @@ public class MainWindow {
                this.mainwindow.undoButton.setEnabled(false);
                this.mainwindow.resetButton.setEnabled(false);
                this.mainwindow.graph.resetAlgorithm();
+               //disableEditorButtons();
                break;
             case UNDO:
                this.mainwindow.undoButton.setEnabled(false);
                this.mainwindow.graph.undoStep();
+               //disableEditorButtons();
                break;
             case NEXT_STEP:
                this.mainwindow.graph.nextStep();
                this.mainwindow.undoButton.setEnabled(true);
                this.mainwindow.resetButton.setEnabled(true);
+
                break;
             case RUN:
                this.mainwindow.graph.finishRun();
                this.mainwindow.undoButton.setEnabled(true);
                this.mainwindow.resetButton.setEnabled(true);
+
                break;
             case FINISH:
                this.mainwindow.graph.finishAlgorithm();
                this.mainwindow.resetButton.setEnabled(true);
+
                break;
          }
 
 
          // some action was performed so the lists must be updated
-
          // in the first step, the "old" list must be cleared
          edgeModel.clear();
          nodeModel.clear();
@@ -718,57 +728,16 @@ public class MainWindow {
    }
 
 
+   public void disableEditorButtons(){
 
-   /*public void highlightUnusedNodes(){
+      this.addNodeButton.setEnabled(false);
+      this.removeNodeButton.setEnabled(false);
+      this.addEdgeButton.setEnabled(false);
+      this.removeEdgeButton.setEnabled(false);
 
-      System.out.println("---> highlightUnusedNodes \n");
-
-      try {
-
-         boolean isPresented = false;
-
-
-         Object xParent = graph.xGetGraph().getDefaultParent();
-
-         for (Object e : graph.xGetGraph().getChildEdges(xParent)) {
-            mxCell edge = (mxCell)e;
-            mxCell src = (mxCell)edge.getSource();
-            mxCell dst = (mxCell)edge.getTarget();
-
-            // Check that all edges are between two vertices
-            if ((src == null) || (dst == null)) {
-               throw new IllegalArgumentException("Each edge must be between 2 vertices.");
-            }
-
-            System.out.println("SRC: " + src.getValue());
-            System.out.println("DST: " + dst.getValue());
-
-            if((src.getValue() == addedNode) || dst.getValue() == addedNode){
-               System.out.println("node is presented \n");
-               isPresented = true;
-            }
-
-         }
-
-         System.out.println("is presented: " + isPresented);
-
-         if(isPresented == false){
-
-            for(int i = 0; i < nodeModel.size(); i++){
-
-               if(nodeModel.get(i).toString() == addedNode ){
-                  nodeChoice.setSelectedIndex(i);
-               }
-
-            }
-         }
+   }
 
 
-      } catch (Exception ex) {
-         System.out.println(ex);
-      }
-
-   }*/
 
 
 }

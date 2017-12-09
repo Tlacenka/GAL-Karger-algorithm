@@ -7,20 +7,9 @@ import javax.swing.*;
 import java.util.HashMap;
 import java.util.LinkedList;
 
-import com.mxgraph.io.mxCodec;
 import com.mxgraph.swing.mxGraphComponent;
-import com.mxgraph.util.mxConstants;
-import com.mxgraph.util.mxUtils;
-import com.mxgraph.util.mxXmlUtils;
-import com.mxgraph.view.mxGraph;
-import com.mxgraph.util.mxRectangle;
-import com.mxgraph.model.mxGeometry;
-import com.mxgraph.model.mxIGraphModel;
 
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 import java.awt.event.MouseWheelEvent;
-import java.awt.event.MouseWheelListener;
 
 
 public class SidePanels {
@@ -38,14 +27,18 @@ public class SidePanels {
     protected String removedSrc;
     protected String removedDst;
 
-    int vertex_size = 60;
+    private int vertex_size = 60;
 
-    protected Object eX = null;
-    protected Object eY = null;
+    protected Object sourceVertex = null;
+    protected Object targetVertex = null;
 
 
     public DefaultListModel<String> algorithmModel = new DefaultListModel<String>();
     public JList<String> algorithmChoice;
+
+    DefaultListModel<String> nModel = new DefaultListModel<String>();
+    mxGraph nGraph;
+    HashMap<mxCell,LinkedList<mxCell>> adjList;
 
     protected HashMap<mxCell,LinkedList<mxCell>> myList;
 
@@ -53,23 +46,36 @@ public class SidePanels {
 
     /**
      * Add node from the input dialog to the node list.
-     * @param model - node model.
+     * @param model - node model
+     * @param adjacencyList - list of existing vertices
+     * @param graph - current graph we work with
+     * @return true if action was successful
      */
     public boolean addNode(DefaultListModel<String> model, HashMap<mxCell,LinkedList<mxCell>> adjacencyList, mxGraph graph){
 
         addedNode = JOptionPane.showInputDialog(null, "Node name");
 
-        if(addedNode != null && adjacencyList != null){
+        if(addedNode != null){
             try {
                 myList = adjacencyList;
-                System.out.println("Add node list 2: " + myList);
+
+                // vertex with the same name as existing one cannot be added
+                for (mxCell vertex: this.myList.keySet()) {
+
+                    if(vertex.getValue().equals(addedNode)){
+                        warningDialog("Vertex with value like this already exists.", "Warning");
+                        return false;
+                    }
+
+                }
+
                 model.addElement(addedNode);
 
                 // adds cells to the model in a single step
                 graph.getModel().beginUpdate();
                 try
                 {
-                    Object v1 = graph.insertVertex(graph.getDefaultParent(), null, addedNode, 20, 20, 60, 60);
+                    Object v1 = graph.insertVertex(graph.getDefaultParent(), null, addedNode, 30, 30, this.vertex_size, this.vertex_size);
                 }
                 finally
                 {
@@ -86,84 +92,121 @@ public class SidePanels {
         }
 
         return false;
-
     }
 
 
 
     /**
-     * Add an edge from input dialog to the edge list.
-     * @param edgeModel - edge model.
+     * Add an edge between two vertices specified by the input dialog.
+     * @param edgeModel - current edge model we work with
+     * @param graph - current graph we work with
+     * @return true if action was successful
      */
-    public boolean addEdge(DefaultListModel<String> edgeModel, mxGraph graph){
+    public boolean addEdge(DefaultListModel<String> edgeModel, mxGraph graph, HashMap<mxCell,LinkedList<mxCell>> adjacencyList){
 
         String strEdge = null;
-
-
+        boolean response = false;
 
         JTextField xField = new JTextField(5);
         JTextField yField = new JTextField(5);
 
         JPanel myPanel = new JPanel();
-        myPanel.add(new JLabel("start:"));
+        myPanel.add(new JLabel("source:"));
         myPanel.add(xField);
         myPanel.add(Box.createHorizontalStrut(15)); // a spacer
-        myPanel.add(new JLabel("end:"));
+        myPanel.add(new JLabel("target:"));
         myPanel.add(yField);
 
         int result = JOptionPane.showConfirmDialog(null, myPanel,
-                "Please enter start and end nodes", JOptionPane.OK_CANCEL_OPTION);
+                "Please enter source and target nodes", JOptionPane.OK_CANCEL_OPTION);
 
         if (result == JOptionPane.OK_OPTION) {
 
             addedSrc = xField.getText();
             addedDst = yField.getText();
-
-            System.out.println("start node: " + addedSrc);
-            System.out.println("end node: " + addedDst);
-
-
             strEdge = addedSrc + " - " + addedDst;
 
             try {
-                edgeModel.addElement(strEdge);
 
+                // go through all vertices in the graph and check if the vertices from the input exist
                 for (Object v : graph.getChildVertices(graph.getDefaultParent())) {
                     mxCell vertex = (mxCell)v;
 
-                    System.out.println("Graph vertex: " + vertex.getValue());
-
                     if(vertex.getValue().equals(addedSrc)){
-                        System.out.println("SRC found: " + vertex.getValue());
-
-                        eX = vertex;
+                        System.out.println("SRC: " + vertex.getValue());
+                        sourceVertex = vertex;
                     }
 
                     if(vertex.getValue().equals(addedDst)){
-                        System.out.println("DST found: " + vertex.getValue());
-
-                        eY = vertex;
+                        System.out.println("DST: " + vertex.getValue());
+                        targetVertex = vertex;
                     }
-
                 }
 
-                if(eX != null && eY != null){
+
+                // one of the vertices doesn't exist
+                if(sourceVertex == null || targetVertex == null){
+
+                    if(sourceVertex == null)
+                        response = desicionDialog("Do you want to create this vertex?", "Vertex " + addedSrc + " doesn't exist");
+
+                    if(targetVertex == null)
+                        response = desicionDialog("Do you want to create this vertex?", "Vertex " + addedDst + " doesn't exist");
+
+                    if(response){
+                        if(sourceVertex == null)
+                            nModel.addElement(addedSrc);
+                        if(targetVertex == null)
+                            nModel.addElement(addedDst);
+
+                        // adds cells to the model in a single step
+                        graph.getModel().beginUpdate();
+                        try
+                        {
+                            Object v1;
+
+                            if(sourceVertex == null){
+                                v1 = graph.insertVertex(graph.getDefaultParent(), null, addedSrc, 30, 30, this.vertex_size, this.vertex_size);
+                                sourceVertex = v1;
+                            }
+
+                            else if(targetVertex == null){
+                                v1 = graph.insertVertex(graph.getDefaultParent(), null, addedDst, 30, 30, this.vertex_size, this.vertex_size);
+                                targetVertex = v1;
+                            }
+
+                        }
+                        finally
+                        {
+                            // update the display
+                            graph.getModel().endUpdate();
+                        }
+                    }
+                }
+
+
+                // both vertices exist or user did want to create non-existent vertex
+                if(sourceVertex != null && targetVertex != null){
 
                     graph.getModel().beginUpdate();
                     try
                     {
                         // graph.insertEdge(parent, null, '', source, target, style);
-                        Object edgeX = graph.insertEdge(graph.getDefaultParent(), null, "", eX, eY);
+                        Object edgeX = graph.insertEdge(graph.getDefaultParent(), null, "", sourceVertex, targetVertex);
+
+                        // add edge to the edge list
+                        edgeModel.addElement(strEdge);
                     }
                     finally
                     {
                         // update the display
                         graph.getModel().endUpdate();
+                        return true;
                     }
 
                 }
 
-                return true;
+                return false;
 
             } catch (Exception ex) {
                 System.out.println(ex);
@@ -177,61 +220,59 @@ public class SidePanels {
 
     /**
      * Remove selected item from node/edge list.
-     * @param choice - which item should be removed.
+     * @param choice - vertex or edge which shall be removed
+     * @param isNode - if true - node must be removed, otherwise, an edge must be removed
+     * @param graph - the current graph we work with
+     * @return true if action was successful
      */
     public boolean removeItem(JList<String> choice, boolean isNode, mxGraph graph){
 
         try {
 
-            if(choice.getSelectedValue() == null){
-                return false;
-            }
-
             if(isNode){
 
+                // value isn't selected
+                if(choice.getSelectedValue() == null){
+                    warningDialog("No selected node", "Error message");
+                    return false;
+                }
+
                 System.out.println("REMOVE node ");
-
                 removedNode = choice.getSelectedValue();
-
-                System.out.println("Node " + removedNode);
 
                 findObjects(graph, false);
 
                 graph.getModel().beginUpdate();
                 try {
-                    // Remove a vertex. The related edge is removed as well.
-                    graph.removeCells(new Object[]{eX});
+                    // remove a vertex
+                    // the related edge is removed as well
+                    graph.removeCells(new Object[]{sourceVertex});
                 } finally {
                     graph.getModel().endUpdate();
-
-                    //return true;
                 }
 
 
             }else {
-                System.out.println("REMOVE edge ");
+
+                // value isn't selected
+                if(choice.getSelectedValue() == null){
+                    warningDialog("No selected edge", "Error message");
+                    return false;
+                }
 
                 String[] splits = choice.getSelectedValue().split("[\\s-]+");
 
                 removedSrc = splits[0];
                 removedDst = splits[1];
 
-                // System.out.println("Src " + removedSrc);
-                // System.out.println("Dsc " + removedDst);
-
                 findObjects(graph, true);
-
-                System.out.println("REMOVE");
 
                 graph.getModel().beginUpdate();
                 try {
-                    Object[] edgeR = graph.getEdgesBetween(eX, eY);
+                    Object[] edgeR = graph.getEdgesBetween(sourceVertex, targetVertex);
                     graph.removeCells(edgeR);
-
                 } finally {
                     graph.getModel().endUpdate();
-
-                    //return true;
                 }
 
             }
@@ -251,39 +292,37 @@ public class SidePanels {
 
 
 
+    /**
+     * Get vertices/edge as an object from a graph.
+     * @param graph - the graph we work with
+     * @param isEdge - distinguished between vertices and edges
+     */
     public void findObjects(mxGraph graph, boolean isEdge){
-
-        System.out.println("FIND OBJECTS \n ");
 
         for (Object v : graph.getChildVertices(graph.getDefaultParent())) {
             mxCell vertex = (mxCell)v;
 
-            //System.out.println("Graph vertex: " + vertex.getValue());
 
             if(isEdge){
-
-                System.out.println("is edge \n ");
 
                 if(vertex.getValue().equals(removedSrc)){
                     System.out.println("SRC found: " + vertex.getValue());
 
-                    eX = vertex;
+                    sourceVertex = vertex;
                 }
 
                 if(vertex.getValue().equals(removedDst)){
                     System.out.println("DST found: " + vertex.getValue());
 
-                    eY = vertex;
+                    targetVertex = vertex;
                 }
 
             }else {
 
-                System.out.println("is node: " + vertex.getValue() + " ==" + removedNode);
-
                 if(vertex.getValue().equals(removedNode)){
                     System.out.println("NODE found: " + vertex.getValue());
 
-                    eX = vertex;
+                    sourceVertex = vertex;
                 }
             }
 
@@ -292,13 +331,19 @@ public class SidePanels {
 
 
 
-    // unused
+    // currently not used
+    /**
+     * Highlight current step from algorithm
+     * @param index - current step (element which should be selected)
+     * @param algorithmChoice - jList with algorithm
+     */
     public void setAlgorithmItem(int index, JList<String> algorithmChoice){
-        algorithmChoice.setSelectedIndex(1);
+        algorithmChoice.setSelectedIndex(index);
     }
 
 
 
+    // currently not used
     protected void zoomByMouseWheel(MouseWheelEvent e, mxGraphComponent gc){
         if (e.isControlDown()) {
             if (e.getWheelRotation() < 0) {
@@ -311,4 +356,39 @@ public class SidePanels {
     }
 
 
+    /**
+     * Error/Warning etc. dialog
+     * @param message - message to be shown
+     * @param dialogType - Error/Warning etc. It will be shown in the dialog title
+     */
+    public void warningDialog(String message, String dialogType){
+        JOptionPane.showMessageDialog(new JFrame(), message, dialogType,
+                JOptionPane.ERROR_MESSAGE);
+    }
+
+
+
+    public boolean desicionDialog(String message, String problem){
+        int dialogResult = JOptionPane.showConfirmDialog (null, message, problem, JOptionPane.OK_CANCEL_OPTION);
+
+        if(dialogResult == JOptionPane.YES_OPTION){
+           return true;
+        }else
+            return false;
+    }
+
+
+    public void getNodeModel(DefaultListModel<String> model){
+        nModel = model;
+    }
+
+
+    public void getGraph(mxGraph graph){
+        nGraph = graph;
+    }
+
+
+    public void getAdjacencyList(HashMap<mxCell,LinkedList<mxCell>> adjacencyList){
+        adjList = adjacencyList;
+    }
 }
