@@ -918,9 +918,9 @@ public class KargerGraph {
 
         // Run the whole thing maximum number of times
         while (Integer.parseInt(this.runCounter) < this.maxRuns) {
-            this.stepCounter = 0;
-            this.loadGraph("./examples/reset.xml");
             this.finishRun();
+            this.loadGraph("./examples/reset.xml");
+            this.stepCounter = 0;
             
         }
 

@@ -65,6 +65,8 @@ public class MainWindow {
 
    private JTextArea runTracker;
    private JTextArea resultTracker;
+   private JTextArea resultTitle;
+   private JTextArea otherResultsTitle;
 
    private JPanel panel1;
    private JPanel panel2;
@@ -72,9 +74,11 @@ public class MainWindow {
    private JScrollPane nodePanel;
    private JScrollPane edgePanel;
    private JScrollPane algorithmPanel;
+   private JScrollPane resultsPanel;
 
    private JPanel nodeButtonPanel;
    private JPanel edgeButtonPanel;
+   private JPanel resultContentPanel;
 
    private JButton addNodeButton;
    private JButton removeNodeButton;
@@ -502,7 +506,39 @@ public class MainWindow {
       this.topPanel.add(this.resultTracker);
 
       // Add graph to panel
-      this.centerPanel.add(this.graph.getGraphComponent());
+      //this.centerPanel.add(this.graph.getGraphComponent());
+
+      this.resultContentPanel = new JPanel();
+      this.resultContentPanel.setPreferredSize(new Dimension(675,720));
+      this.resultContentPanel.setBackground(Color.white);
+      this.resultContentPanel.setBorder(null);
+
+      // Prepare results
+      this.resultTitle = new JTextArea("Best Result");
+      this.resultTitle.setFont(titleFont);
+      this.resultTitle.setForeground(panelColorTest);
+      this.resultTitle.setPreferredSize(new Dimension(650, 50));
+      this.resultTitle.setBorder(BorderFactory.createMatteBorder(1,0,0,0,Color.black));
+
+      this.otherResultsTitle = new JTextArea("Other Results");
+      this.otherResultsTitle.setFont(titleFont);
+      this.otherResultsTitle.setForeground(panelColorTest);
+      this.otherResultsTitle.setPreferredSize(new Dimension(650, 50));
+
+      // Add to panel
+      this.resultContentPanel.add(this.graph.getGraphComponent());
+      this.resultContentPanel.add(this.resultTitle);
+      this.resultContentPanel.add(this.otherResultsTitle);
+
+      // Prepare scrolling
+      this.resultsPanel = new JScrollPane(this.resultContentPanel);
+      this.resultsPanel.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+      this.resultsPanel.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+      this.resultsPanel.setBounds(10, 10, 50, 50);
+      this.resultsPanel.setBorder(null);
+
+      // Add scrolling to panel
+      this.centerPanel.add(this.resultsPanel);
 
    }
 
@@ -563,6 +599,9 @@ public class MainWindow {
       public void actionPerformed(ActionEvent e) {
          switch(this.eventType) {
             case RESET:
+               // Get back algorithm in case it wasn't there
+               //this.centerPanel.add(this.graph.getGraphComponent());
+
                this.mainwindow.undoButton.setEnabled(false);
                this.mainwindow.resetButton.setEnabled(false);
                this.mainwindow.graph.resetAlgorithm();
@@ -601,6 +640,7 @@ public class MainWindow {
                this.mainwindow.resultTracker.setText("Best Result: " + this.mainwindow.graph.getBestResultCut());
 
                // TODO display graph, results below it
+               this.mainwindow.graph.getGraphComponent().zoom(0.6);
                break;
          }
       }
