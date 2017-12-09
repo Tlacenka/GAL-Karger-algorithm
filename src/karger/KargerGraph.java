@@ -123,7 +123,7 @@ public class KargerGraph {
         // Create default edge order and randomize it
         this.curOrder = new ArrayList();
         int i = 0;
-        for (Object e: this.graph.getChildVertices(this.parent)) {
+        for (Object e: this.graph.getChildEdges(this.parent)) {
             this.curOrder.add(i);
             i++;
         }
@@ -131,7 +131,7 @@ public class KargerGraph {
 
         // Wrap it in a component
         this.gc = new mxGraphComponent(this.graph);
-        //this.gc.setEnabled(false); // disable graph editing ad hoc
+        this.gc.setEnabled(false); // disable graph editing ad hoc
         
         // Set background color, remove default border
         this.gc.getViewport().setOpaque(true);
@@ -235,6 +235,7 @@ public class KargerGraph {
         }
 
         do {
+            System.out.print("shuffling");
             Collections.shuffle(this.curOrder);
             //System.out.print(this.curOrder);
 
@@ -311,11 +312,11 @@ public class KargerGraph {
         for (Object e : this.graph.getChildEdges(this.parent)) {
             mxCell edge = (mxCell)e;
 
-            // Add edge to list of edges
-            this.graphEdges.add((mxCell)edge);
-
             mxCell src = (mxCell)edge.getSource();
             mxCell dst = (mxCell)edge.getTarget();
+
+            // Add edge to list of edges
+            this.graphEdges.add((mxCell)edge);
 
             // Check that all edges are between two vertices
             if ((src == null) || (dst == null)) {
@@ -477,11 +478,12 @@ public class KargerGraph {
         for (Object e : this.graphEdges) {
             edge = (mxCell)e;
             if (edge == null) {
+                System.out.println("printing a null edge");
                 continue;
             }
             src = (mxCell)edge.getSource();
             dst = (mxCell)edge.getTarget();
-            //System.out.println("printing edges " + (String)src.getValue() + " - " + (String)dst.getValue());
+            System.out.println("printing edges " + (String)src.getValue() + " - " + (String)dst.getValue());
         }
 
         // Go through all vertices adjacent to v2
@@ -678,27 +680,18 @@ public class KargerGraph {
      * Resets all runs, re-creates the whole graph.
      */
     public void resetAlgorithm() {
-        if (this.stepCounter > 0) {
-            this.loadGraph("./examples/reset.xml");
-            this.stepCounter = 0;
-            this.runCounter = "0";
-            this.bestResultCut = "-";
-            this.runs = new ArrayList<KargerRecord>();
-            this.shuffleEdges();
-            //System.out.println("Current order");
-            //System.out.println(this.curOrder);
-            //System.out.println(this.graphEdges);
-
-            // Print out edges - TODO DEBUG
-            for (Object e : this.graphEdges) {
-                mxCell edge = (mxCell)e;
-                mxCell src = (mxCell)edge.getSource();
-                mxCell dst = (mxCell)edge.getTarget();
-                //System.out.println("hello edges " + (String)src.getValue() + " - " + (String)dst.getValue());
-            }
-        }
+        this.loadGraph("./examples/reset.xml");
+        this.stepCounter = 0;
+        this.runCounter = "0";
+        this.bestResultCut = "-";
+        this.runs = new ArrayList<KargerRecord>();
+        this.shuffleEdges();
+        //System.out.println("Current order");
+        //System.out.println(this.curOrder);
+        //System.out.println(this.graphEdges);
     }
 
+    // TODO fix!!
     /**
      * Goes back one step in the algorithm.
      */
@@ -732,14 +725,22 @@ public class KargerGraph {
 
         // TODO fix
         // In order[stepCounter] is index of edge to be removed
-        //System.out.println("step " + this.stepCounter);
-        //System.out.println("edge at index " + this.curOrder.get(this.stepCounter));
+        System.out.println("step " + this.stepCounter);
+        System.out.println("edge at index " + this.curOrder.get(this.stepCounter));
+        System.out.println("edge array len " + Integer.toString(this.graphEdges.size()));
+        System.out.println("cur order len " + Integer.toString(this.curOrder.size()));
+
+
         int edgeIndex = this.curOrder.get(this.stepCounter);
 
         // If this edge was already contracted, skip step
         if (this.graphEdges.get(edgeIndex) == null) {
-            this.stepCounter += 1;
-            this.nextStep();
+
+            // Make sure it's not exceeding size due to next element being null
+            if ((this.stepCounter + 1) < this.graphEdges.size()) {
+                this.stepCounter += 1;
+                this.nextStep();
+            }
             return;
         }
 
@@ -882,9 +883,10 @@ public class KargerGraph {
 
         // Run the whole thing maximum number of times
         while (Integer.parseInt(this.runCounter) < this.maxRuns) {
-            this.finishRun();
-            this.loadGraph("./examples/reset.xml");
             this.stepCounter = 0;
+            this.loadGraph("./examples/reset.xml");
+            this.finishRun();
+            
         }
 
         // Display the best result - load from best.xml (TODO) or create graph based on best result (bleh)

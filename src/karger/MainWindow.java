@@ -472,7 +472,8 @@ public class MainWindow {
       }
 
       this.bottomPanel.add(this.resetButton);
-      this.bottomPanel.add(this.undoButton);
+      // Undo not supported
+      //this.bottomPanel.add(this.undoButton);
       this.bottomPanel.add(this.stepButton);
       this.bottomPanel.add(this.runButton);
       this.bottomPanel.add(this.finishButton);
