@@ -275,23 +275,19 @@ public class KargerGraph {
         // Add some vertices and edges
         this.graph.getModel().beginUpdate();
         {
-           Object vA = graph.insertVertex(parent, null, "A", 100, 180, vertex_size, vertex_size);
-           Object vB = graph.insertVertex(parent, null, "B", 10, 250, vertex_size, vertex_size);
-           Object vC = graph.insertVertex(parent, null, "C", 180, 320, vertex_size, vertex_size);
-           Object vD = graph.insertVertex(parent, null, "D", 300, 180, vertex_size, vertex_size);
-           Object vE = graph.insertVertex(parent, null, "E", 250, 100, vertex_size, vertex_size);
-           Object vF = graph.insertVertex(parent, null, "F", 300, 20, vertex_size, vertex_size);
-           Object vG = graph.insertVertex(parent, null, "G", 400, 120, vertex_size, vertex_size);
-           Object vH = graph.insertVertex(parent, null, "H", 400, 250, vertex_size, vertex_size);
+           Object vA = graph.insertVertex(parent, null, "A", 200, 50, vertex_size, vertex_size);
+           Object vB = graph.insertVertex(parent, null, "B", 0, 200, vertex_size, vertex_size);
+           Object vC = graph.insertVertex(parent, null, "C", 500, 300, vertex_size, vertex_size);
+           Object vD = graph.insertVertex(parent, null, "D", 300, 400, vertex_size, vertex_size);
+           Object vE = graph.insertVertex(parent, null, "E", 500, 600, vertex_size, vertex_size);
            Object eAB = graph.insertEdge(parent, null, "", vA, vB);
            Object eBC = graph.insertEdge(parent, null, "", vB, vC);
            Object eAC = graph.insertEdge(parent, null, "", vA, vC);
            Object eAD = graph.insertEdge(parent, null, "", vA, vD);
-           Object eDE = graph.insertEdge(parent, null, "", vD, vE);
-           Object eEF = graph.insertEdge(parent, null, "", vE, vF);
-           Object eFG = graph.insertEdge(parent, null, "", vF, vG);
-           Object eDG = graph.insertEdge(parent, null, "", vD, vG);
-           Object eDH = graph.insertEdge(parent, null, "", vD, vH);
+           Object eDE = graph.insertEdge(parent, null, "", vC, vE);
+           Object eEF = graph.insertEdge(parent, null, "", vD, vC);
+           // new edges
+           
         }
         this.graph.getModel().endUpdate();
     }
@@ -422,7 +418,7 @@ public class KargerGraph {
         // Update adjacency list
         this.createAdjacencyList();
 
-        System.out.println("Adj list created.");
+        //System.out.println("Adj list created.");
 
         return;
     }
@@ -474,16 +470,8 @@ public class KargerGraph {
         }
         this.graph.getModel().endUpdate();
 
-        // TODO why is it sometimes null??
-        if (this.adjacencyList.get(v2) == null) {
-            System.out.println("this sucks balls");
-        } else {
-            System.out.println("this does not suck balls");
-        }
-
         mxCell edge, src, dst;
         edge = dst = src = new mxCell();
-        try {
         
         // Print out edges - TODO DEBUG
         for (Object e : this.graphEdges) {
@@ -493,20 +481,7 @@ public class KargerGraph {
             }
             src = (mxCell)edge.getSource();
             dst = (mxCell)edge.getTarget();
-            System.out.println("printing edges " + (String)src.getValue() + " - " + (String)dst.getValue());
-        }
-        } catch (NullPointerException ex) {
-            if (edge == null) {
-                System.out.println("edge null");
-            }
-            if (src == null) {
-                System.out.println("src null");
-            }
-            if (dst == null) {
-                System.out.println("dst null");
-            }
-            System.out.println("some edge has only one vertex");
-            System.out.println("it is this one " + (String)src.getValue() + " - " + (String)dst.getValue());
+            //System.out.println("printing edges " + (String)src.getValue() + " - " + (String)dst.getValue());
         }
 
         // Go through all vertices adjacent to v2
@@ -530,9 +505,9 @@ public class KargerGraph {
                 src = (mxCell)edge.getSource();
                 dst = (mxCell)edge.getTarget();
                 
-                if ((src == null) || (dst == null)) {
-                    System.out.println("This edge is not between 2 edges.");
-                }
+                //if ((src == null) || (dst == null)) {
+                //    System.out.println("This edge is not between 2 edges.");
+                //}
 
                 // Redirect edge, update adjacency list
                 if ((src == v) && (dst == v2)) {
@@ -642,10 +617,6 @@ public class KargerGraph {
 
                 //System.out.println("updated value of edge " + (String)edge.getSource().getValue() + " - " + (String)edge.getTarget().getValue());
 
-                // Store edge to graphEdges for the nth time
-                if ( this.graphEdges.indexOf(edge2) == -1) {
-                    System.out.println("Fuck my life 2");
-                }
 
                 // Replace all occurences of edge2 by edge
                 for (Object e3 : this.graphEdges) {
@@ -663,22 +634,10 @@ public class KargerGraph {
                 }
                 this.graph.getModel().endUpdate();
 
-                if (edge2 != null) {
-                    System.out.println("after removing multiple " + (String)edge2.getSource().getValue() + " - " + (String)edge2.getTarget().getValue());
-                }
-                //System.out.println("still existing edge " + (String)edge.getSource().getValue() + " - " + (String)edge.getTarget().getValue());
-
-                // Print out edges - TODO DEBUG
-                for (Object e3 : this.graph.getChildEdges(this.parent)) {
-                    mxCell edge3 = (mxCell)e3;
-                    if (edge3 == edge2) {
-                        System.out.println("wft???");
-                    }
-                    mxCell src = (mxCell)edge3.getSource();
-                    mxCell dst = (mxCell)edge3.getTarget();
-                    System.out.println("after multiple edges " + (String)src.getValue() + " - " + (String)dst.getValue());
-                }
-
+                //if (edge2 != null) {
+                //    System.out.println("after removing multiple " + (String)edge2.getSource().getValue() + " - " + (String)edge2.getTarget().getValue());
+                //}
+                
                 found = true;
                 break;
 
@@ -773,8 +732,8 @@ public class KargerGraph {
 
         // TODO fix
         // In order[stepCounter] is index of edge to be removed
-        System.out.println("step " + this.stepCounter);
-        System.out.println("edge at index " + this.curOrder.get(this.stepCounter));
+        //System.out.println("step " + this.stepCounter);
+        //System.out.println("edge at index " + this.curOrder.get(this.stepCounter));
         int edgeIndex = this.curOrder.get(this.stepCounter);
 
         // If this edge was already contracted, skip step

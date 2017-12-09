@@ -478,7 +478,7 @@ public class MainWindow {
       this.bottomPanel.add(this.finishButton);
 
       // Add text areas to top panel
-      this.topPanel.setLayout(new FlowLayout(FlowLayout.CENTER, 80, 30));
+      this.topPanel.setLayout(new FlowLayout(FlowLayout.CENTER, 110, 30));
 
       // Create text areas
       this.runTracker = new JTextArea("Total Runs: " + this.graph.getRunCounter());
@@ -489,12 +489,12 @@ public class MainWindow {
       this.runTracker.setBackground(panelColor);
       this.runTracker.setFont(titleFont);
       this.runTracker.setEditable(false);
-      this.runTracker.setPreferredSize(new Dimension(200, 30));
+      this.runTracker.setPreferredSize(new Dimension(225, 30));
       this.resultTracker.setForeground(textColor);
       this.resultTracker.setBackground(panelColor);
       this.resultTracker.setFont(titleFont);
       this.resultTracker.setEditable(false);
-      this.resultTracker.setPreferredSize(new Dimension(200, 30));
+      this.resultTracker.setPreferredSize(new Dimension(225, 30));
 
       // Add text areas
       this.topPanel.add(this.runTracker);
