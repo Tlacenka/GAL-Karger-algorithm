@@ -92,6 +92,10 @@ public class MainWindow {
    private KargerGraph graphBestResult;
    private ArrayList<mxCell> manualVertices;
 
+   boolean isWhile = false;
+
+   protected int clickCounter = 0;
+
 
    protected SidePanels xSidePanels;
 
@@ -305,6 +309,16 @@ public class MainWindow {
 
                   if(addedNode == true){
                      graph.createAdjacencyList();
+
+                     // first of all, the list must be cleared
+                     graph.getCurOrder().clear();
+
+                     // then we can "update" the list with changed values
+                     int i = 0;
+                     for (Object eO: graph.xGetGraph().getChildEdges(graph.xGetGraph().getDefaultParent())) {
+                        graph.getCurOrder().add(i);
+                        i++;
+                     }
                   }
 
 
@@ -331,6 +345,17 @@ public class MainWindow {
                   graph.createAdjacencyList();
                   edgeModel.clear();
                   updateEdgeList();
+
+                  // first of all, the list must be cleared
+                  graph.getCurOrder().clear();
+
+                  // then we can "update" the list with changed values
+                  int i = 0;
+                  for (Object eO: graph.xGetGraph().getChildEdges(graph.xGetGraph().getDefaultParent())) {
+                     graph.getCurOrder().add(i);
+                     i++;
+                  }
+
                }
 
             }
@@ -348,8 +373,24 @@ public class MainWindow {
                //xSidePanels = new SidePanels();
                boolean gotEdge = xSidePanels.addEdge(edgeModel, graph.xGetGraph(), graph.getAdjacencyList());
 
-               if(gotEdge == true)
+               if(gotEdge == true){
+
                   graph.createAdjacencyList();
+
+                  // first of all, the list must be cleared
+                  graph.getCurOrder().clear();
+
+                  // then we can "update" the list with changed values
+                  int i = 0;
+                  for (Object eO: graph.xGetGraph().getChildEdges(graph.xGetGraph().getDefaultParent())) {
+                     graph.getCurOrder().add(i);
+                     i++;
+                  }
+
+               }
+
+
+
 
             }
          });
@@ -370,6 +411,16 @@ public class MainWindow {
                   graph.createAdjacencyList();
                   edgeModel.clear();
                   updateEdgeList();
+
+                  // first of all, the list must be cleared
+                  graph.getCurOrder().clear();
+
+                  // then we can "update" the list with changed values
+                  int i = 0;
+                  for (Object eO: graph.xGetGraph().getChildEdges(graph.xGetGraph().getDefaultParent())) {
+                     graph.getCurOrder().add(i);
+                     i++;
+                  }
                }
 
             }
@@ -434,8 +485,8 @@ public class MainWindow {
          algorithmChoice.setBackground(Color.white);
 
 
-         System.out.println("GET algorithm list \n");
-         graph.getAlgorithmList(algorithmChoice);
+         //System.out.println("GET algorithm list \n");
+         //graph.getAlgorithmList(algorithmChoice);
 
       } catch (Exception ex) {
          System.out.println(ex);
@@ -446,7 +497,7 @@ public class MainWindow {
       this.algorithmPanel.setPreferredSize(new Dimension(350, 350));
       this.algorithmPanel.setBorder(BorderFactory.createMatteBorder(1,0,1,0,Color.black));
 
-       algorithmChoice.setSelectedIndex(1);
+       //algorithmChoice.setSelectedIndex(1);
 
       // Add title Algorithm
       JTextArea algorithmTitle = new JTextArea("Algorithm");
@@ -597,6 +648,12 @@ public class MainWindow {
       this.resultsPanel.setPreferredSize(new Dimension(675, 720));
       this.resultsPanel.revalidate();
 
+      // user can scroll by mouse wheel
+      this.resultsPanel.setWheelScrollingEnabled(true);
+
+      // speed up the mouse scrolling
+      this.resultsPanel.getVerticalScrollBar().setUnitIncrement(16);
+
       // Add scrolling to panel
       this.centerPanel.add(this.resultsPanel);
 
@@ -661,7 +718,9 @@ public class MainWindow {
             case RESET:
 
                // Reset buttons
-                algorithmChoice.setSelectedIndex(1);
+               clickCounter = 0;
+               //algorithmChoice.setSelectedIndex(0);
+               algorithmChoice.clearSelection();
                this.mainwindow.undoButton.setEnabled(false);
                this.mainwindow.resetButton.setEnabled(false);
                this.mainwindow.graph.resetAlgorithm();
@@ -723,7 +782,6 @@ public class MainWindow {
                this.mainwindow.resetButton.setEnabled(true);
                this.mainwindow.runTracker.setText("Total Runs: " + this.mainwindow.graph.getRunCounter());
                this.mainwindow.resultTracker.setText("Best Result: " + this.mainwindow.graph.getBestResultCut());
-                algorithmChoice.setSelectedIndex(7);
 
                // Display zoomed out graph, results below it
                this.mainwindow.graph.getGraphComponent().zoom(0.7);
@@ -767,41 +825,114 @@ public class MainWindow {
                break;
 
             case MANUAL_STEPS:
-               if (this.mainwindow.isPhase1) {
-                  // Disable all buttons except for reset before phase 2 is finished
-                  this.mainwindow.undoButton.setEnabled(false);
-                  this.mainwindow.stepButton.setEnabled(false);
-                  this.mainwindow.runButton.setEnabled(false);
-                  this.mainwindow.finishButton.setEnabled(false);
 
-                  this.mainwindow.manualVertices = this.mainwindow.graph.stepPhase1();
-                  this.mainwindow.isPhase1 = false;
+               clickCounter++;
 
-               } else {
-                  if ((this.mainwindow.manualVertices != null) &&
-                      (this.mainwindow.manualVertices.size() == 2)) {
-                     this.mainwindow.graph.stepPhase2(this.mainwindow.manualVertices);
-                  }
-                  this.mainwindow.manualVertices = new ArrayList<mxCell>();
-                  
-                  // Enable all buttons after phase 2
-                  this.mainwindow.undoButton.setEnabled(true);
-                  this.mainwindow.stepButton.setEnabled(true);
-                  this.mainwindow.runButton.setEnabled(true);
-                  this.mainwindow.finishButton.setEnabled(true);
-                  this.mainwindow.resetButton.setEnabled(true);
+               //System.out.println("click counter: " + clickCounter);
 
-                  this.mainwindow.isPhase1 = true;
+               switch (clickCounter){
+                  case 22:
+                     algorithmChoice.setSelectedIndex(7);      // finish
+                     clickCounter = 21;
 
-                  if (this.mainwindow.graph.isRunFinished()) {
+                     //System.out.println("finished");
                      this.mainwindow.runTracker.setText("Total Runs: " + this.mainwindow.graph.getRunCounter());
                      this.mainwindow.resultTracker.setText("Best Result: " + this.mainwindow.graph.getBestResultCut());
                      this.mainwindow.stepButton.setEnabled(false);
                      this.mainwindow.manualSteps.setEnabled(false);
                      this.mainwindow.runButton.setEnabled(false);
-                  }
-               
+
+                     break;
+                  case 1:
+                    // System.out.println("case 1: " + clickCounter);
+                     algorithmChoice.setSelectedIndex(1);
+                     break;
+                  case 2:
+                     //System.out.println("case 2: " + clickCounter);
+                     algorithmChoice.setSelectedIndex(3);
+                     break;
+                  case 3:
+                     //System.out.println("case 3: " + clickCounter);
+                     algorithmChoice.setSelectedIndex(4);
+
+                     int j = 0;
+                     for (Object eK: graph.xGetGraph().getChildEdges(graph.xGetGraph().getDefaultParent())) {
+                        j++;
+                     }
+
+                     //System.out.println("edge count: " + j);
+
+                     if(j == 1 && this.mainwindow.graph.isRunFinished()){
+                        clickCounter = 21;
+                     }
+
+
+                     break;
+                  case 5:
+                     //System.out.println("case 5: " + clickCounter);
+                     algorithmChoice.setSelectedIndex(6);
+                     break;
+                  case 6:
+                     //System.out.println("case 6: " + clickCounter);
+                     algorithmChoice.setSelectedIndex(9);
+                     break;
+                  case 4:
+                  case 7:
+                     //System.out.println("case 4,7: " + clickCounter);
+
+                     if (this.mainwindow.isPhase1) {
+
+                        // Disable all buttons except for reset before phase 2 is finished
+                        this.mainwindow.undoButton.setEnabled(false);
+                        this.mainwindow.stepButton.setEnabled(false);
+                        this.mainwindow.runButton.setEnabled(false);
+                        this.mainwindow.finishButton.setEnabled(false);
+
+                        this.mainwindow.manualVertices = this.mainwindow.graph.stepPhase1();
+                        this.mainwindow.isPhase1 = false;
+
+                     } else {
+
+                        if ((this.mainwindow.manualVertices != null) &&
+                                (this.mainwindow.manualVertices.size() == 2)) {
+                           this.mainwindow.graph.stepPhase2(this.mainwindow.manualVertices);
+                        }
+                        this.mainwindow.manualVertices = new ArrayList<mxCell>();
+
+                        // Enable all buttons after phase 2
+                        this.mainwindow.undoButton.setEnabled(true);
+                        this.mainwindow.stepButton.setEnabled(true);
+                        this.mainwindow.runButton.setEnabled(true);
+                        this.mainwindow.finishButton.setEnabled(true);
+                        this.mainwindow.resetButton.setEnabled(true);
+
+                        this.mainwindow.isPhase1 = true;
+
+                        //System.out.println("is run finished: " + this.mainwindow.graph.isRunFinished());
+
+                        if (this.mainwindow.graph.isRunFinished() && isWhile == true) {
+                            //System.out.println("finished");
+                            this.mainwindow.runTracker.setText("Total Runs: " + this.mainwindow.graph.getRunCounter());
+                            this.mainwindow.resultTracker.setText("Best Result: " + this.mainwindow.graph.getBestResultCut());
+                            this.mainwindow.stepButton.setEnabled(false);
+                            this.mainwindow.manualSteps.setEnabled(false);
+                            this.mainwindow.runButton.setEnabled(false);
+
+                            algorithmChoice.setSelectedIndex(7);
+                            //clickCounter = 21;
+                        }
+                     }
+
+                     if(clickCounter == 4)
+                        algorithmChoice.setSelectedIndex(5);
+
+                     if(clickCounter == 7){
+                        algorithmChoice.setSelectedIndex(13);
+                        clickCounter = 2;    // back to the while
+                     }
+
                }
+
                break;
          }
 

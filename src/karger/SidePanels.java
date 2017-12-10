@@ -133,6 +133,7 @@ public class SidePanels {
             addedDst = yField.getText();
             strEdge = addedSrc + " - " + addedDst;
 
+
             try {
 
                 // go through all vertices in the graph and check if the vertices from the input exist
@@ -197,11 +198,13 @@ public class SidePanels {
 
 
                 // check if edge like this already exists
+                // ! edge like this can exists in reverse order
                 for(int i = 0; i < edgeModel.getSize(); i++){
 
                     String testStr = addedSrc + " - " + addedDst;
+                    String reverseTestStr = addedDst + " - " + addedSrc;
 
-                    if(edgeModel.get(i).toString().equals(testStr)){
+                    if((edgeModel.get(i).toString().equals(testStr)) || (edgeModel.get(i).toString().equals(reverseTestStr))){
                         warningDialog("Edge with between these vertices already exists.", "Warning");
                         return false;
                     }
@@ -261,7 +264,7 @@ public class SidePanels {
                     return false;
                 }
 
-                System.out.println("REMOVE node ");
+                //System.out.println("REMOVE node ");
                 removedNode = choice.getSelectedValue();
 
                 findObjects(graph, false);
@@ -330,22 +333,19 @@ public class SidePanels {
             if(isEdge){
 
                 if(vertex.getValue().equals(removedSrc)){
-                    System.out.println("SRC found: " + vertex.getValue());
-
+                    //System.out.println("SRC found: " + vertex.getValue());
                     sourceVertex = vertex;
                 }
 
                 if(vertex.getValue().equals(removedDst)){
-                    System.out.println("DST found: " + vertex.getValue());
-
+                   //System.out.println("DST found: " + vertex.getValue());
                     targetVertex = vertex;
                 }
 
             }else {
 
                 if(vertex.getValue().equals(removedNode)){
-                    System.out.println("NODE found: " + vertex.getValue());
-
+                    //System.out.println("NODE found: " + vertex.getValue());
                     sourceVertex = vertex;
                 }
             }
