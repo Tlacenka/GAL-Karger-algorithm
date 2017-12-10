@@ -92,6 +92,8 @@ public class MainWindow {
    private KargerGraph graphBestResult;
    private ArrayList<mxCell> manualVertices;
 
+   boolean isWhile = false;
+
    protected int clickCounter = 0;
 
 
@@ -826,18 +828,31 @@ public class MainWindow {
 
                clickCounter++;
 
+               //System.out.println("click counter: " + clickCounter);
+
                switch (clickCounter){
                   case 22:
                      algorithmChoice.setSelectedIndex(7);      // finish
                      clickCounter = 21;
+
+                     //System.out.println("finished");
+                     this.mainwindow.runTracker.setText("Total Runs: " + this.mainwindow.graph.getRunCounter());
+                     this.mainwindow.resultTracker.setText("Best Result: " + this.mainwindow.graph.getBestResultCut());
+                     this.mainwindow.stepButton.setEnabled(false);
+                     this.mainwindow.manualSteps.setEnabled(false);
+                     this.mainwindow.runButton.setEnabled(false);
+
                      break;
                   case 1:
+                    // System.out.println("case 1: " + clickCounter);
                      algorithmChoice.setSelectedIndex(1);
                      break;
                   case 2:
+                     //System.out.println("case 2: " + clickCounter);
                      algorithmChoice.setSelectedIndex(3);
                      break;
                   case 3:
+                     //System.out.println("case 3: " + clickCounter);
                      algorithmChoice.setSelectedIndex(4);
 
                      int j = 0;
@@ -845,20 +860,25 @@ public class MainWindow {
                         j++;
                      }
 
-                     if(j == 1){
+                     //System.out.println("edge count: " + j);
+
+                     if(j == 1 && this.mainwindow.graph.isRunFinished()){
                         clickCounter = 21;
                      }
 
 
                      break;
                   case 5:
+                     //System.out.println("case 5: " + clickCounter);
                      algorithmChoice.setSelectedIndex(6);
                      break;
                   case 6:
+                     //System.out.println("case 6: " + clickCounter);
                      algorithmChoice.setSelectedIndex(9);
                      break;
                   case 4:
                   case 7:
+                     //System.out.println("case 4,7: " + clickCounter);
 
                      if (this.mainwindow.isPhase1) {
 
@@ -886,17 +906,21 @@ public class MainWindow {
                         this.mainwindow.finishButton.setEnabled(true);
                         this.mainwindow.resetButton.setEnabled(true);
 
-                  this.mainwindow.isPhase1 = true;
-
-                  if (this.mainwindow.graph.isRunFinished()) {
-                     this.mainwindow.runTracker.setText("Total Runs: " + this.mainwindow.graph.getRunCounter());
-                     this.mainwindow.resultTracker.setText("Best Result: " + this.mainwindow.graph.getBestResultCut());
-                     this.mainwindow.stepButton.setEnabled(false);
-                     this.mainwindow.manualSteps.setEnabled(false);
-                     this.mainwindow.runButton.setEnabled(false);
-                  }
-
                         this.mainwindow.isPhase1 = true;
+
+                        //System.out.println("is run finished: " + this.mainwindow.graph.isRunFinished());
+
+                        if (this.mainwindow.graph.isRunFinished() && isWhile == true) {
+                            //System.out.println("finished");
+                            this.mainwindow.runTracker.setText("Total Runs: " + this.mainwindow.graph.getRunCounter());
+                            this.mainwindow.resultTracker.setText("Best Result: " + this.mainwindow.graph.getBestResultCut());
+                            this.mainwindow.stepButton.setEnabled(false);
+                            this.mainwindow.manualSteps.setEnabled(false);
+                            this.mainwindow.runButton.setEnabled(false);
+
+                            algorithmChoice.setSelectedIndex(7);
+                            //clickCounter = 21;
+                        }
                      }
 
                      if(clickCounter == 4)
@@ -904,7 +928,7 @@ public class MainWindow {
 
                      if(clickCounter == 7){
                         algorithmChoice.setSelectedIndex(13);
-                        clickCounter = 2;    // bach to the while
+                        clickCounter = 2;    // back to the while
                      }
 
                }
