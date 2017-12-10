@@ -519,29 +519,30 @@ public class MainWindow {
 
 
       this.bottomPanel.add(this.resetButton);
-      this.bottomPanel.add(this.undoButton);
+      // Undo not supported
+      //this.bottomPanel.add(this.undoButton);
       this.bottomPanel.add(this.stepButton);
       this.bottomPanel.add(this.runButton);
       this.bottomPanel.add(this.finishButton);
 
       // Add text areas to top panel
-      this.topPanel.setLayout(new FlowLayout(FlowLayout.CENTER, 80, 30));
+      this.topPanel.setLayout(new FlowLayout(FlowLayout.CENTER, 110, 30));
 
       // Create text areas
       this.runTracker = new JTextArea("Total Runs: " + this.graph.getRunCounter());
-      this.resultTracker = new JTextArea("Best Result: " + this.graph.getBestResult());
+      this.resultTracker = new JTextArea("Best Result: " + this.graph.getBestResultCut());
 
       // Set text color, size
       this.runTracker.setForeground(textColor);
       this.runTracker.setBackground(panelColor);
       this.runTracker.setFont(titleFont);
       this.runTracker.setEditable(false);
-      this.runTracker.setPreferredSize(new Dimension(200, 30));
+      this.runTracker.setPreferredSize(new Dimension(225, 30));
       this.resultTracker.setForeground(textColor);
       this.resultTracker.setBackground(panelColor);
       this.resultTracker.setFont(titleFont);
       this.resultTracker.setEditable(false);
-      this.resultTracker.setPreferredSize(new Dimension(200, 30));
+      this.resultTracker.setPreferredSize(new Dimension(225, 30));
 
       // Add text areas
       this.topPanel.add(this.runTracker);
@@ -612,6 +613,11 @@ public class MainWindow {
                this.mainwindow.undoButton.setEnabled(false);
                this.mainwindow.resetButton.setEnabled(false);
                this.mainwindow.graph.resetAlgorithm();
+               this.mainwindow.stepButton.setEnabled(true);
+               this.mainwindow.finishButton.setEnabled(true);
+               this.mainwindow.runButton.setEnabled(true);
+               this.mainwindow.runTracker.setText("Total Runs: " + this.mainwindow.graph.getRunCounter());
+               this.mainwindow.resultTracker.setText("Best Result: " + this.mainwindow.graph.getBestResultCut());
                break;
             case UNDO:
                this.mainwindow.undoButton.setEnabled(false);
@@ -621,18 +627,27 @@ public class MainWindow {
                this.mainwindow.graph.nextStep();
                this.mainwindow.undoButton.setEnabled(true);
                this.mainwindow.resetButton.setEnabled(true);
-
                break;
             case RUN:
+               this.mainwindow.undoButton.setEnabled(false);
+               this.mainwindow.stepButton.setEnabled(false);
+               this.mainwindow.runButton.setEnabled(false);
                this.mainwindow.graph.finishRun();
-               this.mainwindow.undoButton.setEnabled(true);
                this.mainwindow.resetButton.setEnabled(true);
-
+               this.mainwindow.runTracker.setText("Total Runs: " + this.mainwindow.graph.getRunCounter());
+               this.mainwindow.resultTracker.setText("Best Result: " + this.mainwindow.graph.getBestResultCut());
                break;
             case FINISH:
+               this.mainwindow.finishButton.setEnabled(false);
+               this.mainwindow.runButton.setEnabled(false);
+               this.mainwindow.undoButton.setEnabled(false);
+               this.mainwindow.stepButton.setEnabled(false);
                this.mainwindow.graph.finishAlgorithm();
                this.mainwindow.resetButton.setEnabled(true);
+               this.mainwindow.runTracker.setText("Total Runs: " + this.mainwindow.graph.getRunCounter());
+               this.mainwindow.resultTracker.setText("Best Result: " + this.mainwindow.graph.getBestResultCut());
 
+               // TODO display graph, results below it
                break;
          }
 

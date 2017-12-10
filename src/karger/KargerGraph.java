@@ -13,12 +13,14 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 import java.lang.Boolean;
+import java.lang.*;
 import java.io.IOException;
 
 import javax.swing.JPanel;
 import javax.swing.JFrame;
 import javax.swing.BorderFactory;
 import javax.swing.JOptionPane;
+import javax.swing.JList;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
@@ -38,7 +40,6 @@ import com.mxgraph.util.mxXmlUtils;
 import com.mxgraph.view.mxGraph;
 import com.mxgraph.util.mxRectangle;
 import com.mxgraph.model.mxGeometry;
-import javax.swing.JList;
 
 import org.w3c.dom.Document;
 
@@ -48,8 +49,14 @@ public class KargerGraph {
     public mxGraphComponent gc; // graph component (wrapper)
 
     private String runCounter;
+    private int maxRuns;
     private int stepCounter;
-    private String bestResult;
+    private KargerRecord bestResult;
+    private String bestResultCut;
+
+    private ArrayList<KargerRecord> runs; // runs
+    private ArrayList<Integer> curOrder;
+    private ArrayList<mxCell> graphEdges; // ordered edges
 
     private Object parent;
     private int vertex_size; // width = height of vertex
@@ -71,10 +78,14 @@ public class KargerGraph {
     public KargerGraph() {
 
         this.runCounter = "0";
-        this.bestResult = "-";
+        this.bestResultCut = "-";
         this.vertex_size = 60;
         this.vertex_scaling = 10;
         this.stepCounter = 0;
+        this.runs = new ArrayList<KargerRecord>();
+        this.graphEdges = new ArrayList<mxCell>();
+        this.bestResult = null;
+        this.maxRuns = 0;
 
         // Create a graph
         this.graph = new mxGraph();
@@ -110,9 +121,18 @@ public class KargerGraph {
         // Create adjacency list from it
         this.createAdjacencyList();
 
+        // Create default edge order and randomize it
+        this.curOrder = new ArrayList();
+        int i = 0;
+        for (Object e: this.graph.getChildEdges(this.parent)) {
+            this.curOrder.add(i);
+            i++;
+        }
+        this.shuffleEdges();
+
         // Wrap it in a component
         this.gc = new mxGraphComponent(this.graph);
-        //this.gc.setEnabled(false); // disable graph editing ad hoc
+        this.gc.setEnabled(false); // disable graph editing ad hoc
         
         // Set background color, remove default border
         this.gc.getViewport().setOpaque(true);
@@ -137,26 +157,111 @@ public class KargerGraph {
 
     }
 
-   /* public mxIGraphModel getModelX() {
-        return graph.getModel();
-    }*/
-
     // Class for storing results of individual runs
     class KargerRecord {
 
         // V1 u V2 = V
-        private JList<mxCell> V1; // First set of vertices
-        private JList<mxCell> V2; // Second set of vertices
+        private String V1; // First set of vertices
+        private String V2; // Second set of vertices
         private int cut; // cut value
+        private ArrayList<Integer> edgeOrder; // Order of removed edges - last stayed
+        private String encodedGraph; // encoded graph
 
         // Class constructor
-        public KargerRecord(JList<mxCell> V1, JList <mxCell> V2, int cut) {
+        public KargerRecord(String V1, String V2, int cut,
+                            ArrayList<Integer> edgeOrder, String encodedGraph) {
 
             this.V1 = V1;
             this.V2 = V2;
             this.cut = cut;
+            this.edgeOrder = edgeOrder;
+            this.encodedGraph = encodedGraph;
+        }
+
+        // Get edge order
+        public ArrayList<Integer> getOrder() {
+            return this.edgeOrder;
+        }
+
+        // Get V1
+        public String getV1() {
+            return this.V1;
+        }
+
+        // Get V2
+        public String getV2() {
+            return V2;
+        }
+
+        // Get cut value
+        public int getCut() {
+            return this.cut;
+        }
+
+        // Set cut value
+        public void setCut(int cut) {
+            this.cut = cut;
+        }
+
+        // Get encoded graph
+        public String getEncodedGraph() {
+            return this.encodedGraph;
         }
     }
+
+    /**
+     * Compute n!
+     */
+    public int factorial(int n) {
+
+        int result = 1;
+
+        if ((n == 0) || (n == 1)) {
+            return 1;
+        }
+
+
+        for (int i = 2; i <= n; i++) {
+            result *= i;
+        }
+
+        return result;
+    }
+
+    /**
+     * Shuffle edges until they are uniquely ordered.
+     */
+    public void shuffleEdges() {
+        //System.out.print(this.curOrder);
+
+        Boolean keepShuffling = true;
+        Boolean isUnique = true;
+
+        // Total number of possible runs is |E|!
+        if (Integer.parseInt(this.runCounter) >= this.maxRuns) {
+            return;
+        }
+
+        do {
+            //System.out.print("shuffling");
+            Collections.shuffle(this.curOrder);
+            //System.out.print(this.curOrder);
+
+            // Make sure it is unique
+            for (KargerRecord r: this.runs) {
+                if (this.curOrder.equals(r)) {
+                    isUnique = false;
+                    break;
+                }
+            }
+
+            if (isUnique) {
+                break;
+            }
+        } while (keepShuffling);
+    }
+
+
 
     /**
      * Get cell from mouse coordinates.
@@ -179,23 +284,19 @@ public class KargerGraph {
         // Add some vertices and edges
         this.graph.getModel().beginUpdate();
         {
-           Object vA = graph.insertVertex(parent, null, "A", 100, 180, vertex_size, vertex_size);
-           Object vB = graph.insertVertex(parent, null, "B", 10, 250, vertex_size, vertex_size);
-           Object vC = graph.insertVertex(parent, null, "C", 180, 320, vertex_size, vertex_size);
-           Object vD = graph.insertVertex(parent, null, "D", 300, 180, vertex_size, vertex_size);
-           Object vE = graph.insertVertex(parent, null, "E", 250, 100, vertex_size, vertex_size);
-           Object vF = graph.insertVertex(parent, null, "F", 300, 20, vertex_size, vertex_size);
-           Object vG = graph.insertVertex(parent, null, "G", 400, 120, vertex_size, vertex_size);
-           Object vH = graph.insertVertex(parent, null, "H", 400, 250, vertex_size, vertex_size);
+           Object vA = graph.insertVertex(parent, null, "A", 200, 50, vertex_size, vertex_size);
+           Object vB = graph.insertVertex(parent, null, "B", 0, 200, vertex_size, vertex_size);
+           Object vC = graph.insertVertex(parent, null, "C", 500, 300, vertex_size, vertex_size);
+           Object vD = graph.insertVertex(parent, null, "D", 300, 400, vertex_size, vertex_size);
+           Object vE = graph.insertVertex(parent, null, "E", 500, 600, vertex_size, vertex_size);
            Object eAB = graph.insertEdge(parent, null, "", vA, vB);
            Object eBC = graph.insertEdge(parent, null, "", vB, vC);
            Object eAC = graph.insertEdge(parent, null, "", vA, vC);
            Object eAD = graph.insertEdge(parent, null, "", vA, vD);
-           Object eDE = graph.insertEdge(parent, null, "", vD, vE);
-           Object eEF = graph.insertEdge(parent, null, "", vE, vF);
-           Object eFG = graph.insertEdge(parent, null, "", vF, vG);
-           Object eDG = graph.insertEdge(parent, null, "", vD, vG);
-           Object eDH = graph.insertEdge(parent, null, "", vD, vH);
+           Object eDE = graph.insertEdge(parent, null, "", vC, vE);
+           Object eEF = graph.insertEdge(parent, null, "", vD, vC);
+           // new edges
+
         }
         this.graph.getModel().endUpdate();
     }
@@ -207,30 +308,53 @@ public class KargerGraph {
 
         // Remove previous adjacency list - TODO somehow empty it?
         this.adjacencyList = new HashMap<mxCell,LinkedList<mxCell>>();
+        this.graphEdges = new ArrayList<mxCell>();
 
         // Add all vertices
         for (Object v : this.graph.getChildVertices(this.parent)) {
             mxCell vertex = (mxCell)v;
-
-            //System.out.println("Vertex: " + vertex.getValue());
-
             this.adjacencyList.put(vertex, new LinkedList<mxCell>());
         }
 
-        // Link adjacent vertices
+        // Link adjacent vertices, add edges into a list
         for (Object e : this.graph.getChildEdges(this.parent)) {
             mxCell edge = (mxCell)e;
+
             mxCell src = (mxCell)edge.getSource();
             mxCell dst = (mxCell)edge.getTarget();
+
+            // Add edge to list of edges
+            this.graphEdges.add((mxCell)edge);
 
             // Check that all edges are between two vertices
             if ((src == null) || (dst == null)) {
                 throw new IllegalArgumentException("Each edge must be between 2 vertices.");
             }
 
+            // Check that there are no self-loops
+            if (src == dst) {
+                throw new IllegalArgumentException("Self-loops are not allowed.");
+            }
+
             this.adjacencyList.get(src).add(dst);
             this.adjacencyList.get(dst).add(src);
         }
+
+        // Get max runs - TODO set maximum edges to say 6
+        this.maxRuns = this.factorial(this.graphEdges.size());
+        //System.out.print(this.maxRuns);
+
+         // Print it for debugging
+        //System.out.println("Adjacency list: ");
+        for (Object v_obj : this.adjacencyList.keySet().toArray()) {
+            mxCell v = (mxCell)v_obj;
+            //System.out.print((String)v.getValue() + " -> ");
+            for (mxCell adj : this.adjacencyList.get(v)) {
+                //System.out.print((String)adj.getValue() + " " );
+            }
+            //System.out.print("\n");
+        }
+
     }
 
     /**
@@ -251,10 +375,17 @@ public class KargerGraph {
 
     /**
      * Prompts for the best result.
-     * @return Best result.
+     * @return Best result (object).
      */
-    public String getBestResult() {
+    public KargerRecord getBestResult() {
         return this.bestResult;
+    }
+
+    /**
+     * Prompts for the best result (string).
+     */
+    public String getBestResultCut() {
+        return this.bestResultCut;
     }
 
     /**
@@ -277,18 +408,17 @@ public class KargerGraph {
         // Empty current graph if one exists
         this.createEmptyGraph();
 
-        Document graph_file;
+        String fileContent;
 
         // Decode graph and store it to graph variable
         try {
-            graph_file = mxXmlUtils.parseXml(mxUtils.readFile(filepath));
+            fileContent = mxUtils.readFile(filepath);
         } catch (IOException ex) {
             JOptionPane.showMessageDialog(null, "File could not be loaded.");
             return;
         }
 
-        mxCodec codec = new mxCodec(graph_file);
-        codec.decode(graph_file.getDocumentElement(), graph.getModel());
+        this.XMLToGraph(fileContent);
 
         // Update default parent
         this.parent = graph.getDefaultParent();
@@ -296,9 +426,25 @@ public class KargerGraph {
         // Update adjacency list
         this.createAdjacencyList();
 
-        System.out.println("Adj list created.");
-
         return;
+    }
+
+
+    /**
+     * Decode XML to graph.
+     */
+    public void XMLToGraph(String encodedGraph) {
+
+        if (this.graph == null) {
+            return;
+        }
+
+        // Parse encoded graph
+        Document graph_file = mxXmlUtils.parseXml(encodedGraph);
+
+        mxCodec codec = new mxCodec(graph_file);
+        codec.decode(graph_file.getDocumentElement(), this.graph.getModel());
+
     }
 
     /**
@@ -307,24 +453,37 @@ public class KargerGraph {
      */
     public void saveGraph(String filepath) {
 
-        // Take current graph and encode it
-        mxCodec codec = new mxCodec();
-        String encodedGraph = mxXmlUtils.getXml(codec.encode(this.graph.getModel()));
-
         try {
-            mxUtils.writeFile(encodedGraph, filepath);
+            mxUtils.writeFile(this.graphToXML(), filepath);
         } catch (IOException ex) {
             JOptionPane.showMessageDialog(null, "File could not be saved.");
             return;
         }
     }
 
+
+    /**
+     * Encode graph to XML.
+     */
+    public String graphToXML() {
+        if (this.graph == null) {
+            return "";
+        }
+
+        // Take current graph and encode it
+        mxCodec codec = new mxCodec();
+        return mxXmlUtils.getXml(codec.encode(this.graph.getModel()));
+    }
+
+    /**
+     * Merge two cells, v and v2.
+     */
     private void mergeCells(mxCell v1, mxCell v2) {
 
         int edge_val = 0;
 
         // Print out their values
-        System.out.println("Merge cells: " + (String)v1.getValue() + " and " + (String)v2.getValue());
+        //System.out.println((String)v1.getValue() + " and " + (String)v2.getValue());
 
         // Merge the cells
 
@@ -349,61 +508,190 @@ public class KargerGraph {
         }
         this.graph.getModel().endUpdate();
 
+        mxCell edge, src, dst;
+        edge = dst = src = new mxCell();
+
+        // Print out edges - TODO DEBUG
+        //for (Object e : this.graphEdges) {
+        //    edge = (mxCell)e;
+        //    if (edge == null) {
+        //        System.out.println("printing a null edge");
+        //        continue;
+        //    }
+        //    src = (mxCell)edge.getSource();
+        //    dst = (mxCell)edge.getTarget();
+        //    System.out.println("printing edges " + (String)src.getValue() + " - " + (String)dst.getValue());
+        //}
+
         // Go through all vertices adjacent to v2
         for (Object v_obj : this.adjacencyList.get(v2)) {
-            mxCell v = (mxCell)v_obj;
-            if (v != v1) {
+            mxCell v = new mxCell();
 
-                // Create/update weighted edge
-                if (this.adjacencyList.get(v).contains(v1)) {
-                    
-                    // Find edge
-                    for (Object e : this.graph.getChildEdges(this.parent)) {
-                        mxCell edge = (mxCell)e;
-                        mxCell src = (mxCell)edge.getSource();
-                        mxCell dst = (mxCell)edge.getTarget();
 
-                        if (((src == v) && (dst == v1)) || ((src == v1) && (dst == v))) {
-                            if (edge.getValue() != null) {
-                                edge_val = ((String)edge.getValue() == "") ? 1 : Integer.parseInt((String)edge.getValue());
-                                this.graph.getModel().beginUpdate();
-                                {
-                                    this.graph.getModel().setValue(edge, Integer.toString(edge_val + 1));
-                                }
-                                this.graph.getModel().endUpdate();
-                            } else {
-                                this.graph.getModel().beginUpdate();
-                                {
-                                    this.graph.getModel().setValue(edge, "2");
-                                }
-                                this.graph.getModel().endUpdate();
-                            }
-                            break;
-                        }
-                    }
-                } else {
+            v = (mxCell)v_obj;
+
+            // Skip v1
+            if (v == v1) {
+                continue;
+            }
+
+            // Find edge and redirect it
+            for (Object e : this.graph.getChildEdges(this.parent)) {
+
+                //mxCell edge, src, dst;
+
+                edge = (mxCell)e;
+                src = (mxCell)edge.getSource();
+                dst = (mxCell)edge.getTarget();
+
+                //if ((src == null) || (dst == null)) {
+                //    System.out.println("This edge is not between 2 edges.");
+                //}
+
+                // Redirect edge, update adjacency list
+                if ((src == v) && (dst == v2)) {
+
+
+                    //System.out.println("redirecting edge " + (String)edge.getSource().getValue() + " - " + (String)edge.getTarget().getValue());
                     this.graph.getModel().beginUpdate();
                     {
-                        Object e = this.graph.insertEdge(parent, null, "", v, v1);
+                        v2.removeEdge(edge, false);
+                        edge.setTarget(v1);
+                    }
+                    this.graph.getModel().endUpdate();
+                    //System.out.println("redirected to edge " + (String)edge.getSource().getValue() + " - " + (String)edge.getTarget().getValue());
+                    // If there is no edge between v and v1, update adjacency
+                    if (!this.multipleEdges(edge)) {
+                        this.adjacencyList.get(v1).add(v);
+                        this.adjacencyList.get(v).add(v1);
+                    }
+                } else if ((src == v2) && (dst == v)) {
+                    this.graph.getModel().beginUpdate();
+                    {
+                        v2.removeEdge(edge, true);
+                        edge.setSource(v1);
                     }
                     this.graph.getModel().endUpdate();
 
-                    this.adjacencyList.get(v).add(v1);
-                    this.adjacencyList.get(v1).add(v);
-                }
+                    // If there is no edge between v and v1, update adjacency
+                    if (!this.multipleEdges(edge)) {
+                        this.adjacencyList.get(v1).add(v);
+                        this.adjacencyList.get(v).add(v1);
+                    }
 
-                this.adjacencyList.get(v).remove(v2);
+                }
             }
         }
 
-        // Remove v2 and connected edges
-        this.adjacencyList.remove(v2);
+        this.gc.refresh();
 
+        // Remove v2, contracted edge
+        this.adjacencyList.remove(v2);
+        mxCell contractedEdge = this.graphEdges.get(this.curOrder.get(this.stepCounter));
         this.graph.getModel().beginUpdate();
         {
+
+            //System.out.println("Removing edge " + (String)removingEdge.getSource().getValue() + " - " + (String)removingEdge.getTarget().getValue());
+            this.graph.removeCells(new Object[] {contractedEdge});
+
+            //System.out.println("Removing node " + (String)v2.getValue());
+            //System.out.println("Edge count " + Integer.toString(v2.getEdgeCount()));
+
             this.graph.removeCells(new Object[] {v2});
         }
         this.graph.getModel().endUpdate();
+        // Replace all occurences of edge by null
+        for (Object e3 : this.graphEdges) {
+            mxCell edge3 = (mxCell)e3;
+
+            if (edge3 == contractedEdge) {
+                this.graphEdges.set(this.graphEdges.indexOf(edge3), null);
+            }
+        }
+
+        // Print out edges - TODO DEBUG
+        //for (Object e : this.graph.getChildEdges(this.parent)) {
+        //    mxCell edge = (mxCell)e;
+        //    mxCell src = (mxCell)edge.getSource();
+        //    mxCell dst = (mxCell)edge.getTarget();
+        //    System.out.println("hello edges " + (String)src.getValue() + " - " + (String)dst.getValue());
+        //}
+
+        this.gc.refresh();
+    }
+
+    /**
+     * Handle multiple edges
+     */
+    public Boolean multipleEdges(mxCell edge) {
+
+        Boolean found = false;
+
+        // Handle multiple edges
+        for (Object e2 : this.graph.getChildEdges(this.parent)) {
+            mxCell edge2 = (mxCell)e2;
+            mxCell src2 = (mxCell)edge2.getSource();
+            mxCell dst2 = (mxCell)edge2.getTarget();
+
+            if (edge == edge2) {
+                continue;
+            }
+
+            if (((edge.getSource() == edge2.getSource()) &&
+                 (edge.getTarget() == edge2.getTarget())) ||
+                ((edge.getSource() == edge2.getTarget()) &&
+                 (edge.getTarget() == edge2.getSource()))) {
+
+                //System.out.println("multiple edge " + (String)edge.getSource().getValue() + " - " + (String)edge.getTarget().getValue());
+
+                // Store sum of edges' values
+                int val1 = this.getEdgeValue(edge);
+                int val2 = this.getEdgeValue(edge2);
+
+                this.graph.getModel().beginUpdate();
+                {
+                    edge.setValue(Integer.toString(val1 + val2));
+                }
+                this.graph.getModel().endUpdate();
+
+                //System.out.println("updated value of edge " + (String)edge.getSource().getValue() + " - " + (String)edge.getTarget().getValue());
+
+
+                // Replace all occurences of edge2 by edge
+                for (Object e3 : this.graphEdges) {
+                    mxCell edge3 = (mxCell)e3;
+
+                    if (edge3 == edge2) {
+                        this.graphEdges.set(this.graphEdges.indexOf(edge3), edge);
+                    }
+                }
+
+                // Remove edge2 - but it still exists outside of the graph
+                this.graph.getModel().beginUpdate();
+                {
+                    this.graph.removeCells(new Object[] {edge2});
+                }
+                this.graph.getModel().endUpdate();
+
+                //if (edge2 != null) {
+                //    System.out.println("after removing multiple " + (String)edge2.getSource().getValue() + " - " + (String)edge2.getTarget().getValue());
+                //}
+
+                found = true;
+                break;
+
+            }
+        }
+
+        return found;
+
+    }
+
+    /**
+     * Get integer value of edge.
+     */
+    public int getEdgeValue(mxCell edge) {
+        return ((String)edge.getValue() == "") ? 1 : Integer.parseInt((String)edge.getValue());
     }
 
     /**
@@ -429,14 +717,18 @@ public class KargerGraph {
      * Resets all runs, re-creates the whole graph.
      */
     public void resetAlgorithm() {
-        if (this.stepCounter > 0) {
-            this.loadGraph("./examples/reset.xml");
-            this.stepCounter = 0;
-            
-            // TODO disable undo button
-        }
+        this.loadGraph("./examples/reset.xml");
+        this.stepCounter = 0;
+        this.runCounter = "0";
+        this.bestResultCut = "-";
+        this.runs = new ArrayList<KargerRecord>();
+        this.shuffleEdges();
+        //System.out.println("Current order");
+        //System.out.println(this.curOrder);
+        //System.out.println(this.graphEdges);
     }
 
+    // TODO fix!!
     /**
      * Goes back one step in the algorithm.
      */
@@ -447,8 +739,6 @@ public class KargerGraph {
 
             // Update step counter
             this.stepCounter = this.stepCounter - 1;
-            
-            // TODO disable undo button
         }
     }
 
@@ -465,15 +755,34 @@ public class KargerGraph {
         // Save current algorithm
         this.saveGraph("./examples/undo.xml");
 
-
-        // Choose cells to be merged
-        // TODO cells based on random generator or user
         // 3 - wouldn't make sense to have empty set of vertices
         if (this.adjacencyList.keySet().toArray().length < 3) {
             return;
         }
-        mxCell v1 = (mxCell)this.adjacencyList.keySet().toArray()[0];
-        mxCell v2 = (mxCell)this.adjacencyList.keySet().toArray()[1];
+
+        // TODO fix
+        // In order[stepCounter] is index of edge to be removed
+        //System.out.println("step " + this.stepCounter);
+        //System.out.println("edge at index " + this.curOrder.get(this.stepCounter));
+        //System.out.println("edge array len " + Integer.toString(this.graphEdges.size()));
+        //System.out.println("cur order len " + Integer.toString(this.curOrder.size()));
+
+
+        int edgeIndex = this.curOrder.get(this.stepCounter);
+
+        // If this edge was already contracted, skip step
+        if (this.graphEdges.get(edgeIndex) == null) {
+
+            // Make sure it's not exceeding size due to next element being null
+            if ((this.stepCounter + 1) < this.graphEdges.size()) {
+                this.stepCounter += 1;
+                this.nextStep();
+            }
+            return;
+        }
+
+        mxCell v1 = (mxCell)this.graphEdges.get(edgeIndex).getSource();
+        mxCell v2 = (mxCell)this.graphEdges.get(edgeIndex).getTarget();
 
         this.graph.getModel().beginUpdate();
         try {
@@ -516,17 +825,110 @@ public class KargerGraph {
      * Finishes current run of the algorithm.
      */
     public void finishRun() {
+
+        if (Integer.parseInt(this.runCounter) >= this.maxRuns) {
+            return;
+        }
+
+        // Go on until there are 2 nodes left
         while (this.adjacencyList.keySet().toArray().length >= 3) {
             this.nextStep();
         }
 
-        // TODO update best result, number of runs
+        // Update results obtained by the last run
+        this.updateResults();
+
+        // Update run counter
+        this.runCounter = Integer.toString(Integer.parseInt(this.runCounter) + 1);
+
+        // Shuffle edge order
+        this.shuffleEdges();
+    }
+
+    /**
+     * Update results - store/update list of results
+     */
+    public void updateResults() {
+
+        // Last two vertices
+
+        mxCell v1 = (mxCell)this.adjacencyList.keySet().toArray()[0];
+        mxCell v2 = (mxCell)this.adjacencyList.keySet().toArray()[1];
+
+        String V1 = (String)v1.getValue();
+        String V2 = (String)v2.getValue();
+
+        // V1 will be the lexiographically lesser one
+        if (V1.compareTo(V2) > 0) {
+            String swap = V1;
+            V1 = V2;
+            V2 = swap;
+        }
+
+        // Find out if these sets have been there before
+        KargerRecord sameResult = this.getResult(V1, V2);
+        KargerRecord newRecord = null;
+
+        // Get edge value in the graph
+        mxCell edge = new mxCell();
+        for (Object e : this.graphEdges) {
+            edge = (mxCell)e;
+            if (edge != null) {
+                System.out.println("updating results, this is left " + (String)edge.getSource().getValue() + " - " + (String)edge.getTarget().getValue());
+                break;
+            }
+        }
+
+        int cut_val = this.getEdgeValue(edge);
+
+        // If result set is unique, Add new record
+        if (sameResult == null) {
+            newRecord = new KargerRecord(V1, V2, cut_val, this.curOrder, this.graphToXML());
+            this.runs.add(newRecord);
+        } else {
+            // Otherwise, compare the two and save the better value
+            if (cut_val < sameResult.getCut()) {
+                sameResult.setCut(cut_val);
+            }
+        }
+
+        // Update best result
+        if (this.bestResultCut.equals("-") || Integer.parseInt(this.bestResultCut) > cut_val) {
+            this.bestResultCut = Integer.toString(cut_val);
+            this.bestResult = (sameResult == null) ? newRecord : sameResult;
+        }
+    }
+
+    /**
+     * Return result with these sets of vertices if it exists
+     */
+    public KargerRecord getResult(String V1, String V2) {
+
+        for (KargerRecord r: this.runs) {
+            if ((r.getV1().compareTo(V1) == 0) && (r.getV2().compareTo(V2) == 0)) {
+                return r;
+            }
+        }
+
+        return null;
     }
 
     /**
      * Finishes the whole algorithm.
      */
     public void finishAlgorithm() {
+
+        // Run the whole thing maximum number of times
+        while (Integer.parseInt(this.runCounter) < this.maxRuns) {
+            this.stepCounter = 0;
+            this.loadGraph("./examples/reset.xml");
+            this.finishRun();
+
+        }
+
+        // Display the best result - load from best.xml (TODO) or create graph based on best result (bleh)
+
+
         return;
     }
 
