@@ -18,12 +18,20 @@ import java.awt.Dimension;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Image;
+import java.awt.Component;
 
 import com.mxgraph.swing.mxGraphComponent;
 import com.mxgraph.model.mxCell;
+import com.mxgraph.swing.mxGraphComponent;
+import com.mxgraph.util.mxConstants;
+import com.mxgraph.util.mxUtils;
+import com.mxgraph.util.mxXmlUtils;
+import com.mxgraph.view.mxGraph;
+import com.mxgraph.util.mxPoint;
 
 import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.ArrayList;
 
 import javax.swing.JFrame;
 import javax.swing.JList;
@@ -53,6 +61,8 @@ public class MainWindow {
 
    private JTextArea runTracker;
    private JTextArea resultTracker;
+   private JTextArea resultTitle;
+   private JTextArea otherResultsTitle;
 
    private JPanel panel1;
    private JPanel panel2;
@@ -60,9 +70,13 @@ public class MainWindow {
    private JScrollPane nodePanel;
    private JScrollPane edgePanel;
    private JScrollPane algorithmPanel;
+   private JScrollPane resultsPanel;
 
    private JPanel nodeButtonPanel;
    private JPanel edgeButtonPanel;
+   private JPanel resultContentPanel;
+   private JPanel bestResultPanel;
+   private JPanel otherResultsPanel;
 
    private JButton addNodeButton;
    private JButton removeNodeButton;
@@ -73,6 +87,8 @@ public class MainWindow {
 
    private KargerGraph graph;
    private mxGraphComponent gc;
+   private ArrayList<KargerGraph> graphResults;
+   private KargerGraph graphBestResult;
 
 
    protected SidePanels xSidePanels;
@@ -548,7 +564,49 @@ public class MainWindow {
       this.topPanel.add(this.resultTracker);
 
       // Add graph to panel
-      this.centerPanel.add(this.graph.getGraphComponent());
+      //this.centerPanel.add(this.graph.getGraphComponent());
+
+      this.resultContentPanel = new JPanel();
+      this.resultContentPanel.setBackground(Color.white);
+      this.resultContentPanel.setBorder(null);
+      this.resultContentPanel.setLayout(new BoxLayout(this.resultContentPanel, BoxLayout.Y_AXIS));
+
+      // Prepare results
+      this.resultTitle = new JTextArea("Best Result");
+      this.resultTitle.setFont(titleFont);
+      this.resultTitle.setForeground(panelColorTest);
+      this.resultTitle.setPreferredSize(new Dimension(650, 30));
+      this.resultTitle.setBorder(BorderFactory.createMatteBorder(1, 0, 0, 0, Color.black));
+
+      // Results panels
+      this.bestResultPanel = new JPanel();
+      this.bestResultPanel.setBorder(null);
+      this.bestResultPanel.setBackground(Color.white);
+      this.bestResultPanel.setLayout(new BoxLayout(this.bestResultPanel, BoxLayout.Y_AXIS));
+      this.otherResultsPanel = new JPanel();
+      this.otherResultsPanel.setBorder(null);
+      this.otherResultsPanel.setBackground(Color.white);
+      this.otherResultsPanel.setLayout(new BoxLayout(this.otherResultsPanel, BoxLayout.Y_AXIS));
+
+      this.otherResultsTitle = new JTextArea("Other Results");
+      this.otherResultsTitle.setFont(titleFont);
+      this.otherResultsTitle.setForeground(panelColorTest);
+      this.otherResultsTitle.setPreferredSize(new Dimension(650, 30));
+      this.otherResultsTitle.setBorder(BorderFactory.createMatteBorder(1, 0, 0, 0, Color.black));
+
+      // Add to panel
+      this.resultContentPanel.add(this.graph.getGraphComponent());
+
+      // Prepare scrolling
+      this.resultsPanel = new JScrollPane(this.resultContentPanel);
+      this.resultsPanel.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+      this.resultsPanel.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+      this.resultsPanel.setBorder(null);
+      this.resultsPanel.setPreferredSize(new Dimension(675, 720));
+      this.resultsPanel.revalidate();
+
+      // Add scrolling to panel
+      this.centerPanel.add(this.resultsPanel);
 
    }
 
@@ -609,6 +667,8 @@ public class MainWindow {
       public void actionPerformed(ActionEvent e) {
          switch(this.eventType) {
             case RESET:
+
+               // Reset buttons
                 algorithmChoice.setSelectedIndex(1);
                this.mainwindow.undoButton.setEnabled(false);
                this.mainwindow.resetButton.setEnabled(false);
@@ -616,8 +676,22 @@ public class MainWindow {
                this.mainwindow.stepButton.setEnabled(true);
                this.mainwindow.finishButton.setEnabled(true);
                this.mainwindow.runButton.setEnabled(true);
+
+               // Reset trackers
                this.mainwindow.runTracker.setText("Total Runs: " + this.mainwindow.graph.getRunCounter());
                this.mainwindow.resultTracker.setText("Best Result: " + this.mainwindow.graph.getBestResultCut());
+
+               // Remove results, display only original graph
+               this.mainwindow.graph.getGraphComponent().zoom(1.0);
+               this.mainwindow.resultContentPanel.remove(this.mainwindow.resultTitle);
+               this.mainwindow.resultContentPanel.remove(this.mainwindow.bestResultPanel);
+               this.mainwindow.resultContentPanel.remove(this.mainwindow.otherResultsTitle);
+               this.mainwindow.resultContentPanel.remove(this.mainwindow.otherResultsPanel);
+
+               // Remove stored results
+               this.mainwindow.bestResultPanel.removeAll();
+               this.mainwindow.otherResultsPanel.removeAll();
+
                break;
             case UNDO:
                this.mainwindow.undoButton.setEnabled(false);
@@ -648,7 +722,47 @@ public class MainWindow {
                this.mainwindow.resultTracker.setText("Best Result: " + this.mainwindow.graph.getBestResultCut());
                 algorithmChoice.setSelectedIndex(7);
 
-               // TODO display graph, results below it
+               // Display zoomed out graph, results below it
+               this.mainwindow.graph.getGraphComponent().zoom(0.7);
+               this.mainwindow.graph.xGetGraph().getView().setTranslate(new mxPoint(100, 0));
+               this.mainwindow.graph.getGraphComponent().refresh();
+               this.mainwindow.graph.getGraphComponent().setAlignmentX(Component.CENTER_ALIGNMENT);
+
+               this.mainwindow.resultContentPanel.add(Box.createRigidArea(new Dimension(0,15)));
+               this.mainwindow.resultContentPanel.add(this.mainwindow.resultTitle);
+
+               // Display best result
+               this.mainwindow.graphBestResult = new KargerGraph();
+               this.mainwindow.graphBestResult.XMLToGraph(this.mainwindow.graph.getBestResult().getEncodedGraph());
+               this.mainwindow.graphBestResult.xGetGraph().getView().setTranslate(new mxPoint(120, 0));
+               this.mainwindow.bestResultPanel.add(Box.createRigidArea(new Dimension(0,15)));
+               this.mainwindow.bestResultPanel.add(this.mainwindow.graphBestResult.getGraphComponent());
+               this.mainwindow.bestResultPanel.add(Box.createRigidArea(new Dimension(0,15)));
+
+               this.mainwindow.resultContentPanel.add(bestResultPanel);
+               this.mainwindow.resultContentPanel.add(this.mainwindow.otherResultsTitle);
+
+               // Display other results
+               this.mainwindow.graphResults = new ArrayList<KargerGraph>();
+
+               for (KargerGraph.KargerRecord r : this.mainwindow.graph.getResults()) {
+                   
+                   if (r == this.mainwindow.graph.getBestResult()) {
+                      continue;
+                   }
+                   
+                   KargerGraph tmp = new KargerGraph();
+                   tmp.XMLToGraph(r.getEncodedGraph());
+                   tmp.xGetGraph().getView().setTranslate(new mxPoint(120, 0));
+                   this.mainwindow.graphResults.add(tmp);
+                   this.mainwindow.otherResultsPanel.add(Box.createRigidArea(new Dimension(0,15)));
+                   this.mainwindow.otherResultsPanel.add(tmp.getGraphComponent());
+                   
+               }
+               this.mainwindow.otherResultsPanel.add(Box.createRigidArea(new Dimension(0,15)));
+               this.mainwindow.resultContentPanel.add(this.mainwindow.otherResultsPanel);
+
+               
                break;
 
             case MANUAL_STEPS:
