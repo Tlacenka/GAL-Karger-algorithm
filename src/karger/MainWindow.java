@@ -84,11 +84,13 @@ public class MainWindow {
    private JButton removeEdgeButton;
 
    boolean addedNode;
+   boolean isPhase1;
 
    private KargerGraph graph;
    private mxGraphComponent gc;
    private ArrayList<KargerGraph> graphResults;
    private KargerGraph graphBestResult;
+   private ArrayList<mxCell> manualVertices;
 
 
    protected SidePanels xSidePanels;
@@ -135,13 +137,12 @@ public class MainWindow {
       // Create graph interface
       this.graph = new KargerGraph();
       this.aList = graph.getAdjacencyList();
+      this.manualVertices = new ArrayList<mxCell>();
 
       xSidePanels = new SidePanels();
       xSidePanels.getNodeModel(nodeModel);
       xSidePanels.getAdjacencyList(graph.getAdjacencyList());
       xSidePanels.getGraph(graph.xGetGraph());
-
-
 
       // Colours
       Color menuColor = new Color(125, 30, 30);
@@ -162,6 +163,7 @@ public class MainWindow {
       int sideButton_width = 50;
       int sideButton_height = 30;
 
+      this.isPhase1 = true;
 
       // Set window options, title, size, position
       this.frame = new JFrame();
@@ -334,8 +336,6 @@ public class MainWindow {
             }
          });
 
-
-
          img = ImageIO.read(getClass().getResource("images/addButton.png"));
          this.addEdgeButton.setIcon(new ImageIcon(img));
          this.addEdgeButton.setPreferredSize(new Dimension(sideButton_width, sideButton_height));
@@ -380,10 +380,6 @@ public class MainWindow {
          System.out.println(ex);
       }
 
-
-
-
-
       this.nodeButtonPanel.add(this.addNodeButton, BorderLayout.WEST);
       this.nodeButtonPanel.add(this.removeNodeButton, BorderLayout.EAST);
 
@@ -400,7 +396,6 @@ public class MainWindow {
       this.leftPanel.add(this.panel2, BorderLayout.CENTER);
 
       this.frame.add(this.leftPanel, BorderLayout.WEST);
-
 
 
       // Simulation panel
@@ -528,9 +523,6 @@ public class MainWindow {
       } catch (Exception ex) {
          System.out.println(ex);
       }
-
-
-
 
       this.bottomPanel.add(this.resetButton);
       // Undo not supported
@@ -676,6 +668,7 @@ public class MainWindow {
                this.mainwindow.stepButton.setEnabled(true);
                this.mainwindow.finishButton.setEnabled(true);
                this.mainwindow.runButton.setEnabled(true);
+               this.mainwindow.manualSteps.setEnabled(true);
 
                // Reset trackers
                this.mainwindow.runTracker.setText("Total Runs: " + this.mainwindow.graph.getRunCounter());
@@ -706,6 +699,7 @@ public class MainWindow {
                this.mainwindow.undoButton.setEnabled(false);
                this.mainwindow.stepButton.setEnabled(false);
                this.mainwindow.runButton.setEnabled(false);
+               this.mainwindow.manualSteps.setEnabled(false);
                this.mainwindow.graph.finishRun();
                this.mainwindow.resetButton.setEnabled(true);
                this.mainwindow.runTracker.setText("Total Runs: " + this.mainwindow.graph.getRunCounter());
@@ -716,6 +710,7 @@ public class MainWindow {
                this.mainwindow.runButton.setEnabled(false);
                this.mainwindow.undoButton.setEnabled(false);
                this.mainwindow.stepButton.setEnabled(false);
+               this.mainwindow.manualSteps.setEnabled(false);
                this.mainwindow.graph.finishAlgorithm();
                this.mainwindow.resetButton.setEnabled(true);
                this.mainwindow.runTracker.setText("Total Runs: " + this.mainwindow.graph.getRunCounter());
@@ -761,12 +756,35 @@ public class MainWindow {
                }
                this.mainwindow.otherResultsPanel.add(Box.createRigidArea(new Dimension(0,15)));
                this.mainwindow.resultContentPanel.add(this.mainwindow.otherResultsPanel);
-
-               
                break;
 
             case MANUAL_STEPS:
+               if (this.mainwindow.isPhase1) {
+                  // Disable all buttons except for reset before phase 2 is finished
+                  this.mainwindow.undoButton.setEnabled(false);
+                  this.mainwindow.stepButton.setEnabled(false);
+                  this.mainwindow.runButton.setEnabled(false);
+                  this.mainwindow.finishButton.setEnabled(false);
 
+                  this.mainwindow.manualVertices = this.mainwindow.graph.stepPhase1();
+                  this.mainwindow.isPhase1 = false;
+
+               } else {
+                  if ((this.mainwindow.manualVertices != null) &&
+                      (this.mainwindow.manualVertices.size() == 2)) {
+                     this.mainwindow.graph.stepPhase2(this.mainwindow.manualVertices);
+                  }
+                  this.mainwindow.manualVertices = new ArrayList<mxCell>();
+                  
+                  // Enable all buttons after phase 2
+                  this.mainwindow.undoButton.setEnabled(true);
+                  this.mainwindow.stepButton.setEnabled(true);
+                  this.mainwindow.runButton.setEnabled(true);
+                  this.mainwindow.finishButton.setEnabled(true);
+                  this.mainwindow.resetButton.setEnabled(true);
+
+                  this.mainwindow.isPhase1 = true;
+               }
                break;
          }
 
@@ -842,8 +860,6 @@ public class MainWindow {
       }
    }
 
-
-
     /**
      * Update node list based on current adjacency list.
      */
@@ -882,12 +898,7 @@ public class MainWindow {
 
    }
 
-
   /* public JList<String> getAlgorithmList(){
        return this.algorithmChoice;
    }*/
-
-
-
-
 }
