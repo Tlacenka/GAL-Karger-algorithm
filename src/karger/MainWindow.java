@@ -577,6 +577,7 @@ public class MainWindow {
       this.bestResultPanel = new JPanel();
       this.bestResultPanel.setBorder(null);
       this.bestResultPanel.setBackground(Color.white);
+      this.bestResultPanel.setLayout(new BoxLayout(this.bestResultPanel, BoxLayout.Y_AXIS));
       this.otherResultsPanel = new JPanel();
       this.otherResultsPanel.setBorder(null);
       this.otherResultsPanel.setBackground(Color.white);
@@ -676,12 +677,12 @@ public class MainWindow {
                // Remove results, display only original graph
                this.mainwindow.graph.getGraphComponent().zoom(1.0);
                this.mainwindow.resultContentPanel.remove(this.mainwindow.resultTitle);
-               this.mainwindow.bestResultPanel.remove(this.mainwindow.graphBestResult.getGraphComponent());
                this.mainwindow.resultContentPanel.remove(this.mainwindow.bestResultPanel);
                this.mainwindow.resultContentPanel.remove(this.mainwindow.otherResultsTitle);
                this.mainwindow.resultContentPanel.remove(this.mainwindow.otherResultsPanel);
 
                // Remove stored results
+               this.mainwindow.bestResultPanel.removeAll();
                this.mainwindow.otherResultsPanel.removeAll();
 
                break;
@@ -714,31 +715,43 @@ public class MainWindow {
                this.mainwindow.resultTracker.setText("Best Result: " + this.mainwindow.graph.getBestResultCut());
 
                // Display zoomed out graph, results below it
-               this.mainwindow.graph.getGraphComponent().zoom(0.6);
-               this.mainwindow.graph.xGetGraph().getView().setTranslate(new mxPoint(200, 0));
+               this.mainwindow.graph.getGraphComponent().zoom(0.7);
+               this.mainwindow.graph.xGetGraph().getView().setTranslate(new mxPoint(100, 0));
                this.mainwindow.graph.getGraphComponent().refresh();
                this.mainwindow.graph.getGraphComponent().setAlignmentX(Component.CENTER_ALIGNMENT);
 
+               this.mainwindow.resultContentPanel.add(Box.createRigidArea(new Dimension(0,15)));
                this.mainwindow.resultContentPanel.add(this.mainwindow.resultTitle);
 
                // Display best result
                this.mainwindow.graphBestResult = new KargerGraph();
                this.mainwindow.graphBestResult.XMLToGraph(this.mainwindow.graph.getBestResult().getEncodedGraph());
+               this.mainwindow.graphBestResult.xGetGraph().getView().setTranslate(new mxPoint(120, 0));
+               this.mainwindow.bestResultPanel.add(Box.createRigidArea(new Dimension(0,15)));
                this.mainwindow.bestResultPanel.add(this.mainwindow.graphBestResult.getGraphComponent());
-               this.mainwindow.resultContentPanel.add(bestResultPanel);
+               this.mainwindow.bestResultPanel.add(Box.createRigidArea(new Dimension(0,15)));
 
+               this.mainwindow.resultContentPanel.add(bestResultPanel);
                this.mainwindow.resultContentPanel.add(this.mainwindow.otherResultsTitle);
 
+               // Display other results
                this.mainwindow.graphResults = new ArrayList<KargerGraph>();
 
                for (KargerGraph.KargerRecord r : this.mainwindow.graph.getResults()) {
+                   
+                   if (r == this.mainwindow.graph.getBestResult()) {
+                      continue;
+                   }
+                   
                    KargerGraph tmp = new KargerGraph();
                    tmp.XMLToGraph(r.getEncodedGraph());
+                   tmp.xGetGraph().getView().setTranslate(new mxPoint(120, 0));
                    this.mainwindow.graphResults.add(tmp);
-                   this.mainwindow.otherResultsPanel.add(tmp.getGraphComponent());
                    this.mainwindow.otherResultsPanel.add(Box.createRigidArea(new Dimension(0,15)));
+                   this.mainwindow.otherResultsPanel.add(tmp.getGraphComponent());
+                   
                }
-               
+               this.mainwindow.otherResultsPanel.add(Box.createRigidArea(new Dimension(0,15)));
                this.mainwindow.resultContentPanel.add(this.mainwindow.otherResultsPanel);
 
                

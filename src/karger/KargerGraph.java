@@ -924,6 +924,19 @@ public class KargerGraph {
     }
 
     /**
+     * Sort results based on edge value using bubble sort
+     */
+    public void sortResults() {
+        for (int i = 0; i < this.runs.size(); i++) {
+            for (int j = 1; j < (this.runs.size() - i); j++){
+                if (this.runs.get(j-1).getCut() > this.runs.get(j).getCut()) {
+                    Collections.swap(this.runs, j-1, j);
+                }
+            }
+        }
+    }
+
+    /**
      * Return results to display them
      */
     public ArrayList<KargerRecord> getResults() {
@@ -947,6 +960,9 @@ public class KargerGraph {
         for (KargerRecord r: this.runs) {
             System.out.println("Result: "+ r.getV1() + " " + r.getV2());
         }
+
+        // Order results based on edge value
+        this.sortResults();
 
         return;
     }
