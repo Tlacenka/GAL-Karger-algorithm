@@ -21,6 +21,7 @@ import java.awt.Dimension;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Image;
+import java.awt.Component;
 
 import com.mxgraph.swing.mxGraphComponent;
 import com.mxgraph.io.mxCodec;
@@ -30,6 +31,7 @@ import com.mxgraph.util.mxConstants;
 import com.mxgraph.util.mxUtils;
 import com.mxgraph.util.mxXmlUtils;
 import com.mxgraph.view.mxGraph;
+import com.mxgraph.util.mxPoint;
 
 import java.awt.BorderLayout;
 import java.awt.EventQueue;
@@ -573,16 +575,12 @@ public class MainWindow {
       this.otherResultsTitle.setPreferredSize(new Dimension(650, 50));
 
       // Add to panel
-      this.graph.getGraphComponent().zoom(0.6);
-      
       this.resultContentPanel.add(this.graph.getGraphComponent());
-      this.resultContentPanel.add(this.resultTitle);
-      this.resultContentPanel.add(this.otherResultsTitle);
 
       // Prepare scrolling
       this.resultsPanel = new JScrollPane(this.resultContentPanel);
       this.resultsPanel.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-      this.resultsPanel.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+      this.resultsPanel.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
       this.resultsPanel.setBorder(null);
       this.resultsPanel.setPreferredSize(new Dimension(675, 720));
       this.resultsPanel.revalidate();
@@ -660,6 +658,9 @@ public class MainWindow {
                this.mainwindow.runButton.setEnabled(true);
                this.mainwindow.runTracker.setText("Total Runs: " + this.mainwindow.graph.getRunCounter());
                this.mainwindow.resultTracker.setText("Best Result: " + this.mainwindow.graph.getBestResultCut());
+               this.mainwindow.graph.getGraphComponent().zoom(1.0);
+               this.mainwindow.resultContentPanel.remove(this.mainwindow.resultTitle);
+               this.mainwindow.resultContentPanel.remove(this.mainwindow.otherResultsTitle);
                break;
             case UNDO:
                this.mainwindow.undoButton.setEnabled(false);
@@ -691,6 +692,12 @@ public class MainWindow {
 
                // TODO display graph, results below it
                this.mainwindow.graph.getGraphComponent().zoom(0.6);
+               this.mainwindow.graph.xGetGraph().getView().setTranslate(new mxPoint(200, 0));
+               this.mainwindow.graph.getGraphComponent().refresh();
+               this.mainwindow.graph.getGraphComponent().setAlignmentX(Component.CENTER_ALIGNMENT);
+               this.mainwindow.resultContentPanel.add(this.mainwindow.resultTitle);
+               this.mainwindow.resultContentPanel.add(this.mainwindow.otherResultsTitle);
+               
                break;
          }
 
