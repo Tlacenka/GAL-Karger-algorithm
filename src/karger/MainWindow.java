@@ -6,16 +6,13 @@
 
 package karger;
 
-import java.lang.reflect.Field;
 import javax.imageio.ImageIO;
 
 import javax.swing.*;
-import javax.swing.border.LineBorder;
 
 import java.awt.BorderLayout;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
-import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 import java.awt.Dimension;
 import java.awt.Color;
@@ -23,28 +20,14 @@ import java.awt.Font;
 import java.awt.Image;
 
 import com.mxgraph.swing.mxGraphComponent;
-import com.mxgraph.io.mxCodec;
 import com.mxgraph.model.mxCell;
-import com.mxgraph.swing.mxGraphComponent;
-import com.mxgraph.util.mxConstants;
-import com.mxgraph.util.mxUtils;
-import com.mxgraph.util.mxXmlUtils;
-import com.mxgraph.view.mxGraph;
 
-import java.awt.BorderLayout;
-import java.awt.EventQueue;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 
 import javax.swing.JFrame;
 import javax.swing.JList;
 import javax.swing.JScrollPane;
-import javax.swing.ListModel;
-import javax.swing.ListSelectionModel;
-import javax.swing.event.ListDataListener;
-import java.util.ArrayList;
-import java.util.List;
 
 
 public class MainWindow {
@@ -66,6 +49,7 @@ public class MainWindow {
    private JButton stepButton;
    private JButton runButton;
    private JButton finishButton;
+   private JButton manualSteps;
 
    private JTextArea runTracker;
    private JTextArea resultTracker;
@@ -125,7 +109,8 @@ public class MainWindow {
       UNDO,
       NEXT_STEP,
       RUN,
-      FINISH
+      FINISH,
+      MANUAL_STEPS
    }
 
    // Class constructor
@@ -437,6 +422,10 @@ public class MainWindow {
          algorithmChoice.setFont(algFont);
          algorithmChoice.setBackground(Color.white);
 
+
+         System.out.println("GET algorithm list \n");
+         graph.getAlgorithmList(algorithmChoice);
+
       } catch (Exception ex) {
          System.out.println(ex);
       }
@@ -445,6 +434,8 @@ public class MainWindow {
       this.algorithmPanel = new JScrollPane(algorithmChoice);
       this.algorithmPanel.setPreferredSize(new Dimension(350, 350));
       this.algorithmPanel.setBorder(BorderFactory.createMatteBorder(1,0,1,0,Color.black));
+
+       algorithmChoice.setSelectedIndex(1);
 
       // Add title Algorithm
       JTextArea algorithmTitle = new JTextArea("Algorithm");
@@ -475,6 +466,7 @@ public class MainWindow {
       this.stepButton = new JButton();
       this.runButton = new JButton();
       this.finishButton = new JButton();
+      this.manualSteps = new JButton();
 
 
       // Set button icons, border, size
@@ -511,6 +503,12 @@ public class MainWindow {
          this.finishButton.setToolTipText("Finish Algorithm");
          this.finishButton.addActionListener(new ButtonListener(this, ButtonEventType.FINISH));
 
+         img = ImageIO.read(getClass().getResource("images/manualSteps.png"));
+         this.manualSteps.setIcon(new ImageIcon(img));
+         this.manualSteps.setPreferredSize(new Dimension(button_width, button_height));
+         this.manualSteps.setToolTipText("Manual steps");
+         this.manualSteps.addActionListener(new ButtonListener(this, ButtonEventType.MANUAL_STEPS));
+
       } catch (Exception ex) {
          System.out.println(ex);
       }
@@ -524,6 +522,7 @@ public class MainWindow {
       this.bottomPanel.add(this.stepButton);
       this.bottomPanel.add(this.runButton);
       this.bottomPanel.add(this.finishButton);
+      this.bottomPanel.add(this.manualSteps);
 
       // Add text areas to top panel
       this.topPanel.setLayout(new FlowLayout(FlowLayout.CENTER, 110, 30));
@@ -610,6 +609,7 @@ public class MainWindow {
       public void actionPerformed(ActionEvent e) {
          switch(this.eventType) {
             case RESET:
+                algorithmChoice.setSelectedIndex(1);
                this.mainwindow.undoButton.setEnabled(false);
                this.mainwindow.resetButton.setEnabled(false);
                this.mainwindow.graph.resetAlgorithm();
@@ -646,8 +646,13 @@ public class MainWindow {
                this.mainwindow.resetButton.setEnabled(true);
                this.mainwindow.runTracker.setText("Total Runs: " + this.mainwindow.graph.getRunCounter());
                this.mainwindow.resultTracker.setText("Best Result: " + this.mainwindow.graph.getBestResultCut());
+                algorithmChoice.setSelectedIndex(7);
 
                // TODO display graph, results below it
+               break;
+
+            case MANUAL_STEPS:
+
                break;
          }
 
@@ -762,6 +767,11 @@ public class MainWindow {
       this.removeEdgeButton.setEnabled(false);
 
    }
+
+
+  /* public JList<String> getAlgorithmList(){
+       return this.algorithmChoice;
+   }*/
 
 
 
