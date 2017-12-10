@@ -66,18 +66,6 @@ public class KargerGraph {
 
     protected JList<String> algorithmList;
 
-    /** Basic idea
-     * - create ordered list of edges
-     * - each time there is a run, store the order of removed edges somewhere?
-     * - after run is finished, store V1, V2, value and edges to KargerResult
-     * - keep the best result yet on the screen (and in best.xml just the 2 nodes)
-     * - when algorithm is finished, find best result and display the graph
-     * - figure out a way to randomly shuffle for one next run
-     * - just go one by one when doing the whole thing
-     * - find out if one can shuffle without repeating itself in a random way
-     **/
-
-
     public KargerGraph() {
 
         this.runCounter = "0";
@@ -311,7 +299,6 @@ public class KargerGraph {
            Object eAD = graph.insertEdge(parent, null, "", vA, vD);
            Object eDE = graph.insertEdge(parent, null, "", vC, vE);
            Object eEF = graph.insertEdge(parent, null, "", vD, vC);
-           // new edges
 
         }
         this.graph.getModel().endUpdate();
@@ -759,9 +746,9 @@ public class KargerGraph {
     }
 
     /**
-     * Performs one step instead of the user.
+     * First part of the step - vertices are chosen and coloured.
      */
-    public void nextStep() {
+    public ArrayList<mxCell> stepPhase1() {
 
         // If this is first step, save for resetting
         if (this.stepCounter == 0) {
@@ -773,16 +760,8 @@ public class KargerGraph {
 
         // 3 - wouldn't make sense to have empty set of vertices
         if (this.adjacencyList.keySet().toArray().length < 3) {
-            return;
+            return null;
         }
-
-        // TODO fix
-        // In order[stepCounter] is index of edge to be removed
-        //System.out.println("step " + this.stepCounter);
-        //System.out.println("edge at index " + this.curOrder.get(this.stepCounter));
-        //System.out.println("edge array len " + Integer.toString(this.graphEdges.size()));
-        //System.out.println("cur order len " + Integer.toString(this.curOrder.size()));
-
 
         int edgeIndex = this.curOrder.get(this.stepCounter);
 
@@ -794,7 +773,7 @@ public class KargerGraph {
                 this.stepCounter += 1;
                 this.nextStep();
             }
-            return;
+            return null;
         }
 
         mxCell v1 = (mxCell)this.graphEdges.get(edgeIndex).getSource();
@@ -817,19 +796,23 @@ public class KargerGraph {
             v2 = v_swap;
         }
 
-        this.mergeCells(v1,v2);
+        ArrayList<mxCell> vertices = new ArrayList<mxCell>();
+        vertices.add(v1);
+        vertices.add(v2);
+        return vertices;
 
-        //this.graph.getModel().beginUpdate();
-        //try {
-            //(new Timer(true)).schedule(new HighlightBeforeMerging(v1, v2), 2*1000);
-        //} finally {
-            //this.graph.getModel().endUpdate();
-        //}
+    }
+
+    /**
+     * Phase 2 of the step - vertices are merged, colour is retrieved back.
+     */
+    public void stepPhase2(ArrayList<mxCell> vertices) {
+        this.mergeCells(vertices.get(0),vertices.get(1));
 
         // Change colour back
         this.graph.getModel().beginUpdate();
         try {
-            this.graph.setCellStyles(mxConstants.STYLE_FILLCOLOR, "#F0EFEA", new Object[] {v1});
+            this.graph.setCellStyles(mxConstants.STYLE_FILLCOLOR, "#F0EFEA", new Object[] {vertices.get(0)});
         } finally {
             this.graph.getModel().endUpdate();
         }
@@ -837,6 +820,17 @@ public class KargerGraph {
         // Update step counter
         this.stepCounter = this.stepCounter + 1;
 
+    }
+
+    /**
+     * Performs one step instead of the user.
+     */
+    public void nextStep() {
+
+        ArrayList<mxCell> vertices = this.stepPhase1();
+        if ((vertices != null) && (vertices.size() == 2)) {
+            this.stepPhase2(vertices);
+        }
     }
 
     /**
