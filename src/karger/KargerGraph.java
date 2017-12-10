@@ -64,6 +64,8 @@ public class KargerGraph {
 
     private HashMap<mxCell,LinkedList<mxCell>> adjacencyList;
 
+    protected JList<String> algorithmList;
+
     /** Basic idea
      * - create ordered list of edges
      * - each time there is a run, store the order of removed edges somewhere?
@@ -74,6 +76,7 @@ public class KargerGraph {
      * - just go one by one when doing the whole thing
      * - find out if one can shuffle without repeating itself in a random way
      **/
+
 
     public KargerGraph() {
 
@@ -118,6 +121,8 @@ public class KargerGraph {
         // Create default graph
         this.createDefaultGraph();
 
+
+
         // Create adjacency list from it
         this.createAdjacencyList();
 
@@ -132,7 +137,13 @@ public class KargerGraph {
 
         // Wrap it in a component
         this.gc = new mxGraphComponent(this.graph);
-        this.gc.setEnabled(false); // disable graph editing ad hoc
+        this.gc.setEnabled(true);                   // disable/enable graph editing ad hoc
+        this.gc.setConnectable(false);              // disable/enable drag and drop from adding new edges
+        this.graph.setCellsEditable(false);         // disable/enable vertex value editing
+
+        this.graph.setCellsDisconnectable(false);
+        this.graph.setDisconnectOnMove(false);
+
         
         // Set background color, remove default border
         this.gc.getViewport().setOpaque(true);
@@ -156,6 +167,11 @@ public class KargerGraph {
         });
 
     }
+
+
+
+
+
 
     // Class for storing results of individual runs
     class KargerRecord {
@@ -784,6 +800,7 @@ public class KargerGraph {
         mxCell v1 = (mxCell)this.graphEdges.get(edgeIndex).getSource();
         mxCell v2 = (mxCell)this.graphEdges.get(edgeIndex).getTarget();
 
+
         this.graph.getModel().beginUpdate();
         try {
             this.graph.setCellStyles(mxConstants.STYLE_FILLCOLOR, "#D72C16", new Object[] {v1});
@@ -791,6 +808,7 @@ public class KargerGraph {
         } finally {
             this.graph.getModel().endUpdate();
         }
+
 
         // v1 is the one being merged to
         if (v1.getGeometry().getX() >  v2.getGeometry().getX()) {
@@ -940,4 +958,9 @@ public class KargerGraph {
     public mxGraph xGetGraph(){
         return this.graph;
     }
+
+    public void getAlgorithmList(JList<String> algList){
+       algorithmList = algList;
+    }
+
 }
