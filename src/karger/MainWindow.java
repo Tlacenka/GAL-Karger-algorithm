@@ -509,9 +509,9 @@ public class MainWindow {
       //this.centerPanel.add(this.graph.getGraphComponent());
 
       this.resultContentPanel = new JPanel();
-      this.resultContentPanel.setPreferredSize(new Dimension(675,720));
       this.resultContentPanel.setBackground(Color.white);
       this.resultContentPanel.setBorder(null);
+      this.resultContentPanel.setLayout(new BoxLayout(this.resultContentPanel, BoxLayout.Y_AXIS));
 
       // Prepare results
       this.resultTitle = new JTextArea("Best Result");
@@ -526,6 +526,8 @@ public class MainWindow {
       this.otherResultsTitle.setPreferredSize(new Dimension(650, 50));
 
       // Add to panel
+      this.graph.getGraphComponent().zoom(0.6);
+      
       this.resultContentPanel.add(this.graph.getGraphComponent());
       this.resultContentPanel.add(this.resultTitle);
       this.resultContentPanel.add(this.otherResultsTitle);
@@ -534,8 +536,9 @@ public class MainWindow {
       this.resultsPanel = new JScrollPane(this.resultContentPanel);
       this.resultsPanel.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
       this.resultsPanel.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
-      this.resultsPanel.setBounds(10, 10, 50, 50);
       this.resultsPanel.setBorder(null);
+      this.resultsPanel.setPreferredSize(new Dimension(675, 720));
+      this.resultsPanel.revalidate();
 
       // Add scrolling to panel
       this.centerPanel.add(this.resultsPanel);
