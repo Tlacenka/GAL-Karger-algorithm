@@ -32,6 +32,11 @@ public class SidePanels {
     protected Object sourceVertex = null;
     protected Object targetVertex = null;
 
+    private int yPosition = 30;
+    private int xPosition = 30;
+    private int xGap = 20;
+    private int yGap = 20;
+
 
     public DefaultListModel<String> algorithmModel = new DefaultListModel<String>();
     public JList<String> algorithmChoice;
@@ -75,12 +80,14 @@ public class SidePanels {
                 graph.getModel().beginUpdate();
                 try
                 {
-                    Object v1 = graph.insertVertex(graph.getDefaultParent(), null, addedNode, 30, 30, this.vertex_size, this.vertex_size);
+                    Object v1 = graph.insertVertex(graph.getDefaultParent(), null, addedNode, xPosition, yPosition, this.vertex_size, this.vertex_size);
                 }
                 finally
                 {
                     // update the display
                     graph.getModel().endUpdate();
+                    yPosition += yGap;
+                    xPosition += xGap;
                 }
 
                 return true;
@@ -166,13 +173,17 @@ public class SidePanels {
                             Object v1;
 
                             if(sourceVertex == null){
-                                v1 = graph.insertVertex(graph.getDefaultParent(), null, addedSrc, 30, 30, this.vertex_size, this.vertex_size);
+                                v1 = graph.insertVertex(graph.getDefaultParent(), null, addedSrc, xPosition, yPosition, this.vertex_size, this.vertex_size);
                                 sourceVertex = v1;
+                                yPosition += yGap;
+                                xPosition += xGap;
                             }
 
                             else if(targetVertex == null){
-                                v1 = graph.insertVertex(graph.getDefaultParent(), null, addedDst, 30, 30, this.vertex_size, this.vertex_size);
+                                v1 = graph.insertVertex(graph.getDefaultParent(), null, addedDst, xPosition, yPosition, this.vertex_size, this.vertex_size);
                                 targetVertex = v1;
+                                yPosition += yGap;
+                                xPosition += xGap;
                             }
 
                         }
