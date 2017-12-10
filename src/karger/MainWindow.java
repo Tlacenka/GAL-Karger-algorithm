@@ -694,6 +694,14 @@ public class MainWindow {
                this.mainwindow.graph.nextStep();
                this.mainwindow.undoButton.setEnabled(true);
                this.mainwindow.resetButton.setEnabled(true);
+               if (this.mainwindow.graph.isRunFinished()) {
+                  this.mainwindow.runTracker.setText("Total Runs: " + this.mainwindow.graph.getRunCounter());
+                  this.mainwindow.resultTracker.setText("Best Result: " + this.mainwindow.graph.getBestResultCut());
+                  this.mainwindow.stepButton.setEnabled(false);
+                  this.mainwindow.manualSteps.setEnabled(false);
+                  this.mainwindow.runButton.setEnabled(false);
+               }
+
                break;
             case RUN:
                this.mainwindow.undoButton.setEnabled(false);
@@ -784,6 +792,15 @@ public class MainWindow {
                   this.mainwindow.resetButton.setEnabled(true);
 
                   this.mainwindow.isPhase1 = true;
+
+                  if (this.mainwindow.graph.isRunFinished()) {
+                     this.mainwindow.runTracker.setText("Total Runs: " + this.mainwindow.graph.getRunCounter());
+                     this.mainwindow.resultTracker.setText("Best Result: " + this.mainwindow.graph.getBestResultCut());
+                     this.mainwindow.stepButton.setEnabled(false);
+                     this.mainwindow.manualSteps.setEnabled(false);
+                     this.mainwindow.runButton.setEnabled(false);
+                  }
+               
                }
                break;
          }

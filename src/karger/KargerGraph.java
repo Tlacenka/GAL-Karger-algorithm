@@ -61,6 +61,7 @@ public class KargerGraph {
     private Object parent;
     private int vertex_size; // width = height of vertex
     private int vertex_scaling; // by how much is vertex expanded when new node is merged into it
+    private Boolean runFinished;
 
     private HashMap<mxCell,LinkedList<mxCell>> adjacencyList;
 
@@ -77,6 +78,7 @@ public class KargerGraph {
         this.graphEdges = new ArrayList<mxCell>();
         this.bestResult = null;
         this.maxRuns = 0;
+        this.runFinished = false;
 
         // Create a graph
         this.graph = new mxGraph();
@@ -108,8 +110,6 @@ public class KargerGraph {
 
         // Create default graph
         this.createDefaultGraph();
-
-
 
         // Create adjacency list from it
         this.createAdjacencyList();
@@ -155,11 +155,6 @@ public class KargerGraph {
         });
 
     }
-
-
-
-
-
 
     // Class for storing results of individual runs
     class KargerRecord {
@@ -389,6 +384,11 @@ public class KargerGraph {
      */
     public String getBestResultCut() {
         return this.bestResultCut;
+    }
+
+    public Boolean isRunFinished() {
+        return ((Integer.parseInt(this.runCounter) >= this.maxRuns) ||
+                (this.adjacencyList.keySet().toArray().length <= 2));
     }
 
     /**
@@ -819,6 +819,14 @@ public class KargerGraph {
 
         // Update step counter
         this.stepCounter = this.stepCounter + 1;
+
+        if (this.isRunFinished()) {
+            // Update results obtained by the last run
+            this.updateResults();
+
+            // Update run counter
+            this.runCounter = Integer.toString(Integer.parseInt(this.runCounter) + 1);
+        }
 
     }
 
