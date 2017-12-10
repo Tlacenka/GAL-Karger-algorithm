@@ -34,6 +34,8 @@ import com.mxgraph.view.mxGraph;
 import java.awt.BorderLayout;
 import java.awt.EventQueue;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedList;
 
 import javax.swing.JFrame;
 import javax.swing.JList;
@@ -41,6 +43,8 @@ import javax.swing.JScrollPane;
 import javax.swing.ListModel;
 import javax.swing.ListSelectionModel;
 import javax.swing.event.ListDataListener;
+import java.util.ArrayList;
+import java.util.List;
 
 
 public class MainWindow {
@@ -85,7 +89,7 @@ public class MainWindow {
    private JButton addEdgeButton;
    private JButton removeEdgeButton;
 
-
+   boolean addedNode;
 
    private KargerGraph graph;
    private mxGraphComponent gc;
@@ -101,6 +105,13 @@ public class MainWindow {
 
    DefaultListModel<String> algorithmModel = new DefaultListModel<String>();
    public JList<String> algorithmChoice;
+
+   private boolean firstTimeCreatedModel = false;
+
+   protected HashMap<mxCell,LinkedList<mxCell>> aList;
+
+  // boolean gotNode = false;
+  // boolean gotEdge = false;
 
 
    // Menu event enumeration type
@@ -126,6 +137,14 @@ public class MainWindow {
 
       // Create graph interface
       this.graph = new KargerGraph();
+      this.aList = graph.getAdjacencyList();
+
+      xSidePanels = new SidePanels();
+      xSidePanels.getNodeModel(nodeModel);
+      xSidePanels.getAdjacencyList(graph.getAdjacencyList());
+      xSidePanels.getGraph(graph.xGetGraph());
+
+
 
       // Colours
       Color menuColor = new Color(125, 30, 30);
@@ -217,27 +236,17 @@ public class MainWindow {
       this.panel2.setBackground(sidePanelColor);
       this.panel2.setPreferredSize(new Dimension(150, 600));
 
-      // Test lists
-      try {
-         nodeModel.addElement("<Edge List>");
-         nodeChoice = new JList<String>(nodeModel);
 
-      } catch (Exception ex) {
-         System.out.println(ex);
-      }
+      // create models for the first time
+       this.firstTimeCreatedModel = true;
 
+        updateNodeList();     // show node lists
+        updateEdgeList();     // show edge list
 
-      try {
-         edgeModel.addElement("<Node List>");
-         edgeChoice = new JList<String>(edgeModel);
-
-      } catch (Exception ex) {
-         System.out.println(ex);
-      }
+       this.firstTimeCreatedModel = false;
 
 
       // Create panel for edges and nodes
-
       JTextArea edgeTitle = new JTextArea("Edge List");
       JTextArea nodeTitle = new JTextArea("Node List");
 
@@ -246,14 +255,14 @@ public class MainWindow {
       edgeTitle.setFont(smallTitleFont);
       edgeTitle.setEditable(false);
       edgeTitle.setPreferredSize(new Dimension(140, 30));
-      this.panel1.add(edgeTitle);
+      this.panel1.add(nodeTitle);
 
       nodeTitle.setForeground(textColor);
       nodeTitle.setBackground(sidePanelColor);
       nodeTitle.setFont(smallTitleFont);
       nodeTitle.setEditable(false);
       nodeTitle.setPreferredSize(new Dimension(140, 30));
-      this.panel2.add(nodeTitle);
+      this.panel2.add(edgeTitle);
 
       this.nodePanel = new JScrollPane(nodeChoice);
       this.edgePanel = new JScrollPane(edgeChoice);
@@ -289,8 +298,20 @@ public class MainWindow {
          {
             public void actionPerformed(ActionEvent e)
             {
-               xSidePanels = new SidePanels();
-               xSidePanels.addNode(nodeModel);
+               //xSidePanels = new SidePanels();
+               //System.out.println("Add node list: " + graph.getAdjacencyList());
+
+               try{
+                  addedNode = xSidePanels.addNode(nodeModel, graph.getAdjacencyList(), graph.xGetGraph());
+
+                  if(addedNode == true){
+                     graph.createAdjacencyList();
+                  }
+
+
+               }catch (Exception ex) {
+                  System.out.println(ex);
+               }
             }
          });
 
@@ -303,10 +324,20 @@ public class MainWindow {
          {
             public void actionPerformed(ActionEvent e)
             {
-               xSidePanels = new SidePanels();
-               xSidePanels.removeItem(nodeChoice);
+               //System.out.println("REMOVE NODE \n");
+               //xSidePanels = new SidePanels();
+               boolean isRemoved = xSidePanels.removeItem(nodeChoice, true, graph.xGetGraph());
+
+               if(isRemoved){
+                  graph.createAdjacencyList();
+                  edgeModel.clear();
+                  updateEdgeList();
+               }
+
             }
          });
+
+
 
          img = ImageIO.read(getClass().getResource("images/addButton.png"));
          this.addEdgeButton.setIcon(new ImageIcon(img));
@@ -317,8 +348,12 @@ public class MainWindow {
          {
             public void actionPerformed(ActionEvent e)
             {
-               xSidePanels = new SidePanels();
-               xSidePanels.addEdge(edgeModel);
+               //xSidePanels = new SidePanels();
+               boolean gotEdge = xSidePanels.addEdge(edgeModel, graph.xGetGraph(), graph.getAdjacencyList());
+
+               if(gotEdge == true)
+                  graph.createAdjacencyList();
+
             }
          });
 
@@ -331,8 +366,15 @@ public class MainWindow {
          {
             public void actionPerformed(ActionEvent e)
             {
-               xSidePanels = new SidePanels();
-               xSidePanels.removeItem(edgeChoice);
+               //xSidePanels = new SidePanels();
+               boolean isRemoved = xSidePanels.removeItem(edgeChoice, false, graph.xGetGraph());
+
+               if(isRemoved){
+                  graph.createAdjacencyList();
+                  edgeModel.clear();
+                  updateEdgeList();
+               }
+
             }
          });
 
@@ -340,6 +382,9 @@ public class MainWindow {
       } catch (Exception ex) {
          System.out.println(ex);
       }
+
+
+
 
 
       this.nodeButtonPanel.add(this.addNodeButton, BorderLayout.WEST);
@@ -400,10 +445,9 @@ public class MainWindow {
          System.out.println(ex);
       }
 
-     // algorithmChoice.setSelectedIndex(graph.algorithmItemIndex);
 
       this.algorithmPanel = new JScrollPane(algorithmChoice);
-      this.algorithmPanel.setPreferredSize(new Dimension(350, 325));
+      this.algorithmPanel.setPreferredSize(new Dimension(350, 350));
       this.algorithmPanel.setBorder(BorderFactory.createMatteBorder(1,0,1,0,Color.black));
 
       // Add title Algorithm
@@ -474,6 +518,9 @@ public class MainWindow {
       } catch (Exception ex) {
          System.out.println(ex);
       }
+
+
+
 
       this.bottomPanel.add(this.resetButton);
       // Undo not supported
@@ -646,6 +693,17 @@ public class MainWindow {
                this.mainwindow.graph.getGraphComponent().zoom(0.6);
                break;
          }
+
+
+         // some action was performed so the lists must be updated
+         // in the first step, the "old" list must be cleared
+         edgeModel.clear();
+         nodeModel.clear();
+
+       //  System.out.println("\nUpdate lists \n");
+
+         this.mainwindow.updateEdgeList();
+         this.mainwindow.updateNodeList();
       }
    }
 
@@ -673,5 +731,82 @@ public class MainWindow {
        this.frame.pack();
        this.frame.setVisible(true);
    }
+
+
+
+    /**
+     * Update edge list based on current graph model.
+     */
+   public void updateEdgeList(){
+      try {
+
+         Object xParent = graph.xGetGraph().getDefaultParent();
+
+         for (Object e : graph.xGetGraph().getChildEdges(xParent)) {
+            mxCell edge = (mxCell)e;
+            mxCell src = (mxCell)edge.getSource();
+            mxCell dst = (mxCell)edge.getTarget();
+
+            // Check that all edges are between two vertices
+            if ((src == null) || (dst == null)) {
+               throw new IllegalArgumentException("Each edge must be between 2 vertices.");
+            }
+
+            this.edgeModel.addElement(src.getValue() + " - " + dst.getValue());
+
+         }
+
+         //System.out.println("first time: " + this.firstTimeCreatedModel);
+         if(firstTimeCreatedModel)
+             this.edgeChoice = new JList<String>(edgeModel);
+
+
+      } catch (Exception ex) {
+         System.out.println(ex);
+      }
+   }
+
+
+
+    /**
+     * Update node list based on current adjacency list.
+     */
+   public void updateNodeList(){
+      try {
+
+         aList = graph.getAdjacencyList();
+
+         if(aList != null){
+
+            for (mxCell value: this.aList.keySet()) {
+               nodeModel.addElement(value.getValue().toString());
+               //System.out.println("Added element: " + value.getValue().toString());
+            }
+
+             //System.out.println("first time: " + this.firstTimeCreatedModel);
+            if(firstTimeCreatedModel)
+                nodeChoice = new JList<String>(nodeModel);
+         }
+
+
+      } catch (Exception ex) {
+         System.out.println(ex);
+      }
+   }
+
+
+
+   // currently not used (and never be?)
+   public void disableEditorButtons(){
+
+      this.addNodeButton.setEnabled(false);
+      this.removeNodeButton.setEnabled(false);
+      this.addEdgeButton.setEnabled(false);
+      this.removeEdgeButton.setEnabled(false);
+
+   }
+
+
+
 
 }

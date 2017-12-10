@@ -32,6 +32,7 @@ import java.awt.event.ActionEvent;
 
 import com.mxgraph.io.mxCodec;
 import com.mxgraph.model.mxCell;
+import com.mxgraph.model.mxIGraphModel;
 import com.mxgraph.swing.mxGraphComponent;
 import com.mxgraph.util.mxConstants;
 import com.mxgraph.util.mxUtils;
@@ -218,7 +219,7 @@ public class KargerGraph {
         if ((n == 0) || (n == 1)) {
             return 1;
         }
-        
+
 
         for (int i = 2; i <= n; i++) {
             result *= i;
@@ -260,7 +261,7 @@ public class KargerGraph {
         } while (keepShuffling);
     }
 
-    
+
 
     /**
      * Get cell from mouse coordinates.
@@ -295,7 +296,7 @@ public class KargerGraph {
            Object eDE = graph.insertEdge(parent, null, "", vC, vE);
            Object eEF = graph.insertEdge(parent, null, "", vD, vC);
            // new edges
-           
+
         }
         this.graph.getModel().endUpdate();
     }
@@ -329,7 +330,7 @@ public class KargerGraph {
             if ((src == null) || (dst == null)) {
                 throw new IllegalArgumentException("Each edge must be between 2 vertices.");
             }
-            
+
             // Check that there are no self-loops
             if (src == dst) {
                 throw new IllegalArgumentException("Self-loops are not allowed.");
@@ -443,8 +444,8 @@ public class KargerGraph {
 
         mxCodec codec = new mxCodec(graph_file);
         codec.decode(graph_file.getDocumentElement(), this.graph.getModel());
-        
-    } 
+
+    }
 
     /**
      * Returns encoded graph to be stored to file.
@@ -460,7 +461,7 @@ public class KargerGraph {
         }
     }
 
-    
+
     /**
      * Encode graph to XML.
      */
@@ -482,10 +483,11 @@ public class KargerGraph {
         int edge_val = 0;
 
         // Print out their values
-        //System.out.println((String)v1.getValue() + " and " + (String)v2.getValue()); 
+        //System.out.println((String)v1.getValue() + " and " + (String)v2.getValue());
 
         // Merge the cells
 
+        // Redirect all edges from v2, remove v2 and connected edges
         // Make the merged node bigger
         this.graph.getModel().beginUpdate();
         {
@@ -508,7 +510,7 @@ public class KargerGraph {
 
         mxCell edge, src, dst;
         edge = dst = src = new mxCell();
-        
+
         // Print out edges - TODO DEBUG
         //for (Object e : this.graphEdges) {
         //    edge = (mxCell)e;
@@ -541,15 +543,15 @@ public class KargerGraph {
                 edge = (mxCell)e;
                 src = (mxCell)edge.getSource();
                 dst = (mxCell)edge.getTarget();
-                
+
                 //if ((src == null) || (dst == null)) {
                 //    System.out.println("This edge is not between 2 edges.");
                 //}
 
                 // Redirect edge, update adjacency list
                 if ((src == v) && (dst == v2)) {
- 
-                    
+
+
                     //System.out.println("redirecting edge " + (String)edge.getSource().getValue() + " - " + (String)edge.getTarget().getValue());
                     this.graph.getModel().beginUpdate();
                     {
@@ -588,7 +590,7 @@ public class KargerGraph {
         mxCell contractedEdge = this.graphEdges.get(this.curOrder.get(this.stepCounter));
         this.graph.getModel().beginUpdate();
         {
-            
+
             //System.out.println("Removing edge " + (String)removingEdge.getSource().getValue() + " - " + (String)removingEdge.getTarget().getValue());
             this.graph.removeCells(new Object[] {contractedEdge});
 
@@ -617,7 +619,7 @@ public class KargerGraph {
 
         this.gc.refresh();
     }
- 
+
     /**
      * Handle multiple edges
      */
@@ -674,7 +676,7 @@ public class KargerGraph {
                 //if (edge2 != null) {
                 //    System.out.println("after removing multiple " + (String)edge2.getSource().getValue() + " - " + (String)edge2.getTarget().getValue());
                 //}
-                
+
                 found = true;
                 break;
 
@@ -815,7 +817,7 @@ public class KargerGraph {
         }
 
         // Update step counter
-        this.stepCounter += 1;
+        this.stepCounter = this.stepCounter + 1;
 
     }
 
@@ -849,7 +851,7 @@ public class KargerGraph {
     public void updateResults() {
 
         // Last two vertices
-    
+
         mxCell v1 = (mxCell)this.adjacencyList.keySet().toArray()[0];
         mxCell v2 = (mxCell)this.adjacencyList.keySet().toArray()[1];
 
@@ -921,18 +923,20 @@ public class KargerGraph {
             this.finishRun();
             this.loadGraph("./examples/reset.xml");
             this.stepCounter = 0;
-            
         }
 
         // Display the best result - load from best.xml (TODO) or create graph based on best result (bleh)
-        
+
 
         return;
     }
 
 
     public HashMap<mxCell,LinkedList<mxCell>> getAdjacencyList(){
+        return this.adjacencyList;
+    }
 
-        return adjacencyList;
+    public mxGraph xGetGraph(){
+        return this.graph;
     }
 }
