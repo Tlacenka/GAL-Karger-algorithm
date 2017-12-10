@@ -874,7 +874,7 @@ public class KargerGraph {
         for (Object e : this.graphEdges) {
             edge = (mxCell)e;
             if (edge != null) {
-                System.out.println("updating results, this is left " + (String)edge.getSource().getValue() + " - " + (String)edge.getTarget().getValue());
+                //System.out.println("updating results, this is left " + (String)edge.getSource().getValue() + " - " + (String)edge.getTarget().getValue());
                 break;
             }
         }
@@ -883,6 +883,16 @@ public class KargerGraph {
 
         // If result set is unique, Add new record
         if (sameResult == null) {
+            // both vertices will be at y = 0, 100 pixels apart
+            this.graph.getModel().beginUpdate();
+            {
+                v1.setGeometry(new mxGeometry(0, 0,
+                               vertex_size+40, vertex_size+40));
+                v2.setGeometry(new mxGeometry(v1.getGeometry().getX() + 300, 0,
+                               vertex_size+40, vertex_size+40));
+            }
+            this.graph.getModel().endUpdate();
+
             newRecord = new KargerRecord(V1, V2, cut_val, this.curOrder, this.graphToXML());
             this.runs.add(newRecord);
         } else {
@@ -914,6 +924,13 @@ public class KargerGraph {
     }
 
     /**
+     * Return results to display them
+     */
+    public ArrayList<KargerRecord> getResults() {
+        return this.runs;
+    }
+
+    /**
      * Finishes the whole algorithm.
      */
     public void finishAlgorithm() {
@@ -926,7 +943,10 @@ public class KargerGraph {
         }
 
         // Display the best result - load from best.xml (TODO) or create graph based on best result (bleh)
-
+        System.out.println("There were this many results: " + Integer.toString(this.runs.size()));
+        for (KargerRecord r: this.runs) {
+            System.out.println("Result: "+ r.getV1() + " " + r.getV2());
+        }
 
         return;
     }

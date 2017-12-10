@@ -85,6 +85,8 @@ public class MainWindow {
    private JPanel nodeButtonPanel;
    private JPanel edgeButtonPanel;
    private JPanel resultContentPanel;
+   private JPanel bestResultPanel;
+   private JPanel otherResultsPanel;
 
    private JButton addNodeButton;
    private JButton removeNodeButton;
@@ -95,6 +97,8 @@ public class MainWindow {
 
    private KargerGraph graph;
    private mxGraphComponent gc;
+   private ArrayList<KargerGraph> graphResults;
+   private KargerGraph graphBestResult;
 
 
    protected SidePanels xSidePanels;
@@ -566,13 +570,23 @@ public class MainWindow {
       this.resultTitle = new JTextArea("Best Result");
       this.resultTitle.setFont(titleFont);
       this.resultTitle.setForeground(panelColorTest);
-      this.resultTitle.setPreferredSize(new Dimension(650, 50));
-      this.resultTitle.setBorder(BorderFactory.createMatteBorder(1,0,0,0,Color.black));
+      this.resultTitle.setPreferredSize(new Dimension(650, 30));
+      this.resultTitle.setBorder(BorderFactory.createMatteBorder(1, 0, 0, 0, Color.black));
+
+      // Results panels
+      this.bestResultPanel = new JPanel();
+      this.bestResultPanel.setBorder(null);
+      this.bestResultPanel.setBackground(Color.white);
+      this.otherResultsPanel = new JPanel();
+      this.otherResultsPanel.setBorder(null);
+      this.otherResultsPanel.setBackground(Color.white);
+      this.otherResultsPanel.setLayout(new BoxLayout(this.otherResultsPanel, BoxLayout.Y_AXIS));
 
       this.otherResultsTitle = new JTextArea("Other Results");
       this.otherResultsTitle.setFont(titleFont);
       this.otherResultsTitle.setForeground(panelColorTest);
-      this.otherResultsTitle.setPreferredSize(new Dimension(650, 50));
+      this.otherResultsTitle.setPreferredSize(new Dimension(650, 30));
+      this.otherResultsTitle.setBorder(BorderFactory.createMatteBorder(1, 0, 0, 0, Color.black));
 
       // Add to panel
       this.resultContentPanel.add(this.graph.getGraphComponent());
@@ -647,20 +661,29 @@ public class MainWindow {
       public void actionPerformed(ActionEvent e) {
          switch(this.eventType) {
             case RESET:
-               // Get back algorithm in case it wasn't there
-               //this.centerPanel.add(this.graph.getGraphComponent());
-
+               // Reset buttons
                this.mainwindow.undoButton.setEnabled(false);
                this.mainwindow.resetButton.setEnabled(false);
                this.mainwindow.graph.resetAlgorithm();
                this.mainwindow.stepButton.setEnabled(true);
                this.mainwindow.finishButton.setEnabled(true);
                this.mainwindow.runButton.setEnabled(true);
+
+               // Reset trackers
                this.mainwindow.runTracker.setText("Total Runs: " + this.mainwindow.graph.getRunCounter());
                this.mainwindow.resultTracker.setText("Best Result: " + this.mainwindow.graph.getBestResultCut());
+
+               // Remove results, display only original graph
                this.mainwindow.graph.getGraphComponent().zoom(1.0);
                this.mainwindow.resultContentPanel.remove(this.mainwindow.resultTitle);
+               this.mainwindow.bestResultPanel.remove(this.mainwindow.graphBestResult.getGraphComponent());
+               this.mainwindow.resultContentPanel.remove(this.mainwindow.bestResultPanel);
                this.mainwindow.resultContentPanel.remove(this.mainwindow.otherResultsTitle);
+               this.mainwindow.resultContentPanel.remove(this.mainwindow.otherResultsPanel);
+
+               // Remove stored results
+               this.mainwindow.otherResultsPanel.removeAll();
+
                break;
             case UNDO:
                this.mainwindow.undoButton.setEnabled(false);
@@ -690,13 +713,34 @@ public class MainWindow {
                this.mainwindow.runTracker.setText("Total Runs: " + this.mainwindow.graph.getRunCounter());
                this.mainwindow.resultTracker.setText("Best Result: " + this.mainwindow.graph.getBestResultCut());
 
-               // TODO display graph, results below it
+               // Display zoomed out graph, results below it
                this.mainwindow.graph.getGraphComponent().zoom(0.6);
                this.mainwindow.graph.xGetGraph().getView().setTranslate(new mxPoint(200, 0));
                this.mainwindow.graph.getGraphComponent().refresh();
                this.mainwindow.graph.getGraphComponent().setAlignmentX(Component.CENTER_ALIGNMENT);
+
                this.mainwindow.resultContentPanel.add(this.mainwindow.resultTitle);
+
+               // Display best result
+               this.mainwindow.graphBestResult = new KargerGraph();
+               this.mainwindow.graphBestResult.XMLToGraph(this.mainwindow.graph.getBestResult().getEncodedGraph());
+               this.mainwindow.bestResultPanel.add(this.mainwindow.graphBestResult.getGraphComponent());
+               this.mainwindow.resultContentPanel.add(bestResultPanel);
+
                this.mainwindow.resultContentPanel.add(this.mainwindow.otherResultsTitle);
+
+               this.mainwindow.graphResults = new ArrayList<KargerGraph>();
+
+               for (KargerGraph.KargerRecord r : this.mainwindow.graph.getResults()) {
+                   KargerGraph tmp = new KargerGraph();
+                   tmp.XMLToGraph(r.getEncodedGraph());
+                   this.mainwindow.graphResults.add(tmp);
+                   this.mainwindow.otherResultsPanel.add(tmp.getGraphComponent());
+                   this.mainwindow.otherResultsPanel.add(Box.createRigidArea(new Dimension(0,15)));
+               }
+               
+               this.mainwindow.resultContentPanel.add(this.mainwindow.otherResultsPanel);
+
                
                break;
          }
