@@ -685,6 +685,18 @@ public class MainWindow {
          switch(this.eventType) {
             case NEW:
                this.mainwindow.newGraph();
+
+               // some action was performed so the lists must be updated
+               // in the first step, the "old" list must be cleared
+               edgeModel.clear();
+               nodeModel.clear();
+
+               //  System.out.println("\nUpdate lists \n");
+
+               this.mainwindow.updateEdgeList();
+               this.mainwindow.updateNodeList();
+
+
                break;
             case LOAD:
                this.mainwindow.loadGraph();
