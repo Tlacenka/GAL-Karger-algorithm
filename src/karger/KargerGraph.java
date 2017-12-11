@@ -65,7 +65,7 @@ public class KargerGraph {
 
     private HashMap<mxCell,LinkedList<mxCell>> adjacencyList;
 
-    // protected JList<String> algorithmList;
+    protected JList<String> algorithmList;
 
     public KargerGraph() {
 
@@ -996,9 +996,9 @@ public class KargerGraph {
         return this.graph;
     }
 
-   /* public void getAlgorithmList(JList<String> algList){
+    public void getAlgorithmList(JList<String> algList){
        algorithmList = algList;
-    }*/
+    }
 
     public ArrayList<Integer> getCurOrder(){
         return this.curOrder;
