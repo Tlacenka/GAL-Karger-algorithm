@@ -19,6 +19,13 @@ public class UserGuideWindow {
                 " there are two vertices left, dividing the original set of vertices into two groups, and one edge" +
                 " that represents the cut. In order to find minimal cut, trying out all possible orders of removing edges" +
                 " is needed (altogether that makes |E|! runs).</p>" +
+                "<h2>Algorithm Complexity</h2>" +
+                "<p>As said above, trying out all possible edge orders can be completed in |E|! runs, in other words polynomial time" +
+                " with regards to the number of edges.</p>" +
+                "<p> One step of the algorithm for vertices v1 and v2 involves going through all adjacent nodes of v2, finding the edge " +
+                "connecting them to v2 and redirecting it to v1. Consequently, multiple edges between two vertices are merged into one and" +
+                "the edge weight is adjusted.</p>" +
+                "<p>Therefore, one step is also completed in polynomial time with regards to both the number of vertices and edges.</p>" +
                 "<h2> The application design</h2>" +
                 "<p>The main window of this application is divided into four main sections:</p>" +
                 "<ul><li> the <b>graph editor</b> on the left </li>" +
@@ -62,7 +69,7 @@ public class UserGuideWindow {
         JScrollPane scrollPane = new JScrollPane(textArea);
         //textArea.setLineWrap(true);
         //textArea.setWrapStyleWord(true);
-        scrollPane.setPreferredSize( new Dimension( 600, 300 ) );
+        scrollPane.setPreferredSize( new Dimension( 600, 400 ) );
         JOptionPane.showMessageDialog(null, scrollPane, "User Guide",
                 JOptionPane.YES_NO_OPTION);
 
