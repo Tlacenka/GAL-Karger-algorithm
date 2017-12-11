@@ -874,12 +874,12 @@ public class KargerGraph {
             return;
         }
 
-        System.out.print("Cur order:");
-        System.out.println(this.curOrder);
+        //System.out.print("Cur order:");
+        //System.out.println(this.curOrder);
 
         // Go on until there are 2 nodes left
         while (this.adjacencyList.keySet().toArray().length >= 3) {
-            System.out.println("Hello");
+            //System.out.println("Hello");
             this.nextStep();
         }
 
@@ -913,10 +913,10 @@ public class KargerGraph {
             V2 = swap;
         }
 
-        System.out.println("result: " + V1 + " " + V2);
+        //System.out.println("result: " + V1 + " " + V2);
 
         this.orderHistory.add(this.curOrder);
-        System.out.println(this.curOrder);
+        //System.out.println(this.curOrder);
 
         // Find out if these sets have been there before
         KargerRecord sameResult = this.getResult(V1, V2);
