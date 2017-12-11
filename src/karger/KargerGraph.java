@@ -63,6 +63,7 @@ public class KargerGraph {
     private int vertex_scaling; // by how much is vertex expanded when new node is merged into it
     private Boolean runFinished;
     private String encodedResetGraph;
+    private ArrayList<ArrayList<Integer>> orderHistory;
 
     private HashMap<mxCell,LinkedList<mxCell>> adjacencyList;
 
@@ -81,6 +82,7 @@ public class KargerGraph {
         this.maxRuns = 0;
         this.runFinished = false;
         this.encodedResetGraph = "";
+        this.orderHistory = new ArrayList<ArrayList<Integer>>();
 
         // Create a graph
         this.graph = new mxGraph();
@@ -241,7 +243,7 @@ public class KargerGraph {
      * Shuffle edges until they are uniquely ordered.
      */
     public void shuffleEdges() {
-        System.out.print(this.curOrder);
+        //System.out.print(this.curOrder);
 
         Boolean keepShuffling = true;
         Boolean isUnique = true;
@@ -251,14 +253,21 @@ public class KargerGraph {
             return;
         }
 
+        //System.out.println("order history");
+        //System.out.println(this.orderHistory);
+
         do {
-            System.out.print("shuffling");
+            //System.out.print("While shuffling");
             Collections.shuffle(this.curOrder);
-            System.out.print(this.curOrder);
+            isUnique = true;
+            //System.out.print(this.curOrder);
 
             // Make sure it is unique
-            for (KargerRecord r: this.runs) {
-                if (this.curOrder.equals(r)) {
+            for (ArrayList<Integer> o: this.orderHistory) {
+                if (this.curOrder.equals(o)) {
+                    //System.out.print(this.curOrder);
+                    //System.out.print(" not unique in ");
+                    //System.out.println(this.orderHistory);
                     isUnique = false;
                     break;
                 }
@@ -740,6 +749,7 @@ public class KargerGraph {
         this.runCounter = "0";
         this.bestResultCut = "-";
         this.runs = new ArrayList<KargerRecord>();
+        this.orderHistory = new ArrayList<ArrayList<Integer>>();
         this.shuffleEdges();
         //System.out.println("Current order");
         //System.out.println(this.curOrder);
@@ -860,23 +870,27 @@ public class KargerGraph {
      */
     public void finishRun() {
 
-        if (Integer.parseInt(this.runCounter) >= this.maxRuns) {
+        if (Integer.parseInt(this.runCounter) > this.maxRuns) {
             return;
         }
 
+        System.out.print("Cur order:");
+        System.out.println(this.curOrder);
+
         // Go on until there are 2 nodes left
         while (this.adjacencyList.keySet().toArray().length >= 3) {
+            System.out.println("Hello");
             this.nextStep();
         }
 
         // Update results obtained by the last run
-        this.updateResults();
+        //this.updateResults();
 
         // Update run counter
-        this.runCounter = Integer.toString(Integer.parseInt(this.runCounter) + 1);
+        //this.runCounter = Integer.toString(Integer.parseInt(this.runCounter) + 1);
 
         // Shuffle edge order
-        this.shuffleEdges();
+        //this.shuffleEdges();
     }
 
     /**
@@ -900,6 +914,9 @@ public class KargerGraph {
         }
 
         System.out.println("result: " + V1 + " " + V2);
+
+        this.orderHistory.add(this.curOrder);
+        System.out.println(this.curOrder);
 
         // Find out if these sets have been there before
         KargerRecord sameResult = this.getResult(V1, V2);
@@ -937,6 +954,7 @@ public class KargerGraph {
                 sameResult.setCut(cut_val);
             }
         }
+
 
         // Update best result
         if (this.bestResultCut.equals("-") || Integer.parseInt(this.bestResultCut) > cut_val) {
@@ -988,12 +1006,16 @@ public class KargerGraph {
         while (Integer.parseInt(this.runCounter) < this.maxRuns) {
             this.finishRun();
 
+            // Shuffle edge order
+            //this.shuffleEdges();
+
             this.XMLToGraph(this.encodedResetGraph);
             // Update default parent
             this.parent = graph.getDefaultParent();
 
             // Update adjacency list
             this.createAdjacencyList();
+            this.initiateOrder();
             this.stepCounter = 0;
         }
 
