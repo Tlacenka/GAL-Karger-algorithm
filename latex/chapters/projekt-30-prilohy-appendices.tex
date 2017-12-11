@@ -31,7 +31,7 @@ Aplikaci lze ovládat pomocí:
 
 \begin{itemize}
     \item \includegraphics[height=10em]{obrazky-figures/file.png} \\Možnosti práce se souborem: \\ - vytvoření nového grafu \\ - načtení uloženého grafu ve formátu XML \\ - uložení grafu ve formátu XML
-    \item \includegraphics[height=10em]{obrazky-figures/help.png} \\Možnosti nápovědy: \\ - uživatelská příručka \\ - aplikaci
+    \item \includegraphics[height=10em]{obrazky-figures/help.png} \\Možnosti nápovědy: \\ - uživatelská příručka \\ - o aplikaci \\
 \end{itemize}
 
 
@@ -41,20 +41,37 @@ Aplikaci lze ovládat pomocí:
 Editor obsahuje seznam uzlů (Node list) a seznam hran (Edge list). Ke každému z těchto seznamů jsou přidružena dvě tlačítka: 
 
 \begin{itemize}
-    \item \includegraphics[height=1.3em]{obrazky-figures/addButton.png} - Vložení uzlu/hrany do grafy
-    \item \includegraphics[height=1.3em]{obrazky-figures/removeButton.png} - Odebrání uzlu/hrany z grafu
-\end{itemize}
+    \item \includegraphics[height=1.3em]{obrazky-figures/addButton.png} - Vložení uzlu/hrany do grafu
+    \item \includegraphics[height=1.3em]{obrazky-figures/removeButton.png} - Odebrání uzlu/hrany z grafu \\
+\end{itemize} 
 
 
 
 \subsection{Ovládací panel}
 
+Ovládací panel obsahuje pět různých tlačítek, přičemž aplikace může běžet ve dvou různých módech. První tlačítko zleva je:  
+
 \begin{itemize}
-    \item \includegraphics[height=1.3em]{obrazky-figures/resetSmall.png} - Reset předchozích kroků.
-    \item \includegraphics[height=1.3em]{obrazky-figures/playSmall.png} - Krok vpřed.
-    \item \includegraphics[height=1.3em]{obrazky-figures/nextStepSmall.png} - Dokončení jednoho běhu algoritmu.
-    \item \includegraphics[height=1.3em]{obrazky-figures/finishSmall.png} - Úplně dokončení algoritmu, dojde k zobrazení výsledků.
-    \item \includegraphics[height=1.3em]{obrazky-figures/manualSteps.png} - Krokování algoritmu v pravém panelu a zobrazování změn na grafu.
+    \item \includegraphics[height=1.3em]{obrazky-figures/resetSmall.png} - Reset grafu. Vrátí graf do počátečního stavu a umožňuje začít znovu. 
+\end{itemize}
+
+\newpage
+
+\noindent Zbývající čtyří tlačítka pracují v různých módech aplikace: \\
+
+\noindent Tzv. Single run mód:
+
+\begin{itemize}
+    \item \includegraphics[height=1.3em]{obrazky-figures/playSmall.png} - Kliknutím na toto tlačítko dojde k provedení jednoho kroku algoritmu, tedy ke sloučení jedné dvojice uzlů a zobrazení aktualizovaného grafu.
+    \item \includegraphics[height=1.3em]{obrazky-figures/nextStepSmall.png} - Kliknutím na toto tlačítko dojde ke spuštění jednoho běhu algoritmu a zobrazení výsledku tohoto běhu.
+    \item \includegraphics[height=1.3em]{obrazky-figures/manualSteps.png} - Kliknutím na toto tlačítko je aktivováno krokování algoritmu v pravém panelu a zobrazování změn na grafu. 
+\end{itemize}
+
+\noindent Tzv. Multiple runs mód:
+
+\begin{itemize}
+	\item \includegraphics[height=1.3em]{obrazky-figures/finishSmall.png} - Kliknutím na dané tlačítko je spuštěn kompletní běh algoritmu. Algoritmus tedy proběhne pro všechny možné varianty. Po dokončení zobrazí graf v počátečním stavu, nejlepší možný výsledek a všechny další výsledky.
 \end{itemize}
 
 \end{document}
+
