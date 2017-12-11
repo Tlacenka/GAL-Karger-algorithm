@@ -62,6 +62,7 @@ public class KargerGraph {
     private int vertex_size; // width = height of vertex
     private int vertex_scaling; // by how much is vertex expanded when new node is merged into it
     private Boolean runFinished;
+    private String encodedResetGraph;
 
     private HashMap<mxCell,LinkedList<mxCell>> adjacencyList;
 
@@ -79,6 +80,7 @@ public class KargerGraph {
         this.bestResult = null;
         this.maxRuns = 0;
         this.runFinished = false;
+        this.encodedResetGraph = "";
 
         // Create a graph
         this.graph = new mxGraph();
@@ -137,6 +139,9 @@ public class KargerGraph {
         this.gc.getViewport().setOpaque(true);
         this.gc.getViewport().setBackground(Color.white);
         this.gc.setBorder(null);
+
+        // Encode graph
+        this.encodedResetGraph = this.graphToXML();
 
         // Override mouse actions
         this.gc.getGraphControl().addMouseListener(new MouseAdapter() {
@@ -344,14 +349,14 @@ public class KargerGraph {
 
          // Print it for debugging
         //System.out.println("Adjacency list: ");
-        for (Object v_obj : this.adjacencyList.keySet().toArray()) {
-            mxCell v = (mxCell)v_obj;
+        //for (Object v_obj : this.adjacencyList.keySet().toArray()) {
+            //mxCell v = (mxCell)v_obj;
             //System.out.print((String)v.getValue() + " -> ");
-            for (mxCell adj : this.adjacencyList.get(v)) {
+            //for (mxCell adj : this.adjacencyList.get(v)) {
                 //System.out.print((String)adj.getValue() + " " );
-            }
+            //}
             //System.out.print("\n");
-        }
+        //}
 
     }
 
@@ -408,6 +413,10 @@ public class KargerGraph {
      */
     public void loadGraph(String filepath) {
 
+        if (filepath == "") {
+            return;
+        }
+
         // Empty current graph if one exists
         this.createEmptyGraph();
 
@@ -422,6 +431,9 @@ public class KargerGraph {
         }
 
         this.XMLToGraph(fileContent);
+
+        // Encode graph
+        this.encodedResetGraph = this.graphToXML();
 
         // Update default parent
         this.parent = graph.getDefaultParent();
@@ -696,7 +708,15 @@ public class KargerGraph {
      * Resets all runs, re-creates the whole graph.
      */
     public void resetAlgorithm() {
-        this.loadGraph("./examples/reset.xml");
+        this.XMLToGraph(this.encodedResetGraph);
+
+        // Update default parent
+        this.parent = graph.getDefaultParent();
+
+        // Update adjacency list
+        this.createAdjacencyList();
+
+        // Initiate variables
         this.stepCounter = 0;
         this.runCounter = "0";
         this.bestResultCut = "-";
@@ -707,19 +727,18 @@ public class KargerGraph {
         //System.out.println(this.graphEdges);
     }
 
-    // TODO fix!!
     /**
      * Goes back one step in the algorithm.
      */
-    public void undoStep() {
+    //public void undoStep() {
 
-        if (this.stepCounter > 0) {
-            this.loadGraph("./examples/undo.xml");
+        //if (this.stepCounter > 0) {
+            //this.loadGraph("./examples/undo.xml");
 
-            // Update step counter
-            this.stepCounter = this.stepCounter - 1;
-        }
-    }
+            //// Update step counter
+            //this.stepCounter = this.stepCounter - 1;
+        //}
+    //}
 
     /**
      * First part of the step - vertices are chosen and coloured.
@@ -728,11 +747,11 @@ public class KargerGraph {
 
         // If this is first step, save for resetting
         if (this.stepCounter == 0) {
-            this.saveGraph("./examples/reset.xml");
+            this.encodedResetGraph = this.graphToXML();
         }
 
-        // Save current algorithm
-        this.saveGraph("./examples/undo.xml");
+        // Save current algorithm - not supported anymore
+        //this.saveGraph("./examples/undo.xml");
 
         // 3 - wouldn't make sense to have empty set of vertices
         if (this.adjacencyList.keySet().toArray().length < 3) {
@@ -947,7 +966,13 @@ public class KargerGraph {
         // Run the whole thing maximum number of times
         while (Integer.parseInt(this.runCounter) < this.maxRuns) {
             this.finishRun();
-            this.loadGraph("./examples/reset.xml");
+
+            this.XMLToGraph(this.encodedResetGraph);
+            // Update default parent
+            this.parent = graph.getDefaultParent();
+
+            // Update adjacency list
+            this.createAdjacencyList();
             this.stepCounter = 0;
         }
 

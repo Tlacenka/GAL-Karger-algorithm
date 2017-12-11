@@ -8,6 +8,7 @@
 package karger;
 
 import java.lang.String;
+import java.lang.NullPointerException;
 
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.JFileChooser;
@@ -24,6 +25,7 @@ public class OpenFileWindow extends JFrame {
      */
     public String showOpenChooser(){
         JFileChooser chooser = new JFileChooser("./examples");
+        int rVal = 0;
         
         // set filter for xml files
         FileNameExtensionFilter xmlfilter = new FileNameExtensionFilter("xml files (*.xml)", "xml");
@@ -32,18 +34,16 @@ public class OpenFileWindow extends JFrame {
         chooser.setFileFilter(xmlfilter);
         
         // Demonstrate "Open" dialog:
-        int rVal = chooser.showOpenDialog(OpenFileWindow.this);
-        
-        // file is selected
-        if (rVal == JFileChooser.APPROVE_OPTION) {
+        rVal = chooser.showOpenDialog(OpenFileWindow.this);
+
+        // Get file content
+        if ((rVal == JFileChooser.APPROVE_OPTION) && (chooser.getSelectedFile() != null)) {
             System.out.println(chooser.getSelectedFile().getPath());
-        }
-      
-        if (rVal == JFileChooser.CANCEL_OPTION) {         
+        } else {
             System.out.println("Action cancelled."); 
             dispose();
+            return "";
         }
-        
         return(chooser.getSelectedFile().getPath());
     }
    
