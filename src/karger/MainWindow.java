@@ -83,6 +83,8 @@ public class MainWindow {
    private JButton addEdgeButton;
    private JButton removeEdgeButton;
 
+   private JMenuItem menuSaveGraph;
+
    boolean addedNode;
    boolean isPhase1;
 
@@ -91,8 +93,6 @@ public class MainWindow {
    private ArrayList<KargerGraph> graphResults;
    private KargerGraph graphBestResult;
    private ArrayList<mxCell> manualVertices;
-
-   boolean isWhile = false;
 
    protected int clickCounter = 0;
 
@@ -188,13 +188,13 @@ public class MainWindow {
       menuCreateGraph.addActionListener(new MenuListener(this, MenuEventType.NEW));
       JMenuItem menuLoadGraph = new JMenuItem("Load Graph");
       menuLoadGraph.addActionListener(new MenuListener(this, MenuEventType.LOAD));
-      JMenuItem menuSaveGraph = new JMenuItem("Save Graph");
-      menuSaveGraph.addActionListener(new MenuListener(this, MenuEventType.SAVE));
+      this.menuSaveGraph = new JMenuItem("Save Graph");
+      this.menuSaveGraph.addActionListener(new MenuListener(this, MenuEventType.SAVE));
 
       // Add items to menu
       this.menu.add(menuCreateGraph);
       this.menu.add(menuLoadGraph);
-      this.menu.add(menuSaveGraph);
+      this.menu.add(this.menuSaveGraph);
       this.menuBar.add(this.menu);
 
       // Create help menu items
@@ -307,21 +307,12 @@ public class MainWindow {
                try{
                   addedNode = xSidePanels.addNode(nodeModel, graph.getAdjacencyList(), graph.xGetGraph());
 
+                  // Update adjacency list
                   if(addedNode == true){
                      graph.createAdjacencyList();
-
-                     // first of all, the list must be cleared
-                     graph.getCurOrder().clear();
-
-                     // then we can "update" the list with changed values
-                     int i = 0;
-                     for (Object eO: graph.xGetGraph().getChildEdges(graph.xGetGraph().getDefaultParent())) {
-                        graph.getCurOrder().add(i);
-                        i++;
-                     }
+                     // It makes graph non-consecutive
+                     disableControlButtons();
                   }
-
-
                }catch (Exception ex) {
                   System.out.println(ex);
                }
@@ -348,16 +339,24 @@ public class MainWindow {
 
                   // first of all, the list must be cleared
                   graph.getCurOrder().clear();
+                  graph.getGraphEdges().clear();
 
                   // then we can "update" the list with changed values
                   int i = 0;
-                  for (Object eO: graph.xGetGraph().getChildEdges(graph.xGetGraph().getDefaultParent())) {
+                  for (Object e_obj: graph.xGetGraph().getChildEdges(graph.xGetGraph().getDefaultParent())) {
+                     mxCell edge = (mxCell)e_obj;
                      graph.getCurOrder().add(i);
+                     graph.getGraphEdges().add(edge);
                      i++;
                   }
 
+                  // Disable control buttons if graph becomes non-consecutive
+                  if (!graph.isConsecutive()) {
+                     disableControlButtons();
+                  } else {
+                     enableControlButtons();
+                  }
                }
-
             }
          });
 
@@ -379,19 +378,21 @@ public class MainWindow {
 
                   // first of all, the list must be cleared
                   graph.getCurOrder().clear();
+                  graph.getGraphEdges().clear();
 
                   // then we can "update" the list with changed values
                   int i = 0;
-                  for (Object eO: graph.xGetGraph().getChildEdges(graph.xGetGraph().getDefaultParent())) {
+                  for (Object e_obj: graph.xGetGraph().getChildEdges(graph.xGetGraph().getDefaultParent())) {
+                     mxCell edge = (mxCell)e_obj;
                      graph.getCurOrder().add(i);
+                     graph.getGraphEdges().add(edge);
                      i++;
                   }
-
+                  // Never makes it non-consecutive
+                  if (graph.isConsecutive()) {
+                     enableControlButtons();
+                  }
                }
-
-
-
-
             }
          });
 
@@ -414,15 +415,23 @@ public class MainWindow {
 
                   // first of all, the list must be cleared
                   graph.getCurOrder().clear();
+                  graph.getGraphEdges().clear();
 
                   // then we can "update" the list with changed values
                   int i = 0;
-                  for (Object eO: graph.xGetGraph().getChildEdges(graph.xGetGraph().getDefaultParent())) {
+                  for (Object e_obj: graph.xGetGraph().getChildEdges(graph.xGetGraph().getDefaultParent())) {
+                     mxCell edge = (mxCell)e_obj;
                      graph.getCurOrder().add(i);
+                     graph.getGraphEdges().add(edge);
                      i++;
                   }
+                  // Disable control buttons if graph becomes non-consecutive
+                  if (!graph.isConsecutive()) {
+                      disableControlButtons();
+                  } else {
+                     enableControlButtons();
+                  }
                }
-
             }
          });
 
@@ -716,40 +725,17 @@ public class MainWindow {
       public void actionPerformed(ActionEvent e) {
          switch(this.eventType) {
             case RESET:
-
-               // Reset buttons
-               clickCounter = 0;
-               //algorithmChoice.setSelectedIndex(0);
-               algorithmChoice.clearSelection();
-               this.mainwindow.undoButton.setEnabled(false);
-               this.mainwindow.resetButton.setEnabled(false);
-               this.mainwindow.graph.resetAlgorithm();
-               this.mainwindow.stepButton.setEnabled(true);
-               this.mainwindow.finishButton.setEnabled(true);
-               this.mainwindow.runButton.setEnabled(true);
-               this.mainwindow.manualSteps.setEnabled(true);
-
-               // Reset trackers
-               this.mainwindow.runTracker.setText("Total Runs: " + this.mainwindow.graph.getRunCounter());
-               this.mainwindow.resultTracker.setText("Best Result: " + this.mainwindow.graph.getBestResultCut());
-
-               // Remove results, display only original graph
-               this.mainwindow.graph.getGraphComponent().zoom(1.0);
-               this.mainwindow.resultContentPanel.remove(this.mainwindow.resultTitle);
-               this.mainwindow.resultContentPanel.remove(this.mainwindow.bestResultPanel);
-               this.mainwindow.resultContentPanel.remove(this.mainwindow.otherResultsTitle);
-               this.mainwindow.resultContentPanel.remove(this.mainwindow.otherResultsPanel);
-
-               // Remove stored results
-               this.mainwindow.bestResultPanel.removeAll();
-               this.mainwindow.otherResultsPanel.removeAll();
-
+               // Reset everything
+               this.mainwindow.resetStats();
                break;
             case UNDO:
                this.mainwindow.undoButton.setEnabled(false);
+               this.mainwindow.menuSaveGraph.setEnabled(false);
                this.mainwindow.graph.undoStep();
                break;
             case NEXT_STEP:
+               this.mainwindow.disableEditorButtons();
+               this.mainwindow.menuSaveGraph.setEnabled(false);
                this.mainwindow.graph.nextStep();
                this.mainwindow.undoButton.setEnabled(true);
                this.mainwindow.resetButton.setEnabled(true);
@@ -763,6 +749,8 @@ public class MainWindow {
 
                break;
             case RUN:
+               this.mainwindow.disableEditorButtons();
+               this.mainwindow.menuSaveGraph.setEnabled(false);
                this.mainwindow.undoButton.setEnabled(false);
                this.mainwindow.stepButton.setEnabled(false);
                this.mainwindow.runButton.setEnabled(false);
@@ -773,6 +761,8 @@ public class MainWindow {
                this.mainwindow.resultTracker.setText("Best Result: " + this.mainwindow.graph.getBestResultCut());
                break;
             case FINISH:
+               this.mainwindow.disableEditorButtons();
+               this.mainwindow.menuSaveGraph.setEnabled(false);
                this.mainwindow.finishButton.setEnabled(false);
                this.mainwindow.runButton.setEnabled(false);
                this.mainwindow.undoButton.setEnabled(false);
@@ -836,6 +826,8 @@ public class MainWindow {
                      clickCounter = 21;
 
                      //System.out.println("finished");
+                     this.mainwindow.disableEditorButtons();
+                     this.mainwindow.menuSaveGraph.setEnabled(false);
                      this.mainwindow.runTracker.setText("Total Runs: " + this.mainwindow.graph.getRunCounter());
                      this.mainwindow.resultTracker.setText("Best Result: " + this.mainwindow.graph.getBestResultCut());
                      this.mainwindow.stepButton.setEnabled(false);
@@ -883,6 +875,8 @@ public class MainWindow {
                      if (this.mainwindow.isPhase1) {
 
                         // Disable all buttons except for reset before phase 2 is finished
+                        this.mainwindow.disableEditorButtons();
+                        this.mainwindow.menuSaveGraph.setEnabled(false);
                         this.mainwindow.undoButton.setEnabled(false);
                         this.mainwindow.stepButton.setEnabled(false);
                         this.mainwindow.runButton.setEnabled(false);
@@ -910,17 +904,7 @@ public class MainWindow {
 
                         //System.out.println("is run finished: " + this.mainwindow.graph.isRunFinished());
 
-                        if (this.mainwindow.graph.isRunFinished() && isWhile == true) {
-                           //System.out.println("finished");
-                           this.mainwindow.runTracker.setText("Total Runs: " + this.mainwindow.graph.getRunCounter());
-                           this.mainwindow.resultTracker.setText("Best Result: " + this.mainwindow.graph.getBestResultCut());
-                           this.mainwindow.stepButton.setEnabled(false);
-                           this.mainwindow.manualSteps.setEnabled(false);
-                           this.mainwindow.runButton.setEnabled(false);
-
-                           algorithmChoice.setSelectedIndex(7);
-                           //clickCounter = 21;
-                        }
+   
                      }
 
                      if(clickCounter == 4)
@@ -952,12 +936,14 @@ public class MainWindow {
    // Create new graph
    public void newGraph() {
       this.graph.createEmptyGraph();
+      this.resetStats();
    }
 
    // Load graph from file
    public void loadGraph() {
       OpenFileWindow win = new OpenFileWindow();
       String filepath = win.showOpenChooser();
+      this.resetStats();
       this.graph.loadGraph(filepath);
    }
 
@@ -1011,7 +997,7 @@ public class MainWindow {
    /**
     * Update node list based on current adjacency list.
     */
-   public void updateNodeList(){
+   public void updateNodeList() {
       try {
 
          aList = graph.getAdjacencyList();
@@ -1035,15 +1021,72 @@ public class MainWindow {
    }
 
 
+   // Enable editor buttons
+   public void enableEditorButtons() {
+      this.addNodeButton.setEnabled(true);
+      this.removeNodeButton.setEnabled(true);
+      this.addEdgeButton.setEnabled(true);
+      this.removeEdgeButton.setEnabled(true);
+   }
 
-   // currently not used (and never be?)
-   public void disableEditorButtons(){
-
+   // Disable editor buttons
+   public void disableEditorButtons() {
       this.addNodeButton.setEnabled(false);
       this.removeNodeButton.setEnabled(false);
       this.addEdgeButton.setEnabled(false);
       this.removeEdgeButton.setEnabled(false);
 
+   }
+
+   // Enable control buttons - except for reset
+   public void enableControlButtons() {
+      //this.resetButton.setEnabled(true);
+      //this.undoButton.setEnabled(false);
+      this.stepButton.setEnabled(true);
+      this.runButton.setEnabled(true);
+      this.finishButton.setEnabled(true);
+      this.manualSteps.setEnabled(true);
+   }
+
+   // Disable control buttons
+   public void disableControlButtons() {
+      this.resetButton.setEnabled(false);
+      //this.undoButton.setEnabled(false);
+      this.stepButton.setEnabled(false);
+      this.runButton.setEnabled(false);
+      this.finishButton.setEnabled(false);
+      this.manualSteps.setEnabled(false);
+   }
+
+   public void resetStats () {
+       // Reset buttons
+       clickCounter = 0;
+       //algorithmChoice.setSelectedIndex(0);
+       algorithmChoice.clearSelection();
+       this.enableEditorButtons();
+       this.undoButton.setEnabled(false);
+       this.resetButton.setEnabled(false);
+       this.graph.resetAlgorithm();
+       this.stepButton.setEnabled(true);
+       this.finishButton.setEnabled(true);
+       this.runButton.setEnabled(true);
+       this.manualSteps.setEnabled(true);
+       this.menuSaveGraph.setEnabled(true);
+
+       // Reset trackers
+       this.runTracker.setText("Total Runs: " + this.graph.getRunCounter());
+       this.resultTracker.setText("Best Result: " + this.graph.getBestResultCut());
+
+       // Remove results, display only original graph
+       this.graph.getGraphComponent().zoom(1.0);
+       this.resultContentPanel.remove(this.resultTitle);
+       this.resultContentPanel.remove(this.bestResultPanel);
+       this.resultContentPanel.remove(this.otherResultsTitle);
+       this.resultContentPanel.remove(this.otherResultsPanel);
+
+       // Remove stored results
+       this.bestResultPanel.removeAll();
+       this.otherResultsPanel.removeAll();
    }
 
   /* public JList<String> getAlgorithmList(){
