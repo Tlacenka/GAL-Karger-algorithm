@@ -12,12 +12,12 @@ Cílem tohoto projektu je návrh a implementace demonstrační aplikace Kargerov
 
 \section{Návrh aplikace}
 
-Předběžný návrh aplikace je důležitým krokem ve vývoji. Při tomto postupu je možno se vyhnout případným problémům, které by mohly nastat v pozdější fázi vývoje. Prvním krokem byl návrh základního rozložení hlavního okna aplikace.  \\•
+Předběžný návrh aplikace je důležitým krokem ve vývoji. Při tomto postupu je možno se vyhnout případným problémům, které by mohly nastat v pozdější fázi vývoje. Prvním krokem byl návrh základního rozložení hlavního okna aplikace.  \\
 
 	\begin{figure}[ht]
     	\begin{center}
   			\includegraphics[scale=0.7]{obrazky-figures/layout.png}
-  			\caption{Layout hlavního okna aplikace.}
+  			\caption{Uspořádání hlavního okna aplikace.}
   			\label{fig:layout}
   		\end{center}
 	\end{figure}
@@ -28,12 +28,12 @@ Dalším krokem návrhu aplikace byl výběr programovacího jazyka, ve kterém 
 
 \noindent\textbf{Swing} 
 
-Swing je knihovna plně založená na platformě Java a postavená na AWT (Abstract Windowing Toolkit), sloužící k ovládání počítače pomocí grafického rozhraní. S využitím této knihovny je možno vytvářet okna (JFrame), dialogy (JOptionPane), tlačítka (JButton), seznamy  a mnoho dalšího \cite{swing}. \\
+Swing \cite{swing} je knihovna plně založená na platformě Java a postavená na AWT (Abstract Windowing Toolkit), sloužící k ovládání počítače pomocí grafického rozhraní. S využitím této knihovny je možno vytvářet okna (JFrame), dialogy (JOptionPane), tlačítka (JButton), seznamy  a mnoho dalšího. \\
 
 
 \noindent\textbf{JGraphX} 
 
-JGraphX je knihovna licencovaná pod licencí BSD, založená na Java Swing framworku, poskytující funkcionalitu pro vizualizaci a interakci s grafy založenými na systému uzel-hrana. JGraphX také obsahuje funkce pro podporu XML šablon, různých importů a exportů a rozvržení grafu \cite{jgraphx}.
+JGraphX \cite{jgraphx} je knihovna licencovaná pod licencí BSD, založená na Java Swing knihovně, poskytující funkcionalitu pro vizualizaci a interakci s grafy založenými na systému uzel-hrana. JGraphX také obsahuje funkce pro podporu XML šablon, různých importů a exportů a rozvržení grafu.
 
 
 
@@ -46,43 +46,47 @@ Hlavní částí vývoje byla implementace algoritmu podle zvolené varianty zad
 
 \subsection{Algoritmus}
 
-Jedná se o deterministický randomizovaný algoritmus, který náhodně vybírá hranu mezi všemi hranami grafu a slučuje koncové uzly této hrany, dokud nezůstanou pouze dva super uzly \cite{karger}. Pseudokód hlavní smyčky programu: \\ 
+Jedná se o deterministický randomizovaný algoritmus, který náhodně vybírá hranu mezi všemi hranami grafu a slučuje koncové uzly této hrany, dokud nezůstanou pouze dva super uzly \cite{karger}. Jednoduchý pseudokód hlavní smyčky programu: \\ 
 
 
 \begin{algorithm}
 \caption{Karger Algorithm}\label{euclid}
 \begin{algorithmic}[1]
-\State $Let \, G = (V, E)$
+\State $Let \; G = (V, E)$
 \While {$|V| > 2$}
-\State $(u, v) \gets uniform\, random\, edge\, from\, F$
-\State $Merge(\overline{u}, \overline{v}, V)$
-\State $F \gets F\backslash E_{\overline{u}\overline{v}}$
+\State $nahodne \; vyber \; dva \; sousedni \; uzly \; v1, \; v2$
+\State $mergeCells(v1, \; v2)$
+%\State $F \gets F\backslash E_{\overline{u}\overline{v}}$
 \EndWhile
-\State $Return\, one\, of \,the\, supernodes\, in\, V \,and \,|E_{uv}|$
+%\State $Return\, one\, of \,the\, supernodes\, in\, V \,and \,|E_{uv}|$
 \end{algorithmic}
 \end{algorithm}
 
 \noindent a spojení dvou uzlů: \\
 
 \begin{algorithm}
-\caption{$Merge(\overline{u}, \overline{v}, V)$}\label{euclid}
+\caption{$mergeCells(v1,\; v2)$}\label{euclid}
 \begin{algorithmic}[1]
-\State $x \gets new \, supernode$
-\State {$V(x) \gets V(a) \cup V(b) \; // merge \, the \, vertices$}
-\ForEach { $d \in V \backslash \{a,b\}$ }
-\State $E_{xd} \gets E_{ad} \ cup E_{bd} \; //operation \, using \, linked \, list$ 
-\State $V \ gets (V \backslash \{a,b\}) \ cup \{x\}$
+%\State $x \gets new \, supernode$
+%\State {$V(x) \gets V(a) \cup V(b) \; // merge \, the \, vertices$}
+\ForEach { $v \in Adj[v2]$ }
+\State $presmeruj \; uzel \; na \; v1$ 
+%\State $V \ gets (V \backslash \{a,b\}) \ cup \{x\}$
 \EndFor
+\State $prejmenuj \; v1$ 
+\State $odstran \; v2 \; a \; jeho \; hrany$ 
 
 \end{algorithmic}
 \end{algorithm}
+
+Časová složitos Kargerova algoritmu je $O (n^4log \, n)$ vzhledem k tomu, že spuštíme $O (n^2log \, n)$ pokusů za $O(n^2)$ času \cite{karger}. 
 
 
 
 
 \subsection{Struktura aplikace}
 
-Celá aplikace je tvořena jedním hlavním oknem MainWindow. Rozložení hlavního okna je zobrazeno v návrhu aplikace na obrázku ~\ref{fig:layout}. Po spuštění aplikace proběhne načtění a zobrazení defaultního grafu. Uživatel má možnost vybrat pro zpracování jiný graf. Graf je možno editovat přidáním nebo odebráním uzlů a hran. Případná komunikace s uživatelem je realizována prostřednictvím dialogových oken. 
+Celá aplikace je tvořena jedním hlavním oknem MainWindow. Rozložení hlavního okna je zobrazeno v návrhu aplikace na obrázku \ref{fig:layout}. Po spuštění aplikace proběhne načtění a zobrazení výchozího grafu. Uživatel má možnost vybrat pro zpracování jiný graf. Graf je možno editovat přidáním nebo odebráním uzlů a hran. Případná komunikace s uživatelem je realizována prostřednictvím dialogových oken. 
 
 
 	\begin{figure}[ht]
@@ -113,9 +117,9 @@ Odevzdaný archiv obsahuje:
 
 \begin{itemize}
 	\item src - adresář se zdrojovými soubory
-	\item libs - adresář s využitými knihovnami
+	\item lib - adresář s využitými knihovnami
 	\item latex - zdrovojé kódy této dokumentace 
-	\item readme
+	\item README.md
 	\item dokumentace.pdf - tato dokumentace 
 	\item build.xml - skript pro kompilaci a spuštění aplikace pomocí Ant
 \end{itemize}
@@ -127,17 +131,18 @@ Odevzdaný archiv obsahuje:
 \subsection{Možnosti aplikace}
 
 \begin{itemize}
-	\item Vytvoření/načtení/uložení grafu ve formátu XML
-	\item Editace grafu - přidání a odebrání uzlu/hrany
-	\item Ovládání grafu pomocí ovládacího panelu - reset, další krok, dokončení jednoho běhu, dokončení algoritmu
-	\item Podrobnější krokování provádění algoritmu spoulu s vyznačením právě provedených částí pseudokódu
-	\item Přesun uzlů pomocí kliknutí a tažení myší
+	\item Vytvoření/načtení/uložení grafu ve formátu XML,
+	\item editace grafu - přidání a odebrání uzlu/hrany,
+	\item ovládání grafu pomocí ovládacího panelu - reset, další krok, dokončení jednoho běhu, dokončení, algoritmu
+	\item podrobnější krokování provádění algoritmu spoulu s vyznačením právě provedených částí pseudokódu,
+	\item přesun uzlů pomocí kliknutí a tažení myší,
+	\item zobrazení uživatelského manuálu pod záložkou help v horním menu.
 \end{itemize}
 
 
 
 \section{Závěr}
 
-Cílem práce bylo vytvořit aplikace, která demonstruje Kargerův algoritmus pro nalezení minimálního řezu. Samotné řešení projektu s využitím knihovny JGraphX bylo poučné a vedlo k pochopení fungování Kargerova algoritmu. Výsledná aplikace je vydařená a toto řešení by mělo uživatele pomoci minimálně s pochopením základního principu algoritmu.
+Cílem práce bylo vytvořit aplikaci, která demonstruje Kargerův algoritmus pro nalezení minimálního řezu. Samotné řešení projektu s využitím knihovny JGraphX bylo poučné a vedlo k pochopení fungování Kargerova algoritmu. Výsledná aplikace je vydařená a toto řešení by mělo uživateli pomoci minimálně s pochopením základního principu algoritmu.
 
 \end{document}
