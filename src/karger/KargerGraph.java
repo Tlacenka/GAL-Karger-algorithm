@@ -116,14 +116,8 @@ public class KargerGraph {
         // Create adjacency list from it
         this.createAdjacencyList();
 
-        // Create default edge order and randomize it
-        this.curOrder = new ArrayList();
-        int i = 0;
-        for (Object e: this.graph.getChildEdges(this.parent)) {
-            this.curOrder.add(i);
-            i++;
-        }
-        this.shuffleEdges();
+        // Initial graphEdges
+        this.initiateOrder();
 
         // Wrap it in a component
         this.gc = new mxGraphComponent(this.graph);
@@ -213,6 +207,17 @@ public class KargerGraph {
         }
     }
 
+    public void initiateOrder() {
+        // Create default edge order and randomize it
+        this.curOrder = new ArrayList();
+        int i = 0;
+        for (Object e: this.graph.getChildEdges(this.parent)) {
+            this.curOrder.add(i);
+            i++;
+        }
+        this.shuffleEdges();
+    }
+
     /**
      * Compute n!
      */
@@ -236,7 +241,7 @@ public class KargerGraph {
      * Shuffle edges until they are uniquely ordered.
      */
     public void shuffleEdges() {
-        //System.out.print(this.curOrder);
+        System.out.print(this.curOrder);
 
         Boolean keepShuffling = true;
         Boolean isUnique = true;
@@ -247,9 +252,9 @@ public class KargerGraph {
         }
 
         do {
-            //System.out.print("shuffling");
+            System.out.print("shuffling");
             Collections.shuffle(this.curOrder);
-            //System.out.print(this.curOrder);
+            System.out.print(this.curOrder);
 
             // Make sure it is unique
             for (KargerRecord r: this.runs) {
@@ -311,6 +316,7 @@ public class KargerGraph {
 
         // Remove previous adjacency list - TODO somehow empty it?
         this.adjacencyList = new HashMap<mxCell,LinkedList<mxCell>>();
+        this.graphEdges.clear();
         this.graphEdges = new ArrayList<mxCell>();
 
         // Add all vertices
@@ -319,6 +325,7 @@ public class KargerGraph {
             this.adjacencyList.put(vertex, new LinkedList<mxCell>());
         }
 
+        int i = 0;
         // Link adjacent vertices, add edges into a list
         for (Object e : this.graph.getChildEdges(this.parent)) {
             mxCell edge = (mxCell)e;
@@ -341,6 +348,7 @@ public class KargerGraph {
 
             this.adjacencyList.get(src).add(dst);
             this.adjacencyList.get(dst).add(src);
+            i++;
         }
 
         // Get max runs - TODO set maximum edges to say 6
@@ -404,7 +412,15 @@ public class KargerGraph {
         {
             this.graph.removeCells(this.graph.getChildCells(this.graph.getDefaultParent(), true, true));
         }
+
         this.graph.getModel().endUpdate();
+
+        // Update default parent
+        this.parent = graph.getDefaultParent();
+        this.createAdjacencyList();
+        this.encodedResetGraph = this.graphToXML();
+        // Initiate graphEdges
+        this.initiateOrder();
     }
 
     /**
@@ -440,6 +456,9 @@ public class KargerGraph {
 
         // Update adjacency list
         this.createAdjacencyList();
+
+        // Initiate graphEdges
+        this.initiateOrder();
 
         return;
     }
@@ -880,6 +899,8 @@ public class KargerGraph {
             V2 = swap;
         }
 
+        System.out.println("result: " + V1 + " " + V2);
+
         // Find out if these sets have been there before
         KargerRecord sameResult = this.getResult(V1, V2);
         KargerRecord newRecord = null;
@@ -998,6 +1019,14 @@ public class KargerGraph {
             }
         }
         return true;
+    }
+
+    public void setEncodedResetGraph(String newEncodedGraph) {
+        this.encodedResetGraph = newEncodedGraph;
+    }
+
+    public Boolean isEmpty() {
+        return ((this.adjacencyList == null) || (this.adjacencyList.size() == 0));
     }
 
     public HashMap<mxCell,LinkedList<mxCell>> getAdjacencyList(){

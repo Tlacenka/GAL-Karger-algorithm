@@ -312,6 +312,8 @@ public class MainWindow {
                      graph.createAdjacencyList();
                      // It makes graph non-consecutive
                      disableControlButtons();
+                     graph.setEncodedResetGraph(graph.graphToXML());
+                     graph.initiateOrder();
                   }
                }catch (Exception ex) {
                   System.out.println(ex);
@@ -338,24 +340,22 @@ public class MainWindow {
                   updateEdgeList();
 
                   // first of all, the list must be cleared
-                  graph.getCurOrder().clear();
                   graph.getGraphEdges().clear();
 
                   // then we can "update" the list with changed values
-                  int i = 0;
                   for (Object e_obj: graph.xGetGraph().getChildEdges(graph.xGetGraph().getDefaultParent())) {
                      mxCell edge = (mxCell)e_obj;
-                     graph.getCurOrder().add(i);
                      graph.getGraphEdges().add(edge);
-                     i++;
                   }
 
                   // Disable control buttons if graph becomes non-consecutive
-                  if (!graph.isConsecutive()) {
+                  if (graph.isEmpty() || !graph.isConsecutive()) {
                      disableControlButtons();
                   } else {
                      enableControlButtons();
                   }
+                  graph.setEncodedResetGraph(graph.graphToXML());
+                  graph.initiateOrder();
                }
             }
          });
@@ -381,17 +381,16 @@ public class MainWindow {
                   graph.getGraphEdges().clear();
 
                   // then we can "update" the list with changed values
-                  int i = 0;
                   for (Object e_obj: graph.xGetGraph().getChildEdges(graph.xGetGraph().getDefaultParent())) {
                      mxCell edge = (mxCell)e_obj;
-                     graph.getCurOrder().add(i);
                      graph.getGraphEdges().add(edge);
-                     i++;
                   }
                   // Never makes it non-consecutive
                   if (graph.isConsecutive()) {
                      enableControlButtons();
                   }
+                  graph.setEncodedResetGraph(graph.graphToXML());
+                  graph.initiateOrder();
                }
             }
          });
@@ -418,19 +417,18 @@ public class MainWindow {
                   graph.getGraphEdges().clear();
 
                   // then we can "update" the list with changed values
-                  int i = 0;
                   for (Object e_obj: graph.xGetGraph().getChildEdges(graph.xGetGraph().getDefaultParent())) {
                      mxCell edge = (mxCell)e_obj;
-                     graph.getCurOrder().add(i);
                      graph.getGraphEdges().add(edge);
-                     i++;
                   }
                   // Disable control buttons if graph becomes non-consecutive
-                  if (!graph.isConsecutive()) {
+                  if (graph.isEmpty() || !graph.isConsecutive()) {
                       disableControlButtons();
                   } else {
                      enableControlButtons();
                   }
+                  graph.setEncodedResetGraph(graph.graphToXML());
+                  graph.initiateOrder();
                }
             }
          });
@@ -731,7 +729,7 @@ public class MainWindow {
             case UNDO:
                this.mainwindow.undoButton.setEnabled(false);
                this.mainwindow.menuSaveGraph.setEnabled(false);
-               this.mainwindow.graph.undoStep();
+               //this.mainwindow.graph.undoStep();
                break;
             case NEXT_STEP:
                this.mainwindow.disableEditorButtons();
@@ -935,8 +933,14 @@ public class MainWindow {
 
    // Create new graph
    public void newGraph() {
-      this.graph.createEmptyGraph();
       this.resetStats();
+      this.graph.createEmptyGraph();
+      this.graph.setEncodedResetGraph(this.graph.graphToXML());
+      this.graph.createAdjacencyList();
+      updateEdgeList();
+      updateNodeList();
+      disableControlButtons();
+      enableEditorButtons();
    }
 
    // Load graph from file
@@ -945,6 +949,14 @@ public class MainWindow {
       String filepath = win.showOpenChooser();
       this.resetStats();
       this.graph.loadGraph(filepath);
+      updateEdgeList();
+      updateNodeList();
+      if (graph.isEmpty() || !graph.isConsecutive()) {
+         disableControlButtons();
+      } else {
+         enableControlButtons();
+      }
+      enableEditorButtons();
    }
 
    // Save graph to file
@@ -969,6 +981,7 @@ public class MainWindow {
       try {
 
          Object xParent = graph.xGetGraph().getDefaultParent();
+         edgeModel.clear();
 
          for (Object e : graph.xGetGraph().getChildEdges(xParent)) {
             mxCell edge = (mxCell)e;
@@ -1000,6 +1013,7 @@ public class MainWindow {
    public void updateNodeList() {
       try {
 
+         nodeModel.clear();
          aList = graph.getAdjacencyList();
 
          if(aList != null){
