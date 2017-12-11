@@ -112,17 +112,17 @@ public class MainWindow {
 
    protected HashMap<mxCell,LinkedList<mxCell>> aList;
 
-  // boolean gotNode = false;
-  // boolean gotEdge = false;
+   // boolean gotNode = false;
+   // boolean gotEdge = false;
 
 
    // Menu event enumeration type
    private enum MenuEventType {
-       NEW,
-       LOAD,
-       SAVE,
-       GUIDE,
-       ABOUT
+      NEW,
+      LOAD,
+      SAVE,
+      GUIDE,
+      ABOUT
    }
 
    // Button event enumeration type
@@ -180,7 +180,7 @@ public class MainWindow {
 
       // Create top menu bar, menu, help menu
       this.menuBar = new JMenuBar();
-      this.menu = new JMenu("Menu");
+      this.menu = new JMenu("File");
       this.help_menu = new JMenu("Help");
 
       // Create menu items
@@ -241,12 +241,12 @@ public class MainWindow {
 
 
       // create models for the first time
-       this.firstTimeCreatedModel = true;
+      this.firstTimeCreatedModel = true;
 
-        updateNodeList();     // show node lists
-        updateEdgeList();     // show edge list
+      updateNodeList();     // show node lists
+      updateEdgeList();     // show edge list
 
-       this.firstTimeCreatedModel = false;
+      this.firstTimeCreatedModel = false;
 
 
       // Create panel for edges and nodes
@@ -497,7 +497,7 @@ public class MainWindow {
       this.algorithmPanel.setPreferredSize(new Dimension(350, 350));
       this.algorithmPanel.setBorder(BorderFactory.createMatteBorder(1,0,1,0,Color.black));
 
-       //algorithmChoice.setSelectedIndex(1);
+      //algorithmChoice.setSelectedIndex(1);
 
       // Add title Algorithm
       JTextArea algorithmTitle = new JTextArea("Algorithm");
@@ -807,18 +807,18 @@ public class MainWindow {
                this.mainwindow.graphResults = new ArrayList<KargerGraph>();
 
                for (KargerGraph.KargerRecord r : this.mainwindow.graph.getResults()) {
-                   
-                   if (r == this.mainwindow.graph.getBestResult()) {
-                      continue;
-                   }
-                   
-                   KargerGraph tmp = new KargerGraph();
-                   tmp.XMLToGraph(r.getEncodedGraph());
-                   tmp.xGetGraph().getView().setTranslate(new mxPoint(120, 0));
-                   this.mainwindow.graphResults.add(tmp);
-                   this.mainwindow.otherResultsPanel.add(Box.createRigidArea(new Dimension(0,15)));
-                   this.mainwindow.otherResultsPanel.add(tmp.getGraphComponent());
-                   
+
+                  if (r == this.mainwindow.graph.getBestResult()) {
+                     continue;
+                  }
+
+                  KargerGraph tmp = new KargerGraph();
+                  tmp.XMLToGraph(r.getEncodedGraph());
+                  tmp.xGetGraph().getView().setTranslate(new mxPoint(120, 0));
+                  this.mainwindow.graphResults.add(tmp);
+                  this.mainwindow.otherResultsPanel.add(Box.createRigidArea(new Dimension(0,15)));
+                  this.mainwindow.otherResultsPanel.add(tmp.getGraphComponent());
+
                }
                this.mainwindow.otherResultsPanel.add(Box.createRigidArea(new Dimension(0,15)));
                this.mainwindow.resultContentPanel.add(this.mainwindow.otherResultsPanel);
@@ -844,7 +844,7 @@ public class MainWindow {
 
                      break;
                   case 1:
-                    // System.out.println("case 1: " + clickCounter);
+                     // System.out.println("case 1: " + clickCounter);
                      algorithmChoice.setSelectedIndex(1);
                      break;
                   case 2:
@@ -911,15 +911,15 @@ public class MainWindow {
                         //System.out.println("is run finished: " + this.mainwindow.graph.isRunFinished());
 
                         if (this.mainwindow.graph.isRunFinished() && isWhile == true) {
-                            //System.out.println("finished");
-                            this.mainwindow.runTracker.setText("Total Runs: " + this.mainwindow.graph.getRunCounter());
-                            this.mainwindow.resultTracker.setText("Best Result: " + this.mainwindow.graph.getBestResultCut());
-                            this.mainwindow.stepButton.setEnabled(false);
-                            this.mainwindow.manualSteps.setEnabled(false);
-                            this.mainwindow.runButton.setEnabled(false);
+                           //System.out.println("finished");
+                           this.mainwindow.runTracker.setText("Total Runs: " + this.mainwindow.graph.getRunCounter());
+                           this.mainwindow.resultTracker.setText("Best Result: " + this.mainwindow.graph.getBestResultCut());
+                           this.mainwindow.stepButton.setEnabled(false);
+                           this.mainwindow.manualSteps.setEnabled(false);
+                           this.mainwindow.runButton.setEnabled(false);
 
-                            algorithmChoice.setSelectedIndex(7);
-                            //clickCounter = 21;
+                           algorithmChoice.setSelectedIndex(7);
+                           //clickCounter = 21;
                         }
                      }
 
@@ -942,7 +942,7 @@ public class MainWindow {
          edgeModel.clear();
          nodeModel.clear();
 
-       //  System.out.println("\nUpdate lists \n");
+         //  System.out.println("\nUpdate lists \n");
 
          this.mainwindow.updateEdgeList();
          this.mainwindow.updateNodeList();
@@ -969,16 +969,16 @@ public class MainWindow {
    }
 
    public void show () {
-       // Show panel in application window
-       this.frame.pack();
-       this.frame.setVisible(true);
+      // Show panel in application window
+      this.frame.pack();
+      this.frame.setVisible(true);
    }
 
 
 
-    /**
-     * Update edge list based on current graph model.
-     */
+   /**
+    * Update edge list based on current graph model.
+    */
    public void updateEdgeList(){
       try {
 
@@ -1000,7 +1000,7 @@ public class MainWindow {
 
          //System.out.println("first time: " + this.firstTimeCreatedModel);
          if(firstTimeCreatedModel)
-             this.edgeChoice = new JList<String>(edgeModel);
+            this.edgeChoice = new JList<String>(edgeModel);
 
 
       } catch (Exception ex) {
@@ -1008,9 +1008,9 @@ public class MainWindow {
       }
    }
 
-    /**
-     * Update node list based on current adjacency list.
-     */
+   /**
+    * Update node list based on current adjacency list.
+    */
    public void updateNodeList(){
       try {
 
@@ -1023,9 +1023,9 @@ public class MainWindow {
                //System.out.println("Added element: " + value.getValue().toString());
             }
 
-             //System.out.println("first time: " + this.firstTimeCreatedModel);
+            //System.out.println("first time: " + this.firstTimeCreatedModel);
             if(firstTimeCreatedModel)
-                nodeChoice = new JList<String>(nodeModel);
+               nodeChoice = new JList<String>(nodeModel);
          }
 
 
