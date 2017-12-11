@@ -94,8 +94,6 @@ public class MainWindow {
    private KargerGraph graphBestResult;
    private ArrayList<mxCell> manualVertices;
 
-   boolean isWhile = false;
-
    protected int clickCounter = 0;
 
 
@@ -906,17 +904,7 @@ public class MainWindow {
 
                         //System.out.println("is run finished: " + this.mainwindow.graph.isRunFinished());
 
-                        if (this.mainwindow.graph.isRunFinished() && isWhile == true) {
-                           //System.out.println("finished");
-                           this.mainwindow.runTracker.setText("Total Runs: " + this.mainwindow.graph.getRunCounter());
-                           this.mainwindow.resultTracker.setText("Best Result: " + this.mainwindow.graph.getBestResultCut());
-                           this.mainwindow.stepButton.setEnabled(false);
-                           this.mainwindow.manualSteps.setEnabled(false);
-                           this.mainwindow.runButton.setEnabled(false);
-
-                           algorithmChoice.setSelectedIndex(7);
-                           //clickCounter = 21;
-                        }
+   
                      }
 
                      if(clickCounter == 4)
@@ -955,8 +943,8 @@ public class MainWindow {
    public void loadGraph() {
       OpenFileWindow win = new OpenFileWindow();
       String filepath = win.showOpenChooser();
-      this.graph.loadGraph(filepath);
       this.resetStats();
+      this.graph.loadGraph(filepath);
    }
 
    // Save graph to file
