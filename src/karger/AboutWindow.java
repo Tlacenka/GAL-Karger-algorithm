@@ -1,3 +1,9 @@
+/**
+ * This class implements the graph interface.
+ * @author Katerina Pilatova (xpilat05), Michal Tabasek (xtabas02)
+ * @date 2017
+ */
+
 package karger;
 
 import javax.swing.*;

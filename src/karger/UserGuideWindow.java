@@ -1,3 +1,10 @@
+/**
+ * This class implements the "Open File" window and its components.
+ * @author Katerina Pilatova (xpilat05), Michal Tabasek (xtabas02)
+ * @date 2017
+ */
+
+
 package karger;
 
 
