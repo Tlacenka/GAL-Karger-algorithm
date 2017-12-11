@@ -63,7 +63,9 @@ public class UserGuideWindow {
                 "edit the current one by adding/removing its vertices and edges.</p>" +
                 "<p>In order to add an edge/vertex, click the <b>+</b> icon below the corresponding panel and choose a name for the new item. " +
                 "Additionally, after adding a new vertex, user can change its location by dragging it elsewhere in the simulation panel.</p>" +
-                "<p>When removing an edge or vertex, click on their name in the Graph Editor panel and then click on the <b>-</b> icon.</p>");
+                "<p>When removing an edge or vertex, click on their name in the Graph Editor panel and then click on the <b>-</b> icon.</p>" +
+                "<p><i>Note: This algorithm is implemented for consecutive graphs only. " +
+                "Therefore, whenever graph becomes non-consecutive in the editing process, control buttons are disabled.</i></p>");
 
         textArea.setFont(textFont);
         JScrollPane scrollPane = new JScrollPane(textArea);

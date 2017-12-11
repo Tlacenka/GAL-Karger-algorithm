@@ -596,14 +596,6 @@ public class KargerGraph {
             }
         }
 
-        // Print out edges - TODO DEBUG
-        //for (Object e : this.graph.getChildEdges(this.parent)) {
-        //    mxCell edge = (mxCell)e;
-        //    mxCell src = (mxCell)edge.getSource();
-        //    mxCell dst = (mxCell)edge.getTarget();
-        //    System.out.println("hello edges " + (String)src.getValue() + " - " + (String)dst.getValue());
-        //}
-
         this.gc.refresh();
     }
 
@@ -971,6 +963,17 @@ public class KargerGraph {
         return;
     }
 
+    // Check that graph is consecutive
+    public Boolean isConsecutive() {
+        for (Object v_obj : this.adjacencyList.keySet().toArray()) {
+            mxCell v = (mxCell)v_obj;
+            if ((this.adjacencyList.get(v) == null) ||
+                (this.adjacencyList.get(v).size() == 0)) {
+                return false;
+            }
+        }
+        return true;
+    }
 
     public HashMap<mxCell,LinkedList<mxCell>> getAdjacencyList(){
         return this.adjacencyList;
