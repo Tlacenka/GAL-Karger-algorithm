@@ -180,7 +180,7 @@ public class MainWindow {
 
       // Create top menu bar, menu, help menu
       this.menuBar = new JMenuBar();
-      this.menu = new JMenu("Menu");
+      this.menu = new JMenu("File");
       this.help_menu = new JMenu("Help");
 
       // Create menu items

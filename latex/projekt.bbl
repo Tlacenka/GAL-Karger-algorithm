@@ -1,0 +1,24 @@
+\begin{thebibliography}{1}
+\providecommand{\url}[1]{\texttt{#1}}
+\providecommand{\urlprefix}{URL }
+\expandafter\ifx\csname urlstyle\endcsname\relax
+  \providecommand{\doi}[1]{doi:\discretionary{}{}{}#1}\else
+  \providecommand{\doi}{doi:\discretionary{}{}{}\begingroup
+  \urlstyle{rm}\Url}\fi
+\providecommand{\selectlanguage}[1]{\relax}
+\providecommand{\eprint}[2][]{\url{#2}}
+
+\bibitem{jgraphx}
+{\it JGraphX (JGraph 6) User Manual}. [Online; navštíveno 12.10.2017].
+\newline\urlprefix\url{https://github.com/jgraph/jgraphx}
+
+\bibitem{swing}
+{\it Lesson: Getting Started with Swing}. [Online; navštíveno 12.10.2017].
+\newline\urlprefix\url{https://docs.oracle.com/javase/tutorial/uiswing/start/index.html}
+
+\bibitem{karger}
+Williams, V.~V.: {\it Min Cut and Karger’s Algorithm}. Květen 2016, [Online;
+  navštíveno 12.10.2017].
+\newline\urlprefix\url{http://web.stanford.edu/class/archive/cs/cs161/cs161.1166/lectures/lecture15.pdf}
+
+\end{thebibliography}
