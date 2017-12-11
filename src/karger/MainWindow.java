@@ -307,18 +307,19 @@ public class MainWindow {
                try{
                   addedNode = xSidePanels.addNode(nodeModel, graph.getAdjacencyList(), graph.xGetGraph());
 
+                  // Update adjacency list
                   if(addedNode == true){
                      graph.createAdjacencyList();
 
-                     // first of all, the list must be cleared
-                     graph.getCurOrder().clear();
+                     //// first of all, the list must be cleared
+                     //graph.getCurOrder().clear();
 
-                     // then we can "update" the list with changed values
-                     int i = 0;
-                     for (Object eO: graph.xGetGraph().getChildEdges(graph.xGetGraph().getDefaultParent())) {
-                        graph.getCurOrder().add(i);
-                        i++;
-                     }
+                     //// then we can "update" the list with changed values
+                     //int i = 0;
+                     //for (Object eO: graph.xGetGraph().getChildEdges(graph.xGetGraph().getDefaultParent())) {
+                        //graph.getCurOrder().add(i);
+                        //i++;
+                     //}
                   }
 
 
@@ -348,11 +349,14 @@ public class MainWindow {
 
                   // first of all, the list must be cleared
                   graph.getCurOrder().clear();
+                  graph.getGraphEdges().clear();
 
                   // then we can "update" the list with changed values
                   int i = 0;
-                  for (Object eO: graph.xGetGraph().getChildEdges(graph.xGetGraph().getDefaultParent())) {
+                  for (Object e_obj: graph.xGetGraph().getChildEdges(graph.xGetGraph().getDefaultParent())) {
+                     mxCell edge = (mxCell)e_obj;
                      graph.getCurOrder().add(i);
+                     graph.getGraphEdges().add(edge);
                      i++;
                   }
 
@@ -379,11 +383,14 @@ public class MainWindow {
 
                   // first of all, the list must be cleared
                   graph.getCurOrder().clear();
+                  graph.getGraphEdges().clear();
 
                   // then we can "update" the list with changed values
                   int i = 0;
-                  for (Object eO: graph.xGetGraph().getChildEdges(graph.xGetGraph().getDefaultParent())) {
+                  for (Object e_obj: graph.xGetGraph().getChildEdges(graph.xGetGraph().getDefaultParent())) {
+                     mxCell edge = (mxCell)e_obj;
                      graph.getCurOrder().add(i);
+                     graph.getGraphEdges().add(edge);
                      i++;
                   }
 
@@ -414,11 +421,14 @@ public class MainWindow {
 
                   // first of all, the list must be cleared
                   graph.getCurOrder().clear();
+                  graph.getGraphEdges().clear();
 
                   // then we can "update" the list with changed values
                   int i = 0;
-                  for (Object eO: graph.xGetGraph().getChildEdges(graph.xGetGraph().getDefaultParent())) {
+                  for (Object e_obj: graph.xGetGraph().getChildEdges(graph.xGetGraph().getDefaultParent())) {
+                     mxCell edge = (mxCell)e_obj;
                      graph.getCurOrder().add(i);
+                     graph.getGraphEdges().add(edge);
                      i++;
                   }
                }
@@ -721,6 +731,7 @@ public class MainWindow {
                clickCounter = 0;
                //algorithmChoice.setSelectedIndex(0);
                algorithmChoice.clearSelection();
+               this.mainwindow.enableEditorButtons();
                this.mainwindow.undoButton.setEnabled(false);
                this.mainwindow.resetButton.setEnabled(false);
                this.mainwindow.graph.resetAlgorithm();
@@ -750,6 +761,7 @@ public class MainWindow {
                this.mainwindow.graph.undoStep();
                break;
             case NEXT_STEP:
+               this.mainwindow.disableEditorButtons();
                this.mainwindow.graph.nextStep();
                this.mainwindow.undoButton.setEnabled(true);
                this.mainwindow.resetButton.setEnabled(true);
@@ -763,6 +775,7 @@ public class MainWindow {
 
                break;
             case RUN:
+               this.mainwindow.disableEditorButtons();
                this.mainwindow.undoButton.setEnabled(false);
                this.mainwindow.stepButton.setEnabled(false);
                this.mainwindow.runButton.setEnabled(false);
@@ -773,6 +786,7 @@ public class MainWindow {
                this.mainwindow.resultTracker.setText("Best Result: " + this.mainwindow.graph.getBestResultCut());
                break;
             case FINISH:
+               this.mainwindow.disableEditorButtons();
                this.mainwindow.finishButton.setEnabled(false);
                this.mainwindow.runButton.setEnabled(false);
                this.mainwindow.undoButton.setEnabled(false);
@@ -836,6 +850,7 @@ public class MainWindow {
                      clickCounter = 21;
 
                      //System.out.println("finished");
+                     this.mainwindow.disableEditorButtons();
                      this.mainwindow.runTracker.setText("Total Runs: " + this.mainwindow.graph.getRunCounter());
                      this.mainwindow.resultTracker.setText("Best Result: " + this.mainwindow.graph.getBestResultCut());
                      this.mainwindow.stepButton.setEnabled(false);
@@ -883,6 +898,7 @@ public class MainWindow {
                      if (this.mainwindow.isPhase1) {
 
                         // Disable all buttons except for reset before phase 2 is finished
+                        this.mainwindow.disableEditorButtons();
                         this.mainwindow.undoButton.setEnabled(false);
                         this.mainwindow.stepButton.setEnabled(false);
                         this.mainwindow.runButton.setEnabled(false);
@@ -1011,7 +1027,7 @@ public class MainWindow {
    /**
     * Update node list based on current adjacency list.
     */
-   public void updateNodeList(){
+   public void updateNodeList() {
       try {
 
          aList = graph.getAdjacencyList();
@@ -1035,10 +1051,16 @@ public class MainWindow {
    }
 
 
+   // Enable editor buttons
+   public void enableEditorButtons() {
+      this.addNodeButton.setEnabled(true);
+      this.removeNodeButton.setEnabled(true);
+      this.addEdgeButton.setEnabled(true);
+      this.removeEdgeButton.setEnabled(true);
+   }
 
-   // currently not used (and never be?)
-   public void disableEditorButtons(){
-
+   // Disable editor buttons
+   public void disableEditorButtons() {
       this.addNodeButton.setEnabled(false);
       this.removeNodeButton.setEnabled(false);
       this.addEdgeButton.setEnabled(false);

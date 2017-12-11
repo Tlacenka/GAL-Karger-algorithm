@@ -514,18 +514,6 @@ public class KargerGraph {
         mxCell edge, src, dst;
         edge = dst = src = new mxCell();
 
-        // Print out edges - TODO DEBUG
-        //for (Object e : this.graphEdges) {
-        //    edge = (mxCell)e;
-        //    if (edge == null) {
-        //        System.out.println("printing a null edge");
-        //        continue;
-        //    }
-        //    src = (mxCell)edge.getSource();
-        //    dst = (mxCell)edge.getTarget();
-        //    System.out.println("printing edges " + (String)src.getValue() + " - " + (String)dst.getValue());
-        //}
-
         // Go through all vertices adjacent to v2
         for (Object v_obj : this.adjacencyList.get(v2)) {
             mxCell v = new mxCell();
@@ -546,10 +534,6 @@ public class KargerGraph {
                 edge = (mxCell)e;
                 src = (mxCell)edge.getSource();
                 dst = (mxCell)edge.getTarget();
-
-                //if ((src == null) || (dst == null)) {
-                //    System.out.println("This edge is not between 2 edges.");
-                //}
 
                 // Redirect edge, update adjacency list
                 if ((src == v) && (dst == v2)) {
